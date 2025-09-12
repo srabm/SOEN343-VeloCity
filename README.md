@@ -1,4 +1,6 @@
 # SOEN343-VeloCity
+
+## Contributors
 | Name                    | ID        | GitHub Username     
 |-------------------------|-----------|---------------------|
 | Jennifer Nguyen          | 40178603  | [@jenniferngu](https://github.com/jenniferngu) | 
