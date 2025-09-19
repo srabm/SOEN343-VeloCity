@@ -1,11 +1,11 @@
 # SOEN343-VeloCity
 
 ## Contributors
-| Name                    | ID        | GitHub Username     
-|-------------------------|-----------|---------------------|
+| Name                    | ID        | Role    | GitHub Username     
+|-------------------------|-----------|---------|------------|
 | Jennifer Nguyen          | 40178603  | [@jenniferngu](https://github.com/jenniferngu) | 
 | Hendrik Tebeng    | 40282196  | [@hendriktebeng](https://github.com/hendriktebeng)       |
 | Karan Kuma   | 40277342  | [@zekaran30](https://github.com/zekaran30)           |
-| Sofia Cimon        | 40282210  | [@sofiacimon](https://github.com/sofiacimon)               |
+| Sofia Cimon        | 40282210  | MVP | [@sofiacimon](https://github.com/sofiacimon)               |
 | Srabanti Mazumdar     | 40263255  | [@srabm](https://github.com/srabm)             |
 | Botao Yang     | 40213554  | [@cherryaki1](https://github.com/cherryaki1)             |
