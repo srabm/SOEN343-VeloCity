@@ -1,5 +1,11 @@
 # SOEN343-VeloCity
 
+<img
+    alt="VeloCity"
+    src="./my-app/velocity/src/assets/Logo.png"
+    style="width:70%"
+/>
+
 ## Contributors
 | Name                    | ID        | Role    | GitHub Username     
 |-------------------------|-----------|---------|------------|
