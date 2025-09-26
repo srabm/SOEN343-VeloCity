@@ -21,5 +21,5 @@ cd my-app\velocity
 ```
 3. Run the following command to install the front end dependencies:
 ```
-yarn install
+npm install
 ```
