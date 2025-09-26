@@ -23,3 +23,15 @@ cd my-app\velocity
 ```
 npm install
 ```
+---
+
+## How to Get the Front End Running
+1. Change your directory from root to `velocity` which is our front end directory
+```
+cd my-app\velocity
+```
+2. Run the following command to install the front end dependencies:
+```
+npm run dev
+```
+3. Open your project at [localhost:5173](http://localhost:5173/)
