@@ -9,3 +9,17 @@
 | Hendrik Tebeng    | 40282196  | Back End Engineer | [@hendriktebeng](https://github.com/hendriktebeng)       |
 | Karan Kuma   | 40277342  | Back End Engineer | [@zekaran30](https://github.com/zekaran30)           |
 | Sofia Cimon        | 40282210  | Back End Engineer | [@sofiacimon](https://github.com/sofiacimon)               |
+
+---
+
+## Install Front End Dependencies
+
+1. First make sure you have [Node](https://nodejs.org/en) installed
+2. Change your directory from root to `velocity` which is our front end directory
+```
+cd my-app\velocity
+```
+3. Run the following command to install the front end dependencies:
+```
+yarn install
+```
