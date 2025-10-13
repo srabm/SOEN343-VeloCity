@@ -16,6 +16,6 @@
             </div>
             <button type="submit">Register</button>
         </form>
-        <h2>WELCOME BACK!</h2>
+        <h2>WELCOME!</h2>
     </div>
 </template>
