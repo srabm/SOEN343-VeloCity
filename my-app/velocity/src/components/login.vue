@@ -9,10 +9,8 @@ const handleLogin = async () => {
   try {
     const userCredential = await login(email.value, password.value)
     const user = userCredential.user
-    console.log("Login successful!", user)
     alert(`Welcome ${user.email}!`)
   } catch (error) {
-    console.error("Login failed:", error)
     alert(`Login failed: ${error.message}`)
   }
 }

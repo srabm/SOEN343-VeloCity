@@ -9,10 +9,8 @@ const handleSignup = async () => {
   try {
     const userCredential = await signUp(email.value, password.value)
     const user = userCredential.user
-    console.log("Signup successful!", user)
     alert(`Account created for ${user.email}!`)
   } catch (error) {
-    console.error("Signup failed:", error)
     alert(`Signup failed: ${error.message}`)
   }
 }

@@ -4,12 +4,8 @@ import Login from './components/login.vue'
 </script>
 
 <template>
-  <div>
-  
-  </div>
   <Register msg="Vite + Vue" />
   <Login msg="Vite + Vue" />
-  
 </template>
 
 <style scoped>
