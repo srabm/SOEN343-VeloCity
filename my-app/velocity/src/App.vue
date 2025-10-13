@@ -1,6 +1,6 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
 import Register from './components/register.vue'
+import Login from './components/login.vue'
 </script>
 
 <template>
@@ -8,6 +8,7 @@ import Register from './components/register.vue'
   
   </div>
   <Register msg="Vite + Vue" />
+  <Login msg="Vite + Vue" />
   
 </template>
 

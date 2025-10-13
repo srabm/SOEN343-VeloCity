@@ -7,4 +7,8 @@ const signUp = (email, password) => {
     return createUserWithEmailAndPassword(auth, email, password);
 }
 
-export default signUp;
+const login = (email, password) => {
+    return signInWithEmailAndPassword(auth, email, password);
+}
+
+export {signUp, login};

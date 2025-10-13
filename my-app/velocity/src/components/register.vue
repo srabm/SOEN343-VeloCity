@@ -1,12 +1,20 @@
 <script setup>
 import { ref } from 'vue'
-import signUp from '../../firebaseAuth.js'
+import { signUp } from '../../firebaseAuth.js'
 
 const email = ref('')
 const password = ref('')
 
 const handleSignup = async () => {
-  await signUp(email.value, password.value)
+  try {
+    const userCredential = await signUp(email.value, password.value)
+    const user = userCredential.user
+    console.log("Signup successful!", user)
+    alert(`Account created for ${user.email}!`)
+  } catch (error) {
+    console.error("Signup failed:", error)
+    alert(`Signup failed: ${error.message}`)
+  }
 }
 </script>
 
