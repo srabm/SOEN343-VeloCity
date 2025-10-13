@@ -1,18 +1,26 @@
+<script setup>
+import { ref } from 'vue'
+import signUp from '../../firebaseAuth.js'
+
+const email = ref('')
+const password = ref('')
+
+const handleSignup = async () => {
+  await signUp(email.value, password.value)
+}
+</script>
+
 <template>
     <div class="login-container">
         <h2>Register</h2>
-        <form @submit="">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" required />
-            </div>
+        <form @submit.prevent="handleSignup">
             <div class="form-group">
                 <label for="email">Email:</label>
-                <input type="email" id="email" required />
+                <input v-model="email" id="email" required />
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" required />
+                <input v-model="password" type="password" id="password" required />
             </div>
             <button type="submit">Register</button>
         </form>

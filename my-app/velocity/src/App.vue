@@ -1,12 +1,14 @@
 <script setup>
 import HelloWorld from './components/HelloWorld.vue'
+import Register from './components/register.vue'
 </script>
 
 <template>
   <div>
   
   </div>
-  <HelloWorld msg="Vite + Vue" />
+  <Register msg="Vite + Vue" />
+  
 </template>
 
 <style scoped>
