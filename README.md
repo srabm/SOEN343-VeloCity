@@ -20,7 +20,7 @@
 ## Install Front End Dependencies
 
 1. First make sure you have [Node](https://nodejs.org/en) installed
-2. Change your directory from root to `velocity` which is our front end directory
+2. Change your directory from root to `velocity-frontend` which is our front end directory
 ```
 cd my-app\velocity
 ```
@@ -31,7 +31,7 @@ npm install
 ---
 
 ## How to Get the Front End Running
-1. Change your directory from root to `velocity` which is our front end directory
+1. Change your directory from root to `velocity-frontend` which is our front end directory
 ```
 cd my-app\velocity
 ```
