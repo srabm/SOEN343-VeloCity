@@ -8,7 +8,7 @@ abstract class Bike {
     private String type;
     private LocalDateTime reservationExpiry;
 
-    public User(String bikeId, String status, String type) {
+    public Bike(String bikeId, String status, String type) {
         this.bikeId = bikeId;
         this.status = status;
         this.type = type;
