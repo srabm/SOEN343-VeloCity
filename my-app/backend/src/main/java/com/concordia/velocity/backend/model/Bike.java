@@ -1,8 +1,14 @@
 package com.concordia.velocity.backend.model;
 
-java.time.LocalDateTime;
+import java.time.LocalDateTime;
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "bikes")
 
 abstract class Bike {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String bikeId;
     private String status;
     private String type;
