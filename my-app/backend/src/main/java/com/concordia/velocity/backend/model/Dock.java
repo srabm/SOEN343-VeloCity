@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 abstract class Dock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String dockId;
+    private Long Id;
     private String state;
 
     public Dock(String dockId, String state) {
