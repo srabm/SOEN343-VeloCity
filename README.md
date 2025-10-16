@@ -1,9 +1,9 @@
 # SOEN343-VeloCity
 
-<img
-    alt="VeloCity"
-    src="./my-app/velocity/src/assets/banner.png"
-/>
+
+<img width="449" height="216" alt="image" src="https://github.com/user-attachments/assets/29472384-ad3d-4965-b606-5861490956f9" />
+
+
 
 ## Contributors
 | Name                    | ID        | Role    | GitHub Username     
