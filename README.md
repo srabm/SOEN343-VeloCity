@@ -1,6 +1,6 @@
 # SOEN343-VeloCity
 
-<img width="449" height="216" alt="image" src="https://github.com/user-attachments/assets/83bd09b4-c085-4e29-a587-a174f1c736c5" />
+<img width="449" height="216" alt="image" src="https://github.com/user-attachments/assets/80f8fd79-309d-4e57-b65c-98393af43095" />
 
 
 ## Contributors
