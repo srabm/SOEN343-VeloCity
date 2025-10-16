@@ -12,7 +12,7 @@ abstract class Bike {
     private Long Id;
 
     private String status;
-    private String type;
+    private String type; // should i keep this as a String type? or should I make the bike class abstract so that it can be extended to different bike types?
     private LocalDateTime reservationExpiry;
 
     @ManyToOne
@@ -26,7 +26,6 @@ abstract class Bike {
         this.type = type;
         this.reservationExpiry = null;
     }
-
 
     public String getStatus() {
         return status;
