@@ -4,10 +4,10 @@ package com.concordia.velocity.backend.controller;
 
 import com.concordia.velocity.backend.model.Station;
 import com.concordia.velocity.backend.service.StationService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -19,19 +19,31 @@ public class StationController {
         this.stationService = stationService;
     }
 
-    // Get all stations
+    @PostMapping
+    public String createStation(@RequestBody Station station) throws ExecutionException, InterruptedException {
+        return stationService.saveStation(station);
+    }
+
+    @GetMapping("/{stationId}")
+    public Station getStation(@PathVariable String stationId) throws ExecutionException, InterruptedException {
+        return stationService.getStationById(stationId);
+    }
+
     @GetMapping
-    public List<Station> getAllStations() {
+    public List<Station> getAllStations() throws ExecutionException, InterruptedException {
         return stationService.getAllStations();
     }
 
-    // Update a station's status (PUT /api/stations/{id}/status?status=out_of_service)
-    @PutMapping("/{id}/status")
-    public ResponseEntity<Station> updateStationStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
+    @DeleteMapping("/{stationId}")
+    public String deleteStation(@PathVariable String stationId) throws ExecutionException, InterruptedException {
+        return stationService.deleteStation(stationId);
+    }
 
-        Station updated = stationService.updateStationStatus(id, status);
-        return ResponseEntity.ok(updated);
+    @PutMapping("/{stationId}/status")
+    public String updateStationStatus(
+            @PathVariable String stationId,
+            @RequestParam String status
+    ) throws ExecutionException, InterruptedException {
+        return stationService.updateStationStatus(stationId, status);
     }
 }

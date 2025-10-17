@@ -1,16 +1,31 @@
 package com.concordia.velocity.backend.model;
-import jakarta.persistence.*;
 
-@Entity
-@Table(name = "docks")
-abstract class Dock {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
-    private String state;
+public class Dock {
+    private String dockId;
+    private String state; // empty | occupied | out_of_service
+    private String bikeId;
+    private String stationId;
 
-    public Dock(String dockId, String state) {
+    public Dock() {}
+
+
+    public Dock(String dockId, String state, String bikeId, String stationId) {
         this.dockId = dockId;
         this.state = state;
+        this.bikeId = bikeId;
+        this.stationId = stationId;
     }
+
+    public String getDockId() {return dockId;}
+    public void setDockId(String dockId) {this.dockId = dockId;}
+
+    public String getState() {return state;}
+    public void setState(String state) {this.state = state;}
+
+    public String getBikeId() {return bikeId;}
+    public void setBikeId(String bikeId) {this.bikeId = bikeId;}
+
+    public String getStationId() {return stationId;}
+    public void setStationId(String stationId) {this.stationId = stationId;}
+
 }

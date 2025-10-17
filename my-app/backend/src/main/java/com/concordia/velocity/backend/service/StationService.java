@@ -3,64 +3,64 @@
 
 package com.concordia.velocity.backend.service;
 
-import com.concordia.velocity.backend.model.Bike;
 import com.concordia.velocity.backend.model.Station;
-import com.concordia.velocity.backend.repository.StationRepository;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.*;
+import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class StationService {
 
-    private final StationRepository stationRepository;
+    private static final String COLLECTION_NAME = "stations";
 
-    public StationService(StationRepository stationRepository) {
-        this.stationRepository = stationRepository;
+    // Create or Update
+    public String saveStation(Station station) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        db.collection(COLLECTION_NAME).document(station.getStationId()).set(station).get();
+        return "Station " + station.getStationId() + " saved successfully.";
     }
 
-    // Operator changes station status
-    public Station updateStationStatus(Long id, String newStatus) {
-        Station station = stationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Station not found"));
+    // Read (Get by ID)
+    public Station getStationById(String stationId) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentSnapshot snapshot = db.collection(COLLECTION_NAME).document(stationId).get().get();
+        return snapshot.exists() ? snapshot.toObject(Station.class) : null;
+    }
 
-        if (newStatus.equalsIgnoreCase("out_of_service")) {
-            handleOutOfService(station);
-        } else if (newStatus.equalsIgnoreCase("active")) {
-            handleReactivate(station);
-        } else {
-            throw new IllegalArgumentException("Invalid status. Use 'active' or 'out_of_service'");
+    // Read (All stations)
+    public List<Station> getAllStations() throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        ApiFuture<QuerySnapshot> future = db.collection(COLLECTION_NAME).get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+        List<Station> stations = new ArrayList<>();
+        for (DocumentSnapshot doc : documents) {
+            stations.add(doc.toObject(Station.class));
         }
-
-        return stationRepository.save(station);
+        return stations;
     }
 
-    private void handleOutOfService(Station station) {
-        station.setStatus("out_of_service");
-
-        // End all bike reservations
-        List<Bike> bikes = station.getDockedBikes();
-        for (Bike bike : bikes) {
-            if (bike.getStatus().equalsIgnoreCase("reserved")) {
-                bike.setStatus("available");
-                bike.setReservationExpiry(null);
-            }
-        }
-
-        System.out.println("Station " + station.getStationName() + " is out of service.");
+    // Delete
+    public String deleteStation(String stationId) throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        db.collection(COLLECTION_NAME).document(stationId).delete().get();
+        return "Station " + stationId + " deleted successfully.";
     }
 
-    private void handleReactivate(Station station) {
-        int num = station.getNumDockedBikes();
-        if (num == 0) station.setStatus("empty");
-        else if (num == station.getCapacity()) station.setStatus("full");
-        else station.setStatus("occupied");
+    // Update Station Status
+    public String updateStationStatus(String stationId, String newStatus)
+            throws ExecutionException, InterruptedException {
 
-        System.out.println("Station " + station.getStationName() + " reactivated as " + station.getStatus());
-    }
+        Firestore db = FirestoreClient.getFirestore();
+        DocumentReference docRef = db.collection(COLLECTION_NAME).document(stationId);
 
-    public List<Station> getAllStations() {
-        return stationRepository.findAll();
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("status", newStatus);
+
+        docRef.update(updates).get();
+        return "Station " + stationId + " status updated to " + newStatus;
     }
 }
-

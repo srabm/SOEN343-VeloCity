@@ -1,17 +1,12 @@
 package com.concordia.velocity.backend.model;
 
-import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "stations") // not sure about this
 
 public class Station {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String stationId; // is the key of the station going to be its name or id?
     private String stationName;
     private String status; // empty | occupied | full | out_of_service
     private String latitude;
@@ -20,17 +15,15 @@ public class Station {
     private int capacity;
     private int numDockedBikes;
     private int reservationHoldTime
-
-    // List of bikes docked at this station
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "station_id")
-    private List<Bike> dockedBikes = new ArrayList<>();
+    private List<String> dockIds;
+    private List<String> bikeIds;
 
     public Station() {}
 
-    public Station(String stationName, String status, String latitude, 
-                   String longitude, String streetAddress, int capacity, 
-                   int numDockedBikes) {
+    public Station(String stationId, String stationName, String status, String latitude, 
+                   String longitude, String streetAddress, int capacity, int reservationHoldTime, 
+                   List<String> dockIds, List<String> bikeIds) {
+        this.stationId = stationId;
         this.stationName = stationName;
         this.status = status;
         this.latitude = latitude;
@@ -38,9 +31,44 @@ public class Station {
         this.streetAddress = streetAddress;
         this.capacity = capacity;
         this.numDockedBikes = numDockedBikes;
-        // this.reservationHoldTime = reservationHoldTime;
-        // this.dockedBikes = new ArrayList<>();
+        this.reservationHoldTime = reservationHoldTime;
+        this.dockIds = dockIds;
+        this.bikeIds = bikeIds;
     }
+
+    public String getStationId() {return stationId;}
+    public void setStationId(String stationId) {this.stationId = stationId;}
+
+    public String getStationName() {return stationName;}
+    public void setStationName(String stationName) {this.stationName = stationName;}
+
+    public String getStatus() {return status;}
+    public void setStatus(String status) {this.status = status;}
+
+    public String getLatitude() {return latitude;}
+    public void setLatitude(String latitude) {this.latitude = latitude;}
+
+    public String getLongitude() {return longitude;}
+    public void setLongitude(String longitude) {this.longitude = longitude;}
+
+    public String getStreetAddress() {return streetAddress;}
+    public void setStreetAddress(String streetAddress) {this.streetAddress = streetAddress;}
+
+    public int getCapacity() {return capacity;}
+    public void setCapacity(int capacity) {this.capacity = capacity;}
+
+    public int getNumDockedBikes() {return numDockedBikes;}
+    public void setNumDockedBikes(int numDockedBikes) {this.numDockedBikes = numDockedBikes;}
+
+    public int getReservationHoldTime() {return reservationHoldTime;}
+    public void setReservationHoldTime(int reservationHoldTime) {this.reservationHoldTime = reservationHoldTime;}
+
+    public List<String> getDockIds() {return dockIds;}
+    public void setDockIds(List<String> dockIds) {this.dockIds = dockIds;}
+
+    public List<String> getBikeIds() {return bikeIds;}
+    public void setBikeIds(List<String> bikeIds) {this.bikeIds = bikeIds;}
+
 
     public void addBike(Bike bike) {
         if (dockedBikes.size() < capacity) {
@@ -68,54 +96,7 @@ public class Station {
         else status = "occupied";
     }
 
-    public long getId() {
-        return id;
-    }
-    public List<Bike> getDockedBikes() {
-        return dockedBikes;
-    }
-
-    public String getStationName() {
-        return stationName;
-    }
-    public void setStationName(String stationName) {
-        this.stationName = stationName;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-
-    public String getLatitude() {
-        return latitude;
-    }   
-
-    public String getLongitude() {
-        return longitude;
-    }  
-
-    public String getStreetAddress() {
-        return streetAddress;
-    }
-
-    public int getCapacity() {
-        return capacity;
-    }
-
-    public int getNumDockedBikes() {
-        return numDockedBikes;
-    } 
-
-    public int getReservationHoldTime() {
-        return reservationHoldTime;
-    }
-    public void setReservationHoldTime(int reservationHoldTime) {
-        this.reservationHoldTime = reservationHoldTime;
-    }
+    
     
     
 
