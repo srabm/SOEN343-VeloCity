@@ -1,6 +1,7 @@
 package com.concordia.velocity.backend.model;
 
-abstract class Trip {
+import java.util.Date;
+public class Trip {
     private String tripId;
     private Date date;
     private Station startStation;

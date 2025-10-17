@@ -19,18 +19,12 @@ repositories {
 }
 
 dependencies {
-	// Spring Boot web and JPA support
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-
-    // SQLite dependencies
-    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
-    implementation 'org.hibernate.orm:hibernate-community-dialects:6.2.0.Final'
-
-    // Validation library for @Valid
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
-    // Testing support
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+    implementation 'com.google.cloud:google-cloud-firestore:3.12.0'
+    implementation 'com.google.api-client:google-api-client:2.0.0'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 

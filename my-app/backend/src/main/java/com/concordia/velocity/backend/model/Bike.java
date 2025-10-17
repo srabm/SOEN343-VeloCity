@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 
 
-abstract class Bike {
+public class Bike {
    
     private String bikeId;
     private String status;
