@@ -75,5 +75,7 @@ const handleSignup = async () => {
             <button type="submit">Register</button>
         </form>
         <h2>WELCOME!</h2>
+
+        <p>Already have an account? <router-link to="/login">Login</router-link></p>
     </div>
 </template>

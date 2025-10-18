@@ -30,7 +30,14 @@ const handleLogin = async () => {
             </div>
             <button type="submit">Login</button>
         </form>
+
+        <div class="forgot-password">
+            <router-link to="/password-recovery">Forgot password?</router-link>
+        </div>
+
         <h2>WELCOME BACK!</h2>
+
+        <p>Don't have an account? <router-link to="/register">Sign up</router-link></p>
     </div>
 </template>
 
