@@ -1,6 +1,6 @@
 // This file handles HTTP requests. The controller handles the incoming requests, processes them by calling the service layer, which calls the repository.
 
-package com.concordia.velocity.backend.controller;
+package controller;
 
 import com.concordia.velocity.backend.model.Station;
 import com.concordia.velocity.backend.service.StationService;

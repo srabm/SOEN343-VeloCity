@@ -1,4 +1,4 @@
-package com.concordia.velocity.backend.controller;
+package controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

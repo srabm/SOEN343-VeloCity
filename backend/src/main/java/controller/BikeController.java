@@ -1,4 +1,4 @@
-package com.concordia.velocity.backend.controller;
+package controller;
 
 import com.concordia.velocity.backend.model.Bike;
 import com.concordia.velocity.backend.service.BikeService;

@@ -1,4 +1,4 @@
-package com.concordia.velocity.backend.model;
+package model;
 
 import java.time.LocalDateTime;
 
