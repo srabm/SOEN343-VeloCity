@@ -1,4 +1,4 @@
-package com.concordia.velocity.backend.service;
+package service;
 
 import com.concordia.velocity.backend.model.Bike;
 import com.google.api.core.ApiFuture;
