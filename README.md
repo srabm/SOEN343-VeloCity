@@ -1,9 +1,7 @@
 # SOEN343-VeloCity
 
-<img
-    alt="VeloCity"
-    src="./my-app/velocity/src/assets/banner.png"
-/>
+<img width="449" height="216" alt="image" src="https://github.com/user-attachments/assets/80f8fd79-309d-4e57-b65c-98393af43095" />
+
 
 ## Contributors
 | Name                    | ID        | Role    | GitHub Username     
@@ -20,7 +18,7 @@
 ## Install Front End Dependencies
 
 1. First make sure you have [Node](https://nodejs.org/en) installed
-2. Change your directory from root to `velocity` which is our front end directory
+2. Change your directory from root to `velocity-frontend` which is our front end directory
 ```
 cd my-app\velocity
 ```
@@ -31,7 +29,7 @@ npm install
 ---
 
 ## How to Get the Front End Running
-1. Change your directory from root to `velocity` which is our front end directory
+1. Change your directory from root to `velocity-frontend` which is our front end directory
 ```
 cd my-app\velocity
 ```
