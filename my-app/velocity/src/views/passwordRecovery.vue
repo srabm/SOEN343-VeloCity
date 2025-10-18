@@ -46,6 +46,10 @@ const handleResetPassword = async () => {
     </div>
 
     <button @click="handleResetPassword">Reset My Password</button>
+
+    <div class="back-to-login">
+      <router-link to="/login">Back to Login</router-link>
+    </div>
   </div>
 </template>
 

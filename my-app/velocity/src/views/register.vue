@@ -1,25 +1,25 @@
 <script setup>
 import { ref } from 'vue'
-import { login } from '../../firebaseAuth.js'
+import { signUp } from '../../firebaseAuth.js'
 
 const email = ref('')
 const password = ref('')
 
-const handleLogin = async () => {
+const handleSignup = async () => {
   try {
-    const userCredential = await login(email.value, password.value)
+    const userCredential = await signUp(email.value, password.value)
     const user = userCredential.user
-    alert(`Welcome ${user.email}!`)
+    alert(`Account created for ${user.email}!`)
   } catch (error) {
-    alert(`Login failed: ${error.message}`)
+    alert(`Signup failed: ${error.message}`)
   }
 }
 </script>
 
 <template>
     <div class="login-container">
-        <h2>Login</h2>
-        <form @submit.prevent="handleLogin">
+        <h2>Register</h2>
+        <form @submit.prevent="handleSignup">
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input v-model="email" id="email" required />
@@ -28,15 +28,10 @@ const handleLogin = async () => {
                 <label for="password">Password:</label>
                 <input v-model="password" type="password" id="password" required />
             </div>
-            <button type="submit">Login</button>
+            <button type="submit">Register</button>
         </form>
+        <h2>WELCOME!</h2>
 
-        <div class="forgot-password">
-            <a href="/password-recovery">Forgot password?</a>
-        </div>
-
-        <h2>WELCOME BACK!</h2>
+        <p>Already have an account? <router-link to="/login">Login</router-link></p>
     </div>
 </template>
-
-<style scoped></style>
