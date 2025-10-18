@@ -55,7 +55,7 @@ public class FirestoreDataSeeder {
                 db.collection("stations").document(station1.getStationId()).set(station1).get();
                 db.collection("stations").document(station2.getStationId()).set(station2).get();
 
-                System.out.println("✅ Sample stations added to Firestore.");
+                System.out.println("Sample stations added to Firestore.");
 
                 // Seed sample docks
                 Dock dock1 = new Dock("D001", "occupied", "B001", "S001");
@@ -69,7 +69,7 @@ public class FirestoreDataSeeder {
                     db.collection("docks").document(d.getDockId()).set(d).get();
                 }
 
-                System.out.println("✅ Sample docks added to Firestore.");
+                System.out.println("Sample docks added to Firestore.");
 
                 // Seed sample bikes
                 Bike bike1 = new Bike("B001", "available", "standard", "D001", "S001");
