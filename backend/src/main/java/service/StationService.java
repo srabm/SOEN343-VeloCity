@@ -3,7 +3,7 @@
 
 package service;
 
-import com.concordia.velocity.backend.model.Station;
+import model.Station;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;

@@ -1,8 +1,8 @@
-package com.concordia.velocity.backend.config;
+package config;
 
-import com.concordia.velocity.backend.model.Bike;
-import com.concordia.velocity.backend.model.Dock;
-import com.concordia.velocity.backend.model.Station;
+import model.Bike;
+import model.Dock;
+import model.Station;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.boot.CommandLineRunner;
