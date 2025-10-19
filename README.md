@@ -22,21 +22,36 @@
 1. First make sure you have [Node](https://nodejs.org/en) installed
 2. Change your directory from root to `velocity` which is our front end directory
 ```
-cd my-app\velocity
+cd velocity
 ```
 3. Run the following command to install the front end dependencies:
 ```
 npm install
 ```
+4. Add our `.env` file in the `velocity` directory
 ---
 
 ## How to Get the Front End Running
 1. Change your directory from root to `velocity` which is our front end directory
 ```
-cd my-app\velocity
+cd velocity
 ```
-2. Run the following command to install the front end dependencies:
+2. Run the following command to start the front end server:
 ```
 npm run dev
 ```
 3. Open your project at [localhost:5173](http://localhost:5173/)
+
+---
+
+## How to Get the Backend Running
+1. Add our `firebase-service-account.json` file under `backend\src\main\resources\`
+2. Make sure you have [Java 21](https://www.oracle.com/java/technologies/downloads/) or a later version installed
+3. Change your directory from root to `backend` which is our backend directory
+```
+cd backend
+```
+4. Run the following command to start the backend server:
+```
+./gradlew bootRun
+```
