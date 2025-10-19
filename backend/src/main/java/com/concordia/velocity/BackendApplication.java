@@ -13,6 +13,6 @@ public class BackendApplication {
 	public static void main(String[] args) {
 		System.out.println("🚀 Starting VeloCity Backend...");
 		SpringApplication.run(BackendApplication.class, args);
-		System.out.println("✅ VeloCity Backend started successfully!");
+		System.out.println("VeloCity Backend started successfully!");
 	}
 }
