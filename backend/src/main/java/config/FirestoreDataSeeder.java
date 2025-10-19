@@ -8,13 +8,14 @@ import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-@Configuration
+@Component
 public class FirestoreDataSeeder {
 
     @Bean
