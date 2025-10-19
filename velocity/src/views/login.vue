@@ -35,7 +35,7 @@ const router = useRouter()
 const handleLogin = async () => {
   try {
     await login(email.value, password.value)
-    router.push({ name: 'UserHome' })
+    router.push({ name: 'Home' })
   } catch (error) {
     alert(`Login failed: ${error.message}`)
   }
