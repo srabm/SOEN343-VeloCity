@@ -1,4 +1,4 @@
-package com.concordia.velocity.backend.model;
+package model;
 
 public class Dock {
     private String dockId;

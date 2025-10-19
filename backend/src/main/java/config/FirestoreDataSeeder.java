@@ -1,20 +1,21 @@
-package com.concordia.velocity.backend.config;
+package config;
 
-import com.concordia.velocity.backend.model.Bike;
-import com.concordia.velocity.backend.model.Dock;
-import com.concordia.velocity.backend.model.Station;
+import model.Bike;
+import model.Dock;
+import model.Station;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-@Configuration
+@Component
 public class FirestoreDataSeeder {
 
     @Bean

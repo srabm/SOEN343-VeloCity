@@ -1,4 +1,5 @@
-package com.concordia.velocity.backend.model;
+
+package model;
 
 abstract class User {
     private String fullName;

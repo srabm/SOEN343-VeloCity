@@ -1,9 +1,9 @@
 // This file is supposed to handle business logic related to stations. 
 // It's the service layer that keeps the logic testable and reusable, so that it keeps the controller clean.
 
-package com.concordia.velocity.backend.service;
+package service;
 
-import com.concordia.velocity.backend.model.Station;
+import model.Station;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
