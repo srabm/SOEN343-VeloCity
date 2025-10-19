@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Login from '../views/login.vue';
 import PasswordRecovery from '../views/passwordRecovery.vue';
 import Register from '../views/register.vue';
-import Home from '../views/home.vue';
+import Home from '../views/userHome.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
