@@ -1,7 +1,12 @@
+<template>
+  <div>
+    <button type="submit" @click="handleLogout">Logout</button>
+  </div>
+</template>
+
 <script setup>
 import { ref } from 'vue'
 import { signOutUser } from '../../firebaseAuth.js'
-
 
 const handleLogout = async () => {
   try {
@@ -12,9 +17,3 @@ const handleLogout = async () => {
   }
 }
 </script>
-
-<template>
-   <div>
-  <button type="submit" @click="handleLogout">Logout</button>
-  </div>
-</template>
