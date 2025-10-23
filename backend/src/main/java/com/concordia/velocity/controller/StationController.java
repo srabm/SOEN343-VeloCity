@@ -27,7 +27,12 @@ public class StationController {
         return stationService.getStationById(stationId);
     }
 
-    
+    @GetMapping
+    public List<Station> getAllStations() throws ExecutionException, InterruptedException {
+    return stationService.getAllStations();
+}
+
+
 
 }
 

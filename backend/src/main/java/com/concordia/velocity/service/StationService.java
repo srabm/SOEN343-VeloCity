@@ -35,16 +35,14 @@ public class StationService {
         
         if (newStatus.equals("out_of_service")) {
             station.setStatus("out_of_service");
+        } else if (Arrays.asList("empty", "occupied", "full").contains(newStatus)) {
+            if (noReservedBikes(station)) {
+                station.setStatus(newStatus);
+            } else {
+                throw new IllegalStateException ("Cannot update status to " + newStatus + " while there are reserved bikes at the station.\n");    
+            }
         } else {
-            int docked = station.getNumDockedBikes();
-            int capacity = station.getCapacity();
-
-            if (docked == 0)
-                station.setStatus("empty");
-            else if (docked == capacity)
-                station.setStatus("full");
-            else
-                station.setStatus("occupied");  
+            throw new IllegalArgumentException("Invalid station status: " + newStatus + "\n");
         }
         station.notifyObservers();
         db.collection("stations").document(stationId).set(station);
@@ -56,4 +54,14 @@ public class StationService {
         return  db.collection("stations").document(stationId)
                 .get().get().toObject(Station.class);
     }
+
+    public List<Station> getAllStations() throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+        List<Station> stations = new ArrayList<>();
+        for (DocumentSnapshot doc : db.collection("stations").get().get().getDocuments()) {
+        stations.add(doc.toObject(Station.class));
+    }
+        return stations;
+}
+
 }
