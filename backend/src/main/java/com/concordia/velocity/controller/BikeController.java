@@ -1,7 +1,7 @@
-package controller;
+package com.concordia.velocity.controller;
 
-import model.Bike;
-import service.BikeService;
+import com.concordia.velocity.model.Bike;
+import com.concordia.velocity.service.BikeService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
