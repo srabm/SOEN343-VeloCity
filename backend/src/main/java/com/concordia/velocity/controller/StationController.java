@@ -1,10 +1,15 @@
 // This file handles HTTP requests. The controller handles the incoming requests, processes them by calling the service layer, which calls the repository.
 
 package com.concordia.velocity.controller;
-
+import com.concordia.velocity.model.Station;
 import com.concordia.velocity.service.StationService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 import java.util.concurrent.ExecutionException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -17,17 +22,24 @@ public class StationController {
     }
 
     @PutMapping("/{stationId}/status") //PUT endpoint that changes a station's status
-    public String updateStationStatus(@PathVariable String stationId, @RequestParam String newStatus) throws ExecutionException, InterruptedException {
-        return stationService.updateStationStatus(stationId, newStatus);
+    public ResponseEntity<Map<String, String>> updateStationStatus(@PathVariable String stationId, @RequestParam String newStatus) throws ExecutionException, InterruptedException {
+        String message = stationService.updateStationStatus(stationId, newStatus);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        response.put("stationId", stationId);
+        response.put("newStatus", newStatus);
+        return ResponseEntity.ok(response);
     }
 
+
+
    
-    @GetMapping("/{stationId}") // GET endoint to fetch station's data
+    @GetMapping("/{stationId}") // GET endpoint to fetch station's data
     public Object getStationById(@PathVariable String stationId) throws ExecutionException, InterruptedException {
         return stationService.getStationById(stationId);
     }
 
-    @GetMapping
+    @GetMapping // GET endpoint to fetch all stations' data
     public List<Station> getAllStations() throws ExecutionException, InterruptedException {
     return stationService.getAllStations();
 }

@@ -2,6 +2,9 @@
 
 package com.concordia.velocity.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.concordia.velocity.model.Station;
 import com.concordia.velocity.observer.DashboardObserver;
 import com.concordia.velocity.observer.NotificationObserver;
@@ -9,7 +12,7 @@ import com.concordia.velocity.observer.Observer;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
-
+import com.google.cloud.firestore.DocumentSnapshot;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -49,7 +52,28 @@ public class StationService {
         return "Station " + stationId + " updated to status:  " + station.getStatus() + ".\n";
     }
 
-    public Object getStationById(String stationId) throws ExecutionException, InterruptedException {
+    // Checks if any bikes at the station are still reserved
+    private boolean noReservedBikes(Station station) throws ExecutionException, InterruptedException {
+        List<String> bikeIds = station.getBikeIds();
+        if (bikeIds == null || bikeIds.isEmpty()) {
+            return true; // No bikes = ok to change status
+        }
+
+        for (String bikeId : bikeIds) {
+            var bikeDoc = db.collection("bikes").document(bikeId).get().get();
+            if (bikeDoc.exists()) {
+                String bikeStatus = bikeDoc.getString("status");
+                if ("reserved".equalsIgnoreCase(bikeStatus)) {
+                    System.out.println("Bike " + bikeId + " is reserved. The station cannot be activated.");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+    public Station getStationById(String stationId) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
         return  db.collection("stations").document(stationId)
                 .get().get().toObject(Station.class);
