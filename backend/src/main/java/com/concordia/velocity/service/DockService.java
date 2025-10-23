@@ -1,7 +1,7 @@
-package service;
+package com.concordia.velocity.service;
 
-import model.Dock;
-import model.Bike;
+import com.concordia.velocity.model.Dock;
+import com.concordia.velocity.model.Bike;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;

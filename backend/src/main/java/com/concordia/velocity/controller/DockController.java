@@ -1,7 +1,7 @@
-package controller;
+package com.concordia.velocity.controller;
 
-import model.Dock;
-import service.DockService;
+import com.concordia.velocity.model.Dock;
+import com.concordia.velocity.service.DockService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

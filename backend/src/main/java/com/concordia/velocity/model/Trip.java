@@ -1,4 +1,4 @@
-package model;
+package com.concordia.velocity.model;
 
 import java.util.Date;
 public class Trip {
