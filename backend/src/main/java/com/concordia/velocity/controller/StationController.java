@@ -5,6 +5,7 @@ import com.concordia.velocity.model.Station;
 import com.concordia.velocity.service.StationService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import java.util.concurrent.ExecutionException;
 
 import java.util.HashMap;
@@ -21,14 +22,36 @@ public class StationController {
         this.stationService = stationService;
     }
 
-    @PutMapping("/{stationId}/status") //PUT endpoint that changes a station's status
-    public ResponseEntity<Map<String, String>> updateStationStatus(@PathVariable String stationId, @RequestParam String newStatus) throws ExecutionException, InterruptedException {
-        String message = stationService.updateStationStatus(stationId, newStatus);
+    @PutMapping("/{stationId}/status")
+    public ResponseEntity<Map<String, String>> updateStationStatus(
+            @PathVariable String stationId,
+            @RequestParam String newStatus) {
+
         Map<String, String> response = new HashMap<>();
-        response.put("message", message);
-        response.put("stationId", stationId);
-        response.put("newStatus", newStatus);
-        return ResponseEntity.ok(response);
+        String message;
+
+        try {
+            
+            message = stationService.updateStationStatus(stationId, newStatus);
+
+            response.put("stationId", stationId);
+            response.put("newStatus", newStatus);
+            response.put("message", message);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
+        } catch (IllegalStateException e) {
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+
+        } catch (Exception e) {
+            response.put("error", "Unexpected error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 

@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-@Component
+// @Component
 public class FirestoreDataSeeder {
 
     @Bean

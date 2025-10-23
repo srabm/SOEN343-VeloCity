@@ -20,6 +20,7 @@ public class StationService {
 
     private final Firestore db = FirestoreClient.getFirestore();
 
+    // This handles the logic for updating a station's status by validating status changes, enforing reservation rules, and emitting observer events
     public String updateStationStatus(String stationId, String newStatus) throws ExecutionException, InterruptedException {
         Station station = db.collection("stations").document(stationId)
                 .get().get().toObject(Station.class);
@@ -40,16 +41,22 @@ public class StationService {
             station.setStatus("out_of_service");
         } else if (Arrays.asList("empty", "occupied", "full").contains(newStatus)) {
             if (noReservedBikes(station)) {
-                station.setStatus(newStatus);
+                // No reservations, so activates normally
+                String computedStatus = determineActiveStatus(station);
+                station.setStatus(computedStatus);
+
             } else {
-                throw new IllegalStateException ("Cannot update status to " + newStatus + " while there are reserved bikes at the station.\n");    
+                // Has reservations, so terminate and then activate
+                terminateReservations(station);
+                String computedStatus = determineActiveStatus(station);
+                station.setStatus(computedStatus);
             }
         } else {
             throw new IllegalArgumentException("Invalid station status: " + newStatus + "\n");
         }
         station.notifyObservers();
         db.collection("stations").document(stationId).set(station);
-        return "Station " + stationId + " updated to status:  " + station.getStatus() + ".\n";
+        return "Station " + stationId + " updated to status:  " + station.getStatus();
     }
 
     // Checks if any bikes at the station are still reserved
@@ -71,7 +78,33 @@ public class StationService {
         }
         return true;
     }
+    // This determines the correct active state based on number of docked bikes (so empty if there's 0 bikes, full when it's at max cap, and occupied in any other case)
+    private String determineActiveStatus(Station station) {
+        int docked = station.getNumDockedBikes();
+        int capacity = station.getCapacity();
 
+        if (docked == 0) {
+            return "empty";
+        } else if (docked == capacity) {
+            return "full";
+        } else {
+            return "occupied";
+        }
+    }
+
+    // This terminates reservations and sets the reserved bikes back to "available" before reactivatnig
+    private void terminateReservations(Station station) throws ExecutionException, InterruptedException {
+        List<String> bikeIds = station.getBikeIds();
+        if (bikeIds == null || bikeIds.isEmpty()) return;
+
+        for (String bikeId : bikeIds) {
+            var bikeDoc = db.collection("bikes").document(bikeId).get().get();
+            if (bikeDoc.exists() && "reserved".equalsIgnoreCase(bikeDoc.getString("status"))) {
+                bikeDoc.getReference().update("status", "available");
+                System.out.println("Reservation terminated for bike " + bikeId);
+            }
+        }
+    }
 
     public Station getStationById(String stationId) throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
