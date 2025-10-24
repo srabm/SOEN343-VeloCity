@@ -1,95 +1,101 @@
 package com.concordia.velocity.service;
 
 import com.concordia.velocity.model.Bike;
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.*;
+import com.concordia.velocity.model.BikeStatus;
+import com.concordia.velocity.observer.DashboardObserver;
+import com.concordia.velocity.observer.NotificationObserver;
+import com.concordia.velocity.observer.Observer;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Service
 public class BikeService {
 
-    private static final String COLLECTION_NAME = "bikes";
+    private final Firestore db = FirestoreClient.getFirestore();
 
-    private Firestore getDb() {
-        return FirestoreClient.getFirestore();
+    public String updateBikeStatus(String bikeId, String newStatus)
+            throws ExecutionException, InterruptedException {
+
+        // Retrieve bike from Firestore
+        DocumentSnapshot doc = db.collection("bikes").document(bikeId).get().get();
+        Bike bike = doc.toObject(Bike.class);
+
+        if (bike == null) {
+            throw new IllegalArgumentException("Bike not found: " + bikeId);
+        }
+
+        BikeStatus currentStatus = BikeStatus.valueOf(bike.getStatus().toUpperCase());
+        BikeStatus targetStatus;
+
+        try {
+            targetStatus = BikeStatus.valueOf(newStatus.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status: " + newStatus +
+                    ". Valid options are: AVAILABLE, RESERVED, MAINTENANCE, ON_TRIP");
+        }
+
+        // Business rule: cannot modify if bike is ON_TRIP
+        if (currentStatus == BikeStatus.ON_TRIP) {
+            throw new IllegalStateException(
+                    "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
+        }
+
+        // If bike is reserved, terminate reservation before proceeding
+        if (currentStatus == BikeStatus.RESERVED) {
+            terminateReservation(bikeId);
+            bike.setStatus(BikeStatus.AVAILABLE.name());
+            System.out.println("Reservation terminated for bike " + bikeId);
+        }
+
+        // Perform update
+        bike.setStatus(targetStatus.name());
+        db.collection("bikes").document(bikeId).set(bike);
+
+        // Attach observers
+        Observer dashboardObserver = new DashboardObserver();
+        Observer notificationObserver = new NotificationObserver();
+
+        bike.attach(dashboardObserver);
+        bike.attach(notificationObserver);
+
+        // Emit event
+        bike.notifyObservers();
+
+        return "Bike " + bikeId + " updated successfully to status: " + bike.getStatus();
     }
 
-    // Add or update bike
-    public String saveBike(Bike bike) throws ExecutionException, InterruptedException {
-        getDb().collection(COLLECTION_NAME)
-                .document(bike.getBikeId())
-                .set(bike)
-                .get();
-        return "Bike " + bike.getBikeId() + " saved successfully.";
-    }
-
-    // Get bike by ID
     public Bike getBikeById(String bikeId) throws ExecutionException, InterruptedException {
-        DocumentSnapshot snapshot = getDb()
-                .collection(COLLECTION_NAME)
-                .document(bikeId)
-                .get()
-                .get();
-        return snapshot.exists() ? snapshot.toObject(Bike.class) : null;
+        return db.collection("bikes").document(bikeId)
+                .get().get().toObject(Bike.class);
     }
 
-    // Get all bikes
     public List<Bike> getAllBikes() throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> docs = getDb()
-                .collection(COLLECTION_NAME)
-                .get()
-                .get()
-                .getDocuments();
         List<Bike> bikes = new ArrayList<>();
-        for (DocumentSnapshot doc : docs) {
+        for (DocumentSnapshot doc : db.collection("bikes").get().get().getDocuments()) {
             bikes.add(doc.toObject(Bike.class));
         }
         return bikes;
     }
 
-    // Delete bike
-    public String deleteBike(String bikeId) throws ExecutionException, InterruptedException {
-        getDb().collection(COLLECTION_NAME).document(bikeId).delete().get();
-        return "Bike " + bikeId + " deleted successfully.";
-    }
+    private void terminateReservation(String bikeId) throws ExecutionException, InterruptedException {
+        // Example: find and delete any reservation document tied to this bike
+        var reservations = db.collection("reservations")
+                .whereEqualTo("bikeId", bikeId)
+                .get()
+                .get()
+                .getDocuments();
 
-    // Update bike status (Operator use case)
-    public String updateBikeStatus(String bikeId, String newStatus)
-            throws ExecutionException, InterruptedException {
-
-        DocumentReference docRef = getDb().collection(COLLECTION_NAME).document(bikeId);
-        DocumentSnapshot snapshot = docRef.get().get();
-
-        if (!snapshot.exists()) {
-            throw new RuntimeException("Bike not found");
+        for (DocumentSnapshot res : reservations) {
+            db.collection("reservations").document(res.getId()).delete();
         }
 
-        Bike bike = snapshot.toObject(Bike.class);
-
-        // Prevent updates while bike is on trip
-        if ("on_trip".equalsIgnoreCase(bike.getStatus())) {
-            return "Cannot change status — bike is currently on a trip.";
-        }
-
-        // If reserved, terminate reservation first
-        if ("reserved".equalsIgnoreCase(bike.getStatus())) {
-            bike.setStatus("available");
-            bike.setReservationExpiry(null);
-            System.out.println("Reservation terminated for bike " + bikeId);
-        }
-
-        bike.setStatus(newStatus.toLowerCase());
-        bike.setReservationExpiry(null);
-        docRef.set(bike).get();
-
-        System.out.println("Bike " + bikeId + " status changed to " + newStatus.toUpperCase() +
-                " at " + LocalDateTime.now());
-
-        return "Bike " + bikeId + " updated to " + newStatus + " successfully.";
+        System.out.println("Reservation entries for bike " + bikeId + " cleaned up.");
     }
 }

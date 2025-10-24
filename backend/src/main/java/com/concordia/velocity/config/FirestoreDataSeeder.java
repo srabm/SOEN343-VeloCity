@@ -110,8 +110,9 @@ public class FirestoreDataSeeder {
                         new Dock("D006","occupied","B006","S001"),
                         new Dock("D007","occupied","B007","S001"),
                         new Dock("D008","occupied","B008","S001"),
-                        new Dock("D009","empty",null,"S001"),
-                        new Dock("D010","empty",null,"S001"),
+                        new Dock("D009","available","B009","S001"),
+                        new Dock("D010","on_trip","B010","S001"),
+                    
 
                         // Station 2 (empty)
                         new Dock("D011","empty",null,"S002"),
@@ -178,6 +179,8 @@ public class FirestoreDataSeeder {
                         new Bike("B006","available","e-bike","D006","S001"),
                         new Bike("B007","available","standard","D007","S001"),
                         new Bike("B008","available","standard","D008","S001"),
+                        new Bike("B009","available","standard","D009","S001"),
+                        new Bike("B010","on_trip","e-bike","D010","S001"),
 
                         // S003 (full)
                         new Bike("B014","available","standard","D021","S003"),
