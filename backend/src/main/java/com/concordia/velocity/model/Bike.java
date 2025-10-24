@@ -1,11 +1,14 @@
 package com.concordia.velocity.model;
 
-import com.concordia.velocity.observer.Subject;
 import com.concordia.velocity.observer.Observer;
-import com.concordia.velocity.model.BikeStatus;
-import java.util.Date;
+import com.concordia.velocity.observer.Subject;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class Bike implements Subject {
@@ -13,9 +16,10 @@ public class Bike implements Subject {
     private String bikeId;
     private String status;
     private String type; 
-    private Date reservationExpiry;
+    private LocalDateTime reservationExpiry;
     private String dockId; // i thought of using private Dock dock, but Firebase can't serialize nested custom objects because it leads to circular references (a bike contains a dock, which contains a station, which contains bikes)
     private String stationId;
+    private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
 
     private transient List<Observer> observers = new ArrayList<>();
 
@@ -60,8 +64,8 @@ public class Bike implements Subject {
     public String getType() {return type;}
     public void setType(String type) {this.type = type;}
 
-    public Date getReservationExpiry() {return reservationExpiry;}
-    public void setReservationExpiry(Date reservationExpiry) {this.reservationExpiry = reservationExpiry;}
+    public LocalDateTime getReservationExpiry() {return reservationExpiry;}
+    public void setReservationExpiry(LocalDateTime reservationExpiry) {this.reservationExpiry = reservationExpiry;}
 
     public String getDockId() {return dockId;}
     public void setDockId(String dockId) {this.dockId = dockId;}
@@ -73,7 +77,7 @@ public class Bike implements Subject {
     public boolean isReservedActive() {
         if (!BikeStatus.RESERVED.name().equalsIgnoreCase(this.status)) return false;
         if (reservationExpiry == null) return false;
-        return reservationExpiry.after(new Date());
+        return reservationExpiry.isAfter(LocalDateTime.now());
     }
 
     @Override
@@ -86,6 +90,25 @@ public class Bike implements Subject {
                 ", stationId='" + stationId + '\'' +
                 ", reservationExpiry=" + reservationExpiry +
                 '}';
+    }
+
+    public LocalDateTime startReservationExpiry(Station station) {
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(station.getReservationHoldTime());
+        setReservationExpiry(expiryTime);
+
+        RESERVATION_SCHEDULER.schedule(new Runnable() {
+            @Override
+            public void run() {
+                if ("reserved".equals(getStatus()) && !LocalDateTime.now().isBefore(getReservationExpiry())) {
+                    setStatus("available");
+                    observers.notifyAll();
+                    setReservationExpiry(null);
+                    System.out.println("Reservation expired, bike " + getBikeId() + " has been set to available.");
+                }
+            }
+        }, station.getReservationHoldTime(), TimeUnit.MINUTES);
+
+        return expiryTime;
     }
 
 }
