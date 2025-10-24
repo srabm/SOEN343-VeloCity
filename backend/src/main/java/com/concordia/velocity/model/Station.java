@@ -64,7 +64,7 @@ public class Station implements Subject {
 
     @Override public void notifyObservers() {
         for (Observer obs : observers) {
-            obs.update(this.stationId, this.status);
+            obs.update("Station " + stationId + " status changed to " + status);
         }
     }
 
