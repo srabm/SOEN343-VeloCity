@@ -4,6 +4,7 @@ import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.model.Rider;
 import com.concordia.velocity.model.Station;
 
+// tests expiry of a reservation
 public class RiderTest {
     public static void main(String[] args) {
         Bike bike = new Bike("B101", "available", "standard", "D101", "S001");

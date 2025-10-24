@@ -6,6 +6,7 @@ import com.concordia.velocity.model.Station;
 
 import java.time.LocalDateTime;
 
+// tests reserving a bike
 public class BikeTest {
     public static void main(String[] args) throws Exception {
         Bike bike = new Bike("B101", "available", "standard", "D101", "S001");
@@ -21,6 +22,7 @@ public class BikeTest {
         System.out.println("Bike status after reservation: " + bike.getStatus());
         System.out.println("Sleeping thread until expiry...");
 
+        // to mimic app running
         while (LocalDateTime.now().isBefore(expiry)) {
             Thread.sleep(1000);
         }
