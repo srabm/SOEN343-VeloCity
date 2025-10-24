@@ -14,5 +14,6 @@ public class BackendApplication {
 		System.out.println("Starting VeloCity Backend...");
 		SpringApplication.run(BackendApplication.class, args);
 		System.out.println("VeloCity Backend started successfully!");
+
 	}
 }

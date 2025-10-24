@@ -1,100 +1,97 @@
 package com.concordia.velocity.service;
 
-import com.concordia.velocity.model.Dock;
 import com.concordia.velocity.model.Bike;
-import com.google.cloud.firestore.*;
+import com.concordia.velocity.model.Dock;
+import com.concordia.velocity.observer.DashboardObserver;
+import com.concordia.velocity.observer.NotificationObserver;
+import com.concordia.velocity.observer.Observer;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class DockService {
 
-    private static final String COLLECTION_NAME = "docks";
+    private final Firestore db = FirestoreClient.getFirestore();
 
-    private Firestore getDb() {
-        return FirestoreClient.getFirestore();
-    }
+    //Updates a dock’s status while validating bike state.
 
-    // Add or update dock
-    public String saveDock(Dock dock) throws ExecutionException, InterruptedException {
-        getDb().collection(COLLECTION_NAME)
-                .document(dock.getDockId())
-                .set(dock)
-                .get();
-        return "Dock " + dock.getDockId() + " saved successfully.";
-    }
-
-    // Get dock by ID
-    public Dock getDockById(String dockId) throws ExecutionException, InterruptedException {
-        DocumentSnapshot snapshot = getDb()
-                .collection(COLLECTION_NAME)
-                .document(dockId)
-                .get()
-                .get();
-        return snapshot.exists() ? snapshot.toObject(Dock.class) : null;
-    }
-
-    // Get all docks
-    public List<Dock> getAllDocks() throws ExecutionException, InterruptedException {
-        List<QueryDocumentSnapshot> docs = getDb()
-                .collection(COLLECTION_NAME)
-                .get()
-                .get()
-                .getDocuments();
-        List<Dock> docks = new ArrayList<>();
-        for (DocumentSnapshot doc : docs) {
-            docks.add(doc.toObject(Dock.class));
-        }
-        return docks;
-    }
-
-    // Delete dock
-    public String deleteDock(String dockId) throws ExecutionException, InterruptedException {
-        getDb().collection(COLLECTION_NAME).document(dockId).delete().get();
-        return "Dock " + dockId + " deleted successfully.";
-    }
-
-    // Update dock status (with reserved bike handling)
     public String updateDockStatus(String dockId, String newStatus)
             throws ExecutionException, InterruptedException {
 
-        Firestore db = getDb();
-        DocumentReference docRef = db.collection(COLLECTION_NAME).document(dockId);
-        DocumentSnapshot snapshot = docRef.get().get();
+        DocumentSnapshot doc = db.collection("docks").document(dockId).get().get();
+        Dock dock = doc.toObject(Dock.class);
 
-        if (!snapshot.exists()) {
-            throw new RuntimeException("Dock not found");
+        if (dock == null) {
+            throw new IllegalArgumentException("Dock not found: " + dockId);
         }
 
-        Dock dock = snapshot.toObject(Dock.class);
+        if (!List.of("empty", "occupied", "out_of_service").contains(newStatus)) {
+            throw new IllegalArgumentException("Invalid dock status: " + newStatus);
+        }
 
-        // Check if a bike is linked to this dock
-        if (dock.getBikeId() != null) {
-            DocumentSnapshot bikeSnap = db.collection("bikes").document(dock.getBikeId()).get().get();
-            if (bikeSnap.exists()) {
-                Bike bike = bikeSnap.toObject(Bike.class);
+        // If dock has an associated bike, check its status
+        if (dock.getBikeId() != null && !dock.getBikeId().isEmpty()) {
+            DocumentSnapshot bikeDoc = db.collection("bikes")
+                                         .document(dock.getBikeId())
+                                         .get().get();
+            Bike bike = bikeDoc.toObject(Bike.class);
 
-                // If reserved, terminate reservation
-                if ("reserved".equalsIgnoreCase(bike.getStatus())) {
-                    bike.setStatus("available");
-                    bike.setReservationExpiry(null);
-                    db.collection("bikes").document(bike.getBikeId()).set(bike).get();
-                    System.out.println("Reservation terminated for bike " + bike.getBikeId());
-                    System.out.println("Rider notified: Reservation cancelled due to dock status change.");
-                }
+            if (bike != null && "reserved".equalsIgnoreCase(bike.getStatus())) {
+                // terminate reservation before proceeding
+                terminateReservation(bike.getBikeId());
+                bike.setStatus("available");
+                db.collection("bikes").document(bike.getBikeId()).set(bike);
+                System.out.println("Reservation terminated for bike " + bike.getBikeId());
             }
         }
 
-        dock.setState(newStatus.toLowerCase());
-        docRef.set(dock).get();
 
-        System.out.println("Dock " + dockId + " status changed to " + newStatus.toUpperCase() +
-                " at " + LocalDateTime.now());
+        dock.setStatus(newStatus);
+        db.collection("docks").document(dockId).set(dock);
 
-        return "Dock " + dockId + " updated successfully.";
+
+        Observer dashboardObserver = new DashboardObserver();
+        Observer notificationObserver = new NotificationObserver();
+        dock.attach(dashboardObserver);
+        dock.attach(notificationObserver);
+
+        dock.notifyObservers();
+
+        return "Dock " + dockId + " updated to status: " + dock.getStatus();
+    }
+
+    private void terminateReservation(String bikeId)
+            throws ExecutionException, InterruptedException {
+        var reservations = db.collection("reservations")
+                             .whereEqualTo("bikeId", bikeId)
+                             .get()
+                             .get()
+                             .getDocuments();
+
+        for (DocumentSnapshot res : reservations) {
+            db.collection("reservations").document(res.getId()).delete();
+        }
+        System.out.println("Reservation entries for bike " + bikeId + " cleaned up.");
+    }
+
+
+    public Dock getDockById(String dockId)
+            throws ExecutionException, InterruptedException {
+        DocumentSnapshot doc = db.collection("docks").document(dockId).get().get();
+        return doc.toObject(Dock.class);
+    }
+
+    public List<Dock> getAllDocks()
+            throws ExecutionException, InterruptedException {
+        List<Dock> docks = new ArrayList<>();
+        for (DocumentSnapshot doc : db.collection("docks").get().get().getDocuments()) {
+            docks.add(doc.toObject(Dock.class));
+        }
+        return docks;
     }
 }
