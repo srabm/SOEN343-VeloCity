@@ -32,7 +32,8 @@ public class RideService {
 
         this.stationService.decreaseBikeCount(stationId);
         this.dockService.updateDockStatus(dockId, "empty")
-        // change bike status here
+        this.bikeService.updateBikeStatus(bikeId, "on_trip")
+        // change bike, user and station status here
 
         // TO-DO: Add ride history through database for future logging
 
