@@ -33,14 +33,33 @@ const handleLogin = async () => {
             <button type="submit">Login</button>
         </form>
 
-        <div class="forgot-password">
-            <router-link to="/password-recovery">Forgot password?</router-link>
-        </div>
-
-        <h2>WELCOME BACK!</h2>
-
-        <p>Don't have an account? <router-link to="/register">Sign up</router-link></p>
+    <div class="forgot-password">
+      <router-link to="/password-recovery">Forgot password?</router-link>
     </div>
+
+    <h2>WELCOME BACK!</h2>
+
+    <p>Don't have an account? <router-link to="/register">Sign up</router-link></p>
+  </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { login } from '../../firebaseAuth.js'
+
+const email = ref('')
+const password = ref('')
+const router = useRouter()
+
+const handleLogin = async () => {
+  try {
+    await login(email.value, password.value)
+    router.push({ name: 'Home' })
+  } catch (error) {
+    alert(`Login failed: ${error.message}`)
+  }
+}
+</script>
 
 <style scoped></style>

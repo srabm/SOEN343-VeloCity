@@ -1,37 +1,3 @@
-<script setup>
-import { ref } from 'vue'
-import { signUp, firestore, doc, setDoc } from '../../firebaseAuth.js'
-
-const email = ref('')
-const password = ref('')
-const firstName = ref('')
-const lastName = ref('')
-const phoneNumber = ref('')
-const paymentInfo = ref('')
-
-const handleSignup = async () => {
-  try {
-    const userCredential = await signUp(email.value, password.value)
-    const user = userCredential.user
-
-     await setDoc(doc(firestore, 'riders', user.uid), {
-      id: user.uid,
-      firstName: firstName.value,
-      lastName: lastName.value,
-      email: email.value,
-      createdAt: new Date(),
-      isOperator: false,
-      phoneNumber: phoneNumber.value,
-      paymentInfo: paymentInfo.value
-    })
-    alert(`Account created for ${user.email}!`)
-
-  } catch (error) {
-    alert(`Signup failed: ${error.message}`)
-  }
-}
-</script>
-
 <template>
     <div class="login-container">
         <h2>Register</h2>
@@ -42,7 +8,7 @@ const handleSignup = async () => {
                 <input v-model="firstName" type="firstName" id="firstName" required />
             </div>
 
-             <!-- last name -->
+            <!-- last name -->
             <div class="form-group">
                 <label for="lastName">Last Name:</label>
                 <input v-model="lastName" type="lastName" id="lastName" required />
@@ -79,3 +45,37 @@ const handleSignup = async () => {
         <p>Already have an account? <router-link to="/login">Login</router-link></p>
     </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+import { signUp, firestore, doc, setDoc } from '../../firebaseAuth.js'
+
+const email = ref('')
+const password = ref('')
+const firstName = ref('')
+const lastName = ref('')
+const phoneNumber = ref('')
+const paymentInfo = ref('')
+
+const handleSignup = async () => {
+    try {
+        const userCredential = await signUp(email.value, password.value)
+        const user = userCredential.user
+
+        await setDoc(doc(firestore, 'riders', user.uid), {
+            id: user.uid,
+            firstName: firstName.value,
+            lastName: lastName.value,
+            email: email.value,
+            createdAt: new Date(),
+            isOperator: false,
+            phoneNumber: phoneNumber.value,
+            paymentInfo: paymentInfo.value
+        })
+        alert(`Account created for ${user.email}!`)
+
+    } catch (error) {
+        alert(`Signup failed: ${error.message}`)
+    }
+}
+</script>

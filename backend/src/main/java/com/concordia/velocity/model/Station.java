@@ -1,9 +1,11 @@
-package model;
+package com.concordia.velocity.model;
 
+import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.Subject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Station {
+public class Station implements Subject {
 
     // Firestore document ID 
     private String stationId;
@@ -18,6 +20,8 @@ public class Station {
     private int reservationHoldTime; 
     private List<String> dockIds;
     private List<String> bikeIds;
+
+    private transient final List<Observer> observers = new ArrayList<>(); // put transient here so that it doesn't serialize Firestore (Serialization error)
 
     public Station() {}
 
@@ -43,10 +47,28 @@ public class Station {
         this.capacity = capacity;
         this.numDockedBikes = numDockedBikes;
         this.reservationHoldTime = reservationHoldTime;
-        this.dockIds = (dockIds != null) ? dockIds : new ArrayList<>();
-        this.bikeIds = (bikeIds != null) ? bikeIds : new ArrayList<>();
+        this.dockIds = dockIds;
+        this.bikeIds = bikeIds;
+    }
+    @Override
+    public void attach (Observer observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
     }
 
+    @Override 
+    public void detach (Observer observer) {
+        observers.remove(observer);
+    }
+
+    @Override public void notifyObservers() {
+        for (Observer obs : observers) {
+            obs.update("Station " + stationId + " status changed to " + status);
+        }
+    }
+
+    // setters, getters
     public String getStationId() { return stationId; }
     public void setStationId(String stationId) { this.stationId = stationId; }
 
@@ -54,7 +76,10 @@ public class Station {
     public void setStationName(String stationName) { this.stationName = stationName; }
 
     public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(String status) { 
+        this.status = status;
+        notifyObservers(); 
+    }
 
     public String getLatitude() { return latitude; }
     public void setLatitude(String latitude) { this.latitude = latitude; }
@@ -71,7 +96,6 @@ public class Station {
     public int getNumDockedBikes() { return numDockedBikes; }
     public void setNumDockedBikes(int numDockedBikes) {
         this.numDockedBikes = numDockedBikes;
-        updateStatus(); // auto-update status whenever count changes
     }
 
     public int getReservationHoldTime() { return reservationHoldTime; }
@@ -83,32 +107,5 @@ public class Station {
     public List<String> getBikeIds() { return bikeIds; }
     public void setBikeIds(List<String> bikeIds) { this.bikeIds = bikeIds; }
 
-
-    public void addBike(String bikeId) {
-        if (bikeIds.size() < capacity) {
-            bikeIds.add(bikeId);
-            numDockedBikes = bikeIds.size();
-            updateStatus();
-        } else {
-            throw new IllegalStateException("Station is at full capacity");
-        }
-    }
-
-    public void removeBike(String bikeId) {
-        if (bikeIds.remove(bikeId)) {
-            numDockedBikes = bikeIds.size();
-            updateStatus();
-        } else {
-            throw new IllegalArgumentException("Bike not found at this station");
-        }
-    }
-
-    // Auto-update station status (unless out of service)
-    private void updateStatus() {
-        if ("out_of_service".equalsIgnoreCase(status)) return;
-
-        if (numDockedBikes == 0) status = "empty";
-        else if (numDockedBikes == capacity) status = "full";
-        else status = "occupied";
-    }
+    
 }

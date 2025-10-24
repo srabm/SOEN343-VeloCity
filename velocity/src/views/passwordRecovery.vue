@@ -1,3 +1,28 @@
+<template>
+  <div class="password-recovery-container">
+    <h2>Password Reset</h2>
+
+    <div>
+      Please enter the email address connected with your account to proceed with resetting your password.
+    </div>
+
+    <div class="input-group">
+      <label for="email">Email:</label>
+      <input v-model="email" type="email" id="email" placeholder="Enter your email" />
+    </div>
+
+    <div v-if="message">
+      {{ message }}
+    </div>
+
+    <button @click="handleResetPassword">Reset My Password</button>
+
+    <div class="back-to-login">
+      <router-link to="/login">Back to Login</router-link>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref } from 'vue'
 import { resetPassword } from '../../firebaseAuth.js'
@@ -27,30 +52,5 @@ const handleResetPassword = async () => {
   }
 }
 </script>
-
-<template>
-  <div class="password-recovery-container">
-    <h2>Password Reset</h2>
-
-    <div>
-      Please enter the email address connected with your account to proceed with resetting your password.
-    </div>
-
-    <div class="input-group">
-      <label for="email">Email:</label>
-      <input v-model="email" type="email" id="email" placeholder="Enter your email" />
-    </div>
-
-    <div v-if="message">
-      {{ message }}
-    </div>
-
-    <button @click="handleResetPassword">Reset My Password</button>
-
-    <div class="back-to-login">
-      <router-link to="/login">Back to Login</router-link>
-    </div>
-  </div>
-</template>
 
 <style scoped></style>
