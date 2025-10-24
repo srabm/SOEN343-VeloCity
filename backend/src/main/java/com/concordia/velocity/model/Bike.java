@@ -50,6 +50,12 @@ public class Bike implements Subject {
         }
     }
 
+    public void reportProblem() {
+        status = BikeStatus.valueOf("MAINTENANCE");
+        notifyObservers();
+//        System.out.print("Bike is now in maintenance")
+    }
+
     // setters, getters
     public String getBikeId() {return bikeId;}
     public void setBikeId(String bikeId) {this.bikeId = bikeId;}
