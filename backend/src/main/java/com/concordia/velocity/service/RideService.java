@@ -4,6 +4,7 @@ import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.model.Dock;
 import com.concordia.velocity.model.Station;
 import org.springframework.stereotype.Service;
+import com.concordia.velocity.model.BikeStatus;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -27,7 +28,7 @@ public class RideService {
 
         if (!dock.getStatus().equals("occupied")) {
             return "Dock empty; undocking failed.";
-        } else if (!bike.getStatus().equals("available")) {
+        } else if (!bike.getStatus().toLowerCase().equals("available")) {
             return "Bike unavailable; undocking failed.";
         } else if (station.getStatus().equals("out_of_service")) {
             return "Station out of service; undocking failed.";
@@ -39,6 +40,7 @@ public class RideService {
 
         // TO-DO: Add ride history through database for future logging
         // TO-DO: Send context/notification (user - on - ride)
+        // TO-do: Change bike dockId attribute
 
         return "Bike " + bikeId + " succesfully undocked. Starting ride...";
     }
@@ -51,7 +53,7 @@ public class RideService {
 
         if (!dock.getStatus().equals("empty")) {
             return "Dock unavailable; docking failed.";
-        } else if (!bike.getStatus().equals("on_trip")) {
+        } else if (!bike.getStatus().toLowerCase().equals("on_trip")) {
             return "Bike not on trip; docking failed.";
         } else if (station.getStatus().equals("out_of_service")) {
             return "Station out of service; undocking failed.";

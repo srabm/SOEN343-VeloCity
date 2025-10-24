@@ -28,7 +28,7 @@ public class RideController {
     }
 
     @GetMapping("/return/{dockId}/{bikeId}")
-    public String returnBike(@PathVariable String bikeId, String dockId) throws ExecutionException, InterruptedException {
+    public String returnBike(@PathVariable String bikeId, @PathVariable String dockId) throws ExecutionException, InterruptedException {
         return this.rideService.returnBike(bikeId, dockId);
     }
 }

@@ -41,11 +41,11 @@ public class BikeService {
                     ". Valid options are: AVAILABLE, RESERVED, MAINTENANCE, ON_TRIP");
         }
 
-        // Business rule: cannot modify if bike is ON_TRIP
-        if (currentStatus == BikeStatus.ON_TRIP) {
-            throw new IllegalStateException(
-                    "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
-        }
+        // // Business rule: cannot modify if bike is ON_TRIP
+        // if (currentStatus == BikeStatus.ON_TRIP) {
+        //     throw new IllegalStateException(
+        //             "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
+        // }
 
         // If bike is reserved, terminate reservation before proceeding
         if (currentStatus == BikeStatus.RESERVED) {
