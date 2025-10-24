@@ -112,30 +112,30 @@ public class StationService {
                 .get().get().toObject(Station.class);
     }
 
-    public void updateBikeCount(String stationId, int count) throws ExecutionException, InterruptedException  {
+    public String updateBikeCount(String stationId, int count) throws ExecutionException, InterruptedException  {
         Station station = db.collection("stations").document(stationId)
                 .get().get().toObject(Station.class);
 
         if (station == null) {
             return "Station not found.";
         }else if (count > 0 && station.getCapacity() == station.getNumDockedBikes()) {
-            return "Station already full; cannot dock bike."
+            return "Station already full; cannot dock bike.";
         }
 
-        station.setNumDockedBikes(station.getCapacity + count);
+        station.setNumDockedBikes(station.getNumDockedBikes() + count);
 
-        if (station.numDockedBikes() == 0) {
+        if (station.getNumDockedBikes() == 0) {
             station.setStatus("empty");
-        } else if (station.numDockedBikes() == station.getCapacity()) {
+        } else if (station.getNumDockedBikes() == station.getCapacity()) {
             station.setStatus("full");
         } else {
             station.setStatus("occupied");
         }
 
         db.collection("stations").document(stationId).set(station);
-        return station.getNumDockedBikes() + " bikes docked at station " + stationId + "; " + station.getCapacity() - station.getNumDockedBikes() + " slots remaining.\n";
+        return station.getNumDockedBikes() + " bikes docked at station " + stationId + "; " + (station.getCapacity() - station.getNumDockedBikes()) + " slots remaining.\n";
     }
-    
+
     public List<Station> getAllStations() throws ExecutionException, InterruptedException {
         Firestore db = FirestoreClient.getFirestore();
         List<Station> stations = new ArrayList<>();

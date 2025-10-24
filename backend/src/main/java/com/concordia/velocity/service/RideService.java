@@ -5,7 +5,6 @@ import com.concordia.velocity.model.Dock;
 import com.concordia.velocity.model.Station;
 import org.springframework.stereotype.Service;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.InterruptedException;
 
 @Service
 public class RideService {
@@ -26,17 +25,17 @@ public class RideService {
         String stationId = dock.getStationId();
         Station station = this.stationService.getStationById(stationId);
 
-        if (!dock.getState().equals("occupied")) {
-            return "Dock empty; undocking failed."
-        } else if (!bike.getState().equals("available")) {
-            return "Bike unavailable; undocking failed."
-        } else if (station.getState().equals("out_of_service")) {
-            return "Station out of service; undocking failed."
+        if (!dock.getStatus().equals("occupied")) {
+            return "Dock empty; undocking failed.";
+        } else if (!bike.getStatus().equals("available")) {
+            return "Bike unavailable; undocking failed.";
+        } else if (station.getStatus().equals("out_of_service")) {
+            return "Station out of service; undocking failed.";
         }
 
-        this.dockService.updateDockStatus(dockId, "empty")
-        this.bikeService.updateBikeStatus(bikeId, "on_trip")
-        this.stationService.update(stationId, -1);
+        this.dockService.updateDockStatus(dockId, "empty");
+        this.bikeService.updateBikeStatus(bikeId, "on_trip");
+        this.stationService.updateBikeCount(stationId, -1);
 
         // TO-DO: Add ride history through database for future logging
         // TO-DO: Send context/notification (user - on - ride)
@@ -44,23 +43,23 @@ public class RideService {
         return "Bike " + bikeId + " succesfully undocked. Starting ride...";
     }
 
-    public String return(String bikeId, String dockId) throws ExecutionException, InterruptedException {
+    public String returnBike(String bikeId, String dockId) throws ExecutionException, InterruptedException {
         Bike bike = this.bikeService.getBikeById(bikeId);
         Dock dock = this.dockService.getDockById(dockId);
         String stationId = dock.getStationId();
         Station station = this.stationService.getStationById(stationId);
 
-        if (!dock.getState().equals("empty")) {
-            return "Dock unavailable; docking failed."
-        } else if (!bike.getState().equals("on_trip")) {
-            return "Bike not on trip; docking failed."
-        } else if (station.getState().equals("out_of_service")) {
-            return "Station out of service; undocking failed."
+        if (!dock.getStatus().equals("empty")) {
+            return "Dock unavailable; docking failed.";
+        } else if (!bike.getStatus().equals("on_trip")) {
+            return "Bike not on trip; docking failed.";
+        } else if (station.getStatus().equals("out_of_service")) {
+            return "Station out of service; undocking failed.";
         }
 
-        this.dockService.updateDockStatus(dockId, "occupied")
-        this.bikeService.updateBikeStatus(bikeId, "available")
-        this.stationService.update(stationId, 1);
+        this.dockService.updateDockStatus(dockId, "occupied");
+        this.bikeService.updateBikeStatus(bikeId, "available");
+        this.stationService.updateBikeCount(stationId, 1);
 
         // TO-DO: Send context/notification (user - not - on - ride)
 

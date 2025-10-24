@@ -1,8 +1,8 @@
 package com.concordia.velocity.controller;
 
+import org.springframework.web.bind.annotation.*;
 import com.concordia.velocity.service.RideService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.InterruptedException;
 
 @RestController
 @RequestMapping("/api/ride")
@@ -22,8 +22,13 @@ public class RideController {
      * 4. Bike, Dock and Station status or capacity must change
      */
 
-    @GetMapping("/{bikeId}")
-    public String getDock(@PathVariable String bikeId) throws ExecutionException, InterruptedException {
+    @GetMapping("/undock/{bikeId}")
+    public String undockBike(@PathVariable String bikeId) throws ExecutionException, InterruptedException {
         return this.rideService.undock(bikeId);
+    }
+
+    @GetMapping("/return/{dockId}/{bikeId}")
+    public String returnBike(@PathVariable String bikeId, String dockId) throws ExecutionException, InterruptedException {
+        return this.rideService.returnBike(bikeId, dockId);
     }
 }
