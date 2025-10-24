@@ -19,24 +19,51 @@ public class RideService {
         this.stationService = stationService;
     }
 
-    public boolean undock(String bikeId) throws ExecutionException, InterruptedException {
+    public String undock(String bikeId) throws ExecutionException, InterruptedException {
         Bike bike = this.bikeService.getBikeById(bikeId);
         String dockId = bike.getDockId();
         Dock dock = this.dockService.getDockById(dockId);
         String stationId = dock.getStationId();
         Station station = this.stationService.getStationById(stationId);
 
-        if (!dock.getState().equals("occupied") || !bike.getState().equals("available") || station.getState().equals("out_of_service")) {
-            return false
+        if (!dock.getState().equals("occupied")) {
+            return "Dock empty; undocking failed."
+        } else if (!bike.getState().equals("available")) {
+            return "Bike unavailable; undocking failed."
+        } else if (station.getState().equals("out_of_service")) {
+            return "Station out of service; undocking failed."
         }
 
-        this.stationService.decreaseBikeCount(stationId);
         this.dockService.updateDockStatus(dockId, "empty")
         this.bikeService.updateBikeStatus(bikeId, "on_trip")
-        // change bike, user and station status here
+        this.stationService.update(stationId, -1);
 
         // TO-DO: Add ride history through database for future logging
+        // TO-DO: Send context/notification (user - on - ride)
 
-        return true;
+        return "Bike " + bikeId + " succesfully undocked. Starting ride...";
+    }
+
+    public String return(String bikeId, String dockId) throws ExecutionException, InterruptedException {
+        Bike bike = this.bikeService.getBikeById(bikeId);
+        Dock dock = this.dockService.getDockById(dockId);
+        String stationId = dock.getStationId();
+        Station station = this.stationService.getStationById(stationId);
+
+        if (!dock.getState().equals("empty")) {
+            return "Dock unavailable; docking failed."
+        } else if (!bike.getState().equals("on_trip")) {
+            return "Bike not on trip; docking failed."
+        } else if (station.getState().equals("out_of_service")) {
+            return "Station out of service; undocking failed."
+        }
+
+        this.dockService.updateDockStatus(dockId, "occupied")
+        this.bikeService.updateBikeStatus(bikeId, "available")
+        this.stationService.update(stationId, 1);
+
+        // TO-DO: Send context/notification (user - not - on - ride)
+
+        return "Bike " + bikeId + " succesfully docked. Ending ride...";
     }
 }

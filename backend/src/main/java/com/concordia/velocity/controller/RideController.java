@@ -23,7 +23,7 @@ public class RideController {
      */
 
     @GetMapping("/{bikeId}")
-    public boolean getDock(@PathVariable String bikeId) throws ExecutionException, InterruptedException {
+    public String getDock(@PathVariable String bikeId) throws ExecutionException, InterruptedException {
         return this.rideService.undock(bikeId);
     }
 }
