@@ -78,6 +78,6 @@ public class StationService {
         }
 
         db.collection("stations").document(stationId).set(station);
-        return "Station " + stationId + " updated to status:  " + station.getStatus() + ".\n";
+        return station.getNumDockedBikes() + " bikes docked at station " + stationId + "; " + station.getCapacity() - station.getNumDockedBikes() + " slots remaining.\n";
     }
 }
