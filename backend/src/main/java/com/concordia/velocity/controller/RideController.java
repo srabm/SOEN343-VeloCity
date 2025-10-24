@@ -24,6 +24,6 @@ public class RideController {
 
     @GetMapping("/{bikeId}")
     public boolean getDock(@PathVariable String bikeId) throws ExecutionException, InterruptedException {
-        return false;
+        return this.rideService.undock(bikeId);
     }
 }

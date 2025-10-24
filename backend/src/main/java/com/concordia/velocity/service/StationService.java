@@ -56,4 +56,8 @@ public class StationService {
         return  db.collection("stations").document(stationId)
                 .get().get().toObject(Station.class);
     }
+
+    public void decreaseBikeCount(String stationId) throws ExecutionException, InterruptedException  {
+
+    }
 }
