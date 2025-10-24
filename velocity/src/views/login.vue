@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { login } from '../../firebaseAuth.js'
+import topbar from './topbar.vue'
 
 const email = ref('')
 const password = ref('')
@@ -17,6 +18,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
+  <topbar />
     <div class="login-container">
         <h2>Login</h2>
         <form @submit.prevent="handleLogin">
