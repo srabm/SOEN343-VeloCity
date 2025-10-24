@@ -173,7 +173,7 @@ public class FirestoreDataSeeder {
                         // S001
                         new Bike("B001","available","standard","D001","S001"),
                         new Bike("B002","available","standard","D002","S001"),
-                        new Bike("B003","available","e-bike","D003","S001"),
+                        new Bike("B003","reserved","e-bike","D003","S001"),
                         new Bike("B004","maintenance","standard","D004","S001"),
                         new Bike("B005","available","standard","D005","S001"),
                         new Bike("B006","available","e-bike","D006","S001"),
@@ -195,8 +195,8 @@ public class FirestoreDataSeeder {
                         new Bike("B023","available","standard","D030","S003"),
 
                         // S004 (7 bikes)
-                        new Bike("B024","available","standard","D031","S004"),
-                        new Bike("B025","available","standard","D032","S004"),
+                        new Bike("B024","reserved","standard","D031","S004"),
+                        new Bike("B025","reserved","standard","D032","S004"),
                         new Bike("B026","maintenance","e-bike","D033","S004"),
                         new Bike("B027","available","standard","D034","S004"),
                         new Bike("B028","available","standard","D035","S004"),
