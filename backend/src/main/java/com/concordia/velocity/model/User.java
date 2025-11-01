@@ -14,4 +14,9 @@ abstract class User {
         this.phoneNumber = phoneNumber;
         this.username = username;
     }
+
+    @Override
+    public String toString() {
+        return fullName;
+    }
 }

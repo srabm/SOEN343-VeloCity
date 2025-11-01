@@ -19,6 +19,7 @@ public class RiderTest {
         String reserveResult = rider.reserveBike(bike, station);
         System.out.println("reserveBike result: " + reserveResult);
         System.out.println("Bike status after reservation: " + bike.getStatus());
+        System.out.println("Bike reservation user: " + bike.getReservationUser());
         System.out.println("Bike reservation expiry: " + bike.getReservationExpiry());
         System.out.println("");
     }
