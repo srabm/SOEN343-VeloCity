@@ -20,6 +20,7 @@ public class Bike implements Subject {
     private String dockId; // i thought of using private Dock dock, but Firebase can't serialize nested custom objects because it leads to circular references (a bike contains a dock, which contains a station, which contains bikes)
     private String stationId;
     private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+    private Rider reservationUser;
 
     private transient List<Observer> observers = new ArrayList<>();
 
@@ -31,6 +32,7 @@ public class Bike implements Subject {
         this.type = type;
         this.dockId = dockId;
         this.stationId = stationId;
+        this.reservationUser = null;
         this.reservationExpiry = null;
     }
 
@@ -72,6 +74,9 @@ public class Bike implements Subject {
 
     public String getStationId() {return stationId;}
     public void setStationId(String stationId) {this.stationId = stationId;}
+
+    public Rider getReservationUser() {return reservationUser;}
+    public void setReservationUser(Rider reservationUser) {this.reservationUser = reservationUser;}
 
     // Returns true if this bike is currently reserved and has not expired. 
     public boolean isReservedActive() {
