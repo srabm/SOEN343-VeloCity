@@ -1,24 +1,4 @@
-<script setup>
-import { ref } from 'vue'
-import { login } from '../../firebaseAuth.js'
-import topbar from './topbar.vue'
-
-const email = ref('')
-const password = ref('')
-
-const handleLogin = async () => {
-  try {
-    const userCredential = await login(email.value, password.value)
-    const user = userCredential.user
-    alert(`Welcome ${user.email}!`)
-  } catch (error) {
-    alert(`Login failed: ${error.message}`)
-  }
-}
-</script>
-
 <template>
-  <topbar />
     <div class="login-container">
         <h2>Login</h2>
         <form @submit.prevent="handleLogin">
