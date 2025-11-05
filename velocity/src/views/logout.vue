@@ -1,6 +1,12 @@
 <template>
   <div>
-    <button type="submit" @click="handleLogout">Logout</button>
+    <button
+      type="button"
+      class="bg-yellow-300 text-black font-medium px-3 py-1 rounded hover:bg-yellow-400 duration-300"
+      @click="handleLogout"
+    >
+      Logout
+    </button>
   </div>
 </template>
 
