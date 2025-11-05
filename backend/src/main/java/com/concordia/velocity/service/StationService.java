@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class StationService {
-
+        ///////
     private final Firestore db = FirestoreClient.getFirestore();
 
     // This handles the logic for updating a station's status by validating status changes, enforing reservation rules, and emitting observer events

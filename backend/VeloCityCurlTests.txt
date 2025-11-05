@@ -1,0 +1,92 @@
+# VeloCity Backend - CURL Test Suite
+# Description: This file contains all curl test commands for demoing the Manage Status & Bike Transfer use cases.
+
+====================================================
+MANAGE BIKE STATUS
+====================================================
+Endpoint: PUT /api/bikes/{bikeId}/status?newStatus={status}
+
+# B1 - Change available bike to maintenance
+curl -X PUT "http://localhost:8080/api/bikes/B001/status?newStatus=maintenance"
+
+# B2 - Change maintenance bike to available
+curl -X PUT "http://localhost:8080/api/bikes/B004/status?newStatus=available"
+
+# B3 - Try to change bike that’s on a trip
+curl -X PUT "http://localhost:8080/api/bikes/B010/status?newStatus=available"
+
+# B4 - Invalid status test
+curl -X PUT "http://localhost:8080/api/bikes/B001/status?newStatus=broken"
+
+
+====================================================
+MANAGE STATION STATUS
+====================================================
+Endpoint: PUT /api/stations/{stationId}/status?newStatus={status}
+
+# S1 - Set station out of service
+curl -X PUT "http://localhost:8080/api/stations/S001/status?newStatus=out_of_service"
+
+# S2 - Reactivate an out-of-service station
+curl -X PUT "http://localhost:8080/api/stations/S005/status?newStatus=occupied"
+
+# S3 - Invalid status test
+curl -X PUT "http://localhost:8080/api/stations/S001/status?newStatus=broken"
+
+# S4 - Get specific station data
+curl http://localhost:8080/api/stations/S001
+
+# S5 - Get all stations
+curl http://localhost:8080/api/stations
+
+
+====================================================
+MANAGE DOCK STATUS
+====================================================
+Endpoint: PUT /api/docks/{dockId}/status?newStatus={status}
+
+# D1 - Set dock to out_of_service
+curl -X PUT "http://localhost:8080/api/docks/D001/status?newStatus=out_of_service"
+
+# D2 - Reactivate dock to empty
+curl -X PUT "http://localhost:8080/api/docks/D045/status?newStatus=empty"
+
+# D3 - Dock has reserved bike (auto-terminates)
+curl -X PUT "http://localhost:8080/api/docks/D002/status?newStatus=out_of_service"
+
+# D4 - Invalid dock status
+curl -X PUT "http://localhost:8080/api/docks/D001/status?newStatus=broken"
+
+# D5 - Get dock details
+curl http://localhost:8080/api/docks/D001
+
+
+====================================================
+MANUAL BIKE TRANSFER (REBALANCING)
+====================================================
+Endpoint: PUT /api/transfer/bike?bikeId={bikeId}&sourceStationId={sid}&destinationStationId={sid}&destinationDockId={dockId}
+
+# T1 - Move bike B001 → empty dock D038
+curl -X PUT "http://localhost:8080/api/transfer/bike?bikeId=B001&sourceStationId=S001&destinationStationId=S004&destinationDockId=D038"
+
+# T2 - Try to move reserved bike
+curl -X PUT "http://localhost:8080/api/transfer/bike?bikeId=B002&sourceStationId=S001&destinationStationId=S004&destinationDockId=D039"
+
+# T3 - Move bike to full station (expect fail)
+curl -X PUT "http://localhost:8080/api/transfer/bike?bikeId=B005&sourceStationId=S001&destinationStationId=S003&destinationDockId=D028"
+
+# T4 - Move bike from out_of_service station (S005)
+curl -X PUT "http://localhost:8080/api/transfer/bike?bikeId=B031&sourceStationId=S005&destinationStationId=S004&destinationDockId=D038"
+
+# T5 - Invalid dock destination (occupied)
+curl -X PUT "http://localhost:8080/api/transfer/bike?bikeId=B001&sourceStationId=S001&destinationStationId=S004&destinationDockId=D037"
+
+====================================================
+DEMO TIPS
+====================================================
+1. Run backend: ./gradlew bootRun
+2. In a separate terminal, run curl commands above.
+3. Verify updates with GET requests:
+   curl http://localhost:8080/api/bikes/B001
+   curl http://localhost:8080/api/docks/D038
+   curl http://localhost:8080/api/stations/S004
