@@ -7,11 +7,14 @@
 <script setup>
 import { ref } from 'vue'
 import { signOutUser } from '../../firebaseAuth.js'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const handleLogout = async () => {
   try {
     await signOutUser()
-    alert(`Signed out!`)
+    router.push({ name: 'Login' })
   } catch (error) {
     alert(`Signout failed: ${error.message}`)
   }
