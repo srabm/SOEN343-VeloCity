@@ -87,7 +87,7 @@ function getCurrentUser() {
 router.beforeEach(async (to) => {
   if (to.matched.some((r) => r.meta?.requiresGuest)) {
     const user = await getCurrentUser();
-    if (user) return { path: '/home' };
+    if (user) return { path: '/VeloCity/home' };
   }
   return true;
 });

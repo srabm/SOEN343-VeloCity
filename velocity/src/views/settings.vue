@@ -1,105 +1,113 @@
 <template>
   <topbar />
-  <div class="settings-page">
-    <h1>User Settings</h1>
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
+    <div class="min-h-screen bg-black/40 flex flex-col">
+      <header class="text-center py-8 text-white drop-shadow">
+        <h1 class="text-3xl font-semibold">User Settings</h1>
+      </header>
 
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto w-full px-4 text-black items-start">
+        <!-- User Info Card -->
+        <div class="self-start rounded-xl p-6 shadow-lg bg-white/50 backdrop-blur-md">
+          <h2 class="text-xl font-semibold mb-4">User Info</h2>
+          <ul class="space-y-2 text-sm">
+            <li><strong>Full Name:</strong> {{ profile?.firstName ? (profile.firstName + ' ' + profile.lastName) : 'Not set' }}</li>
+            <li><strong>Email:</strong> {{ user?.email || 'Not set' }}</li>
+            <li><strong>Address:</strong> {{ profile?.address || 'Not set' }}</li>
+            <li><strong>Phone Number:</strong> {{ profile?.phoneNumber || 'Not set' }}</li>
+            <li><strong>Role:</strong> {{ profile?.isOperator ? 'Operator' : 'Rider' }}</li>
+          </ul>
+          <div class="mt-4">
+            <button @click="startProfileEdit"
+              class="bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-400 duration-300">Edit Profile</button>
+          </div>
+          <div v-if="editProfileMode" class="mt-6 border-t border-white/20 pt-4">
+            <h3 class="text-lg font-medium mb-3">Edit Profile</h3>
+            <label class="block text-sm mb-1">Address:</label>
+            <input v-model="profileEditForm.address" placeholder="Enter your address"
+              class="w-full mb-3 px-3 py-2 rounded bg-white/80 text-black focus:outline-none" />
+            <label class="block text-sm mb-1">Phone Number:</label>
+            <input v-model="profileEditForm.phoneNumber" placeholder="514-123-4567"
+              class="w-full mb-4 px-3 py-2 rounded bg-white/80 text-black focus:outline-none" />
+            <div class="flex gap-3">
+              <button @click="saveProfileInfo"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 duration-200">Save</button>
+              <button @click="cancelProfileEdit"
+                class="bg-slate-300 text-black px-4 py-2 rounded hover:bg-slate-200 duration-200">Cancel</button>
+            </div>
+          </div>
+        </div>
 
-    <!-- Basic profile info -->
-    <p>
-      <strong>Full Name:</strong>
-      {{ profile?.firstName ? profile.firstName + " " + profile.lastName : "Not set" }}
-    </p>
+        <!-- Payment Info Card -->
+        <div class="self-start rounded-xl p-6 shadow-lg bg-white/50 backdrop-blur-md">
+          <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
+          <div v-if="!editPaymentMode && profile?.paymentInfo" class="space-y-2 text-sm">
+            <p><strong>Cardholder Name:</strong> {{ profile.paymentInfo.cardholderName || 'Not set' }}</p>
+            <p><strong>Card Number:</strong> {{ profile.paymentInfo.cardNumber || 'Not set' }}</p>
+            <p><strong>Expiry Date:</strong> {{ profile.paymentInfo.expiryDate || 'Not set' }}</p>
+            <p><strong>CVC:</strong> {{ profile.paymentInfo.cvc || 'Not set' }}</p>
+            <button @click="togglePaymentEdit(true)"
+              class="mt-3 bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-400 duration-300">Edit Payment
+              Info</button>
+          </div>
+          <!-- Edit payment info -->
+          <div v-else-if="editPaymentMode">
+            <div class="space-y-8 w-full">
+              <!-- Front of card -->
+              <div
+                class="w-full rounded-xl shadow-lg bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 text-white overflow-hidden"
+                style="aspect-ratio: 85.6 / 54;">
+                <div class="relative h-full p-5 flex flex-col">
+                  <div class="mt-2 mb-auto">
+                    <label class="text-[10px] uppercase tracking-wide opacity-80">Card Number</label>
+                    <input :value="formattedCardNumber" @input="handleCardNumberInput" maxlength="19"
+                      placeholder="1234 5678 9012 3456"
+                      class="w-full bg-white/95 text-black px-3 py-2 rounded mt-1 font-mono text-sm focus:outline-none placeholder:text-black/50" />
+                  </div>
+                  <div class="flex items-end justify-between">
+                    <div class="w-[65%]">
+                      <label class="text-[10px] uppercase tracking-wide opacity-80">Cardholder</label>
+                      <input v-model="paymentForm.cardholderName" placeholder="Full Name"
+                        class="w-full bg-white/95 text-black px-3 py-2 rounded mt-1 text-sm focus:outline-none placeholder:text-black/50" />
+                    </div>
+                    <div class="w-[28%] text-right">
+                      <label class="text-[10px] uppercase tracking-wide opacity-80">Exp</label>
+                      <input :value="paymentForm.expiryDate" @input="handleExpiryInput" placeholder="MM/YY"
+                        maxlength="5"
+                        class="w-full bg-white/95 text-black px-2 py-2 rounded mt-1 text-sm focus:outline-none placeholder:text-black/50 text-center" />
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-    <p>
-      <strong>Email:</strong>
-      {{ user?.email }}
-    </p>
+              <!-- Back of card -->
+              <div
+                class="relative w-full rounded-xl shadow-lg bg-gradient-to-br from-slate-800 to-slate-900 text-white overflow-hidden"
+                style="aspect-ratio: 85.6 / 54;">
+                <div class="absolute left-0 right-0 top-8 h-8 bg-black/60"></div>
+                <div class="absolute top-[38%] right-6 w-32">
+                  <label class="text-[10px] uppercase tracking-wide opacity-80">CVC</label>
+                  <input :value="paymentForm.cvc" @input="handleCvcInput" placeholder="123" maxlength="4"
+                    class="w-full bg-white/95 text-black px-2 py-2 rounded mt-1 text-sm focus:outline-none placeholder:text-black/50 text-center" />
+                </div>
+              </div>
+            </div>
 
-    <p>
-      <strong>Address:</strong>
-      {{ profile?.address || "Not set" }}
-    </p>
-
-    <p>
-      <strong>Phone Number:</strong>
-      {{ profile?.phoneNumber || "Not set" }}
-    </p>
-
-    <p>
-      <strong>Role:</strong>
-      {{ profile?.isOperator ? "Operator" : "Rider" }}
-    </p>
-
-    <!-- Edit Profile -->
-    <div class="profile-actions">
-      <button @click="startProfileEdit" class="edit-profile-btn">
-        Edit Profile
-      </button>
-    </div>
-
-    <!-- Edit Profile (only address and phone can be changed) -->
-    <div v-if="editProfileMode" class="profile-edit-form">
-      <h2 class="section-title">Edit Profile</h2>
-
-      <label>Address:</label>
-      <input v-model="profileEditForm.address" placeholder="Enter your address" />
-
-      <label>Phone Number:</label>
-      <input v-model="profileEditForm.phoneNumber" placeholder="514-123-4567" />
-
-      <div class="btn-row">
-        <button @click="saveProfileInfo" class="save-btn">Save</button>
-        <button @click="cancelProfileEdit" class="cancel-btn">Cancel</button>
-      </div>
-    </div>
-
-    <!-- Payment Information -->
-    <h2 class="section-title">Payment Information</h2>
-
-    <!-- View mode -->
-    <div v-if="!editPaymentMode && profile?.paymentInfo">
-      <p><strong>Cardholder Name:</strong> {{ profile.paymentInfo.cardholderName || 'Not set' }}</p>
-      <p><strong>Card Number:</strong> {{ profile.paymentInfo.cardNumber || 'Not set' }}</p>
-      <p><strong>Expiry Date:</strong> {{ profile.paymentInfo.expiryDate || 'Not set' }}</p>
-      <p><strong>CVC:</strong> {{ profile.paymentInfo.cvc || 'Not set' }}</p>
-
-      <button @click="togglePaymentEdit(true)" class="edit-btn">
-        Edit Payment Info
-      </button>
-    </div>
-
-    <!-- Edit payment info -->
-    <div v-else-if="editPaymentMode" class="payment-edit-form">
-      <label>Cardholder Name:</label>
-      <input v-model="paymentForm.cardholderName" placeholder="Full name" />
-
-      <label>Card Number:</label>
-      <input v-model="paymentForm.cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" />
-
-      <label>Expiry Date:</label>
-      <input v-model="paymentForm.expiryDate" placeholder="MM/YY" />
-
-      <label>CVC:</label>
-      <input v-model="paymentForm.cvc" maxlength="4" placeholder="123" />
-
-      <div class="btn-row">
-        <button @click="savePaymentInfo" class="save-btn">Save</button>
-        <button @click="togglePaymentEdit(false)" class="cancel-btn">Cancel</button>
-      </div>
-    </div>
-
-    <!-- No payment info yet -->
-    <div v-else>
-      <p>No payment method on file.</p>
-      <button @click="togglePaymentEdit(true)" class="add-btn">
-        Add Payment Info
-      </button>
+            <div class="flex gap-3 pt-2 justify-center mt-5">
+              <button @click="savePaymentInfo"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 duration-200">Save</button>
+              <button @click="togglePaymentEdit(false)"
+                class="bg-slate-300 text-black px-4 py-2 rounded hover:bg-slate-200 duration-200">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
@@ -125,9 +133,29 @@ const editPaymentMode = ref(false);
 const paymentForm = ref({
   cardNumber: "",
   cardholderName: "",
-  expiryName: "",
+  expiryDate: "",
   cvc: "",
 });
+
+const formattedCardNumber = computed(() => {
+  const raw = (paymentForm.value.cardNumber || "").replace(/[^0-9]/g, "").slice(0, 16);
+  return raw.replace(/(.{4})/g, "$1 ").trim();
+});
+
+function handleCardNumberInput(e) {
+  const digits = (e.target.value || "").replace(/[^0-9]/g, "").slice(0, 16);
+  paymentForm.value.cardNumber = digits;
+}
+
+function handleExpiryInput(e) {
+  let v = (e.target.value || "").replace(/[^0-9]/g, "").slice(0, 4);
+  if (v.length >= 3) v = v.slice(0, 2) + "/" + v.slice(2);
+  paymentForm.value.expiryDate = v;
+}
+
+function handleCvcInput(e) {
+  paymentForm.value.cvc = (e.target.value || "").replace(/[^0-9]/g, "").slice(0, 4);
+}
 
 onMounted(() => {
   onAuthStateChanged(auth, async (firebaseUser) => {
@@ -147,7 +175,7 @@ onMounted(() => {
         console.error("Error loading profile:", err);
       }
     } else {
-      router.push("/velocity/login");
+      router.push("/VeloCity/login");
     }
   });
 });
@@ -223,87 +251,4 @@ async function savePaymentInfo() {
 
 </script>
 
-<style scoped>
-.settings-page {
-  max-width: 700px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Sections */
-.section-title {
-  margin-top: 1.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 0.25rem;
-}
-
-/* Inputs & buttons */
-input {
-  display: block;
-  width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95rem;
-}
-
-button {
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: none;
-  font-size: 0.9rem;
-}
-
-/* Profile buttons */
-.profile-actions {
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.75rem;
-}
-
-.edit-profile-btn {
-  background-color: #4a5568; /* gray */
-  color: white;
-}
-
-.edit-profile-btn:hover {
-  background-color: #2d3748;
-}
-
-/* Save / cancel / edit / add */
-.btn-row {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.edit-btn,
-.add-btn {
-  background-color: #3490dc;
-  color: white;
-}
-
-.save-btn {
-  background-color: #38c172;
-  color: white;
-}
-
-.cancel-btn {
-  background-color: #e2e8f0;
-  color: #333;
-}
-
-/* Edit sections */
-.profile-edit-form,
-.payment-edit-form {
-  margin-top: 1rem;
-}
-</style>
+<style scoped></style>
