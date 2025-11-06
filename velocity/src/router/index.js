@@ -3,6 +3,7 @@ import Login from '../views/login.vue';
 import PasswordRecovery from '../views/passwordRecovery.vue';
 import Register from '../views/register.vue';
 import Home from '../views/userHome.vue';
+import mapView  from '../views/mapView.vue';
 import Settings from '../views/settings.vue';
 import pricing from '../views/pricing.vue';
 
@@ -31,11 +32,17 @@ const router = createRouter({
       name: 'Home',
       component: Home
     },
+    {
+      path: '/map',
+      name: 'MapView',
+      component: mapView
+    },
 
     {
       path: '/settings',
       name: 'Settings',
       component: Settings
+    },
     {
       path: '/pricing',
       name: 'Pricing',
