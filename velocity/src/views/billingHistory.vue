@@ -1,4 +1,5 @@
 <template>
+  <topbar />
   <div class="billing-history">
     <h1>Billing History</h1>
     <p>
@@ -8,6 +9,7 @@
 </template>
 
 <script setup>
+import topbar from './topbar.vue'
 // Later, you can:
 // - accept props (e.g., userId)
 // - or fetch billing data here using Firebase or your backend API
