@@ -10,6 +10,8 @@ import pricing from '../views/pricing.vue';
 import RideHistory from '../views/rideHistory.vue';
 import BillingHistory from '../views/billingHistory.vue';
 import AboutUs from '../views/aboutUs.vue';
+import BikeReservation from '../views/bikeReservation.vue';
+import ActiveTrip from '../views/activeTrip.vue';
 
 
 const router = createRouter({
@@ -44,7 +46,18 @@ const router = createRouter({
       name: 'MapView',
       component: mapView
     },
-
+    {
+      path: '/VeloCity/reservation',
+      name: 'BikeReservation',
+      component: BikeReservation,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/VeloCity/active-trip',
+      name: 'ActiveTrip',
+      component: ActiveTrip,
+      meta: { requiresAuth: true }
+    },
     {
       path: '/VeloCity/settings',
       name: 'Settings',
@@ -85,10 +98,19 @@ function getCurrentUser() {
 }
 
 router.beforeEach(async (to) => {
+  const user = await getCurrentUser();
+
+  // Redirect authenticated users away from guest-only pages
   if (to.matched.some((r) => r.meta?.requiresGuest)) {
     const user = await getCurrentUser();
     if (user) return { path: '/VeloCity/home' };
   }
+
+  // Redirect unauthenticated users to login for protected pages
+  if (to.matched.some((r) => r.meta?.requiresAuth)) {
+    if (!user) return { path: '/VeloCity/login' };
+  }
+
   return true;
 });
 

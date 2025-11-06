@@ -5,8 +5,8 @@
     <section class="ride-details" v-if="selectedRide">
       <h1>Ride Details</h1>
 
-      <p><strong>Ride ID:</strong> {{ selectedRide.rideId }}</p>
-      <p><strong>Rider Name:</strong> {{ selectedRide.riderName }}</p>
+      <p><strong>Ride ID:</strong> {{ selectedRide.tripId }}</p>
+      <p><strong>Rider Email:</strong> {{ user.email }}</p>
 
       <p>
         <strong>Time:</strong>
@@ -17,8 +17,8 @@
 
       <p>
         <strong>Route:</strong>
-        {{ selectedRide.originStationName }} →
-        {{ selectedRide.arrivalStationName }}
+        {{ selectedRide.startStationName }} →
+        {{ selectedRide.endStationName }}
       </p>
 
       <p><strong>Bike ID:</strong> {{ selectedRide.bikeId }}</p>
@@ -60,8 +60,8 @@
 
           <select v-model="filters.bikeType">
             <option value="">All bike types</option>
-            <option value="BIKE">Bike</option>
-            <option value="E-BIKE">E-Bike</option>
+            <option value="standard">standard</option>
+            <option value="electric">electric</option>
           </select>
         </div>
 
@@ -93,7 +93,7 @@
         <li v-for="ride in filteredRides" :key="ride._id" :class="{ selected: ride._id === selectedRide?._id }"
           @click="selectRide(ride)">
           <div class="ride-line">
-            <span class="ride-id">{{ ride.rideId }}</span>
+            <span class="ride-id">{{ ride.tripId }}</span>
             <span class="ride-date">{{ formatDate(ride.startTime) }}</span>
             <span class="ride-cost">${{ ride.bill?.total?.toFixed(2) || '—' }}</span>
           </div>
@@ -114,24 +114,16 @@
 import topbar from './topbar.vue'
 import { ref, computed, onMounted } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  orderBy,
-  limit,
-  getDocs,
-} from "firebase/firestore";
+import { tripApi } from "../services/api.js"; // updated api.js
+import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import app from "../../firebase-config.js";
 
-const auth = getAuth(app);
 const db = getFirestore(app);
 
 const user = ref(null);
 const allRides = ref([]);
 const selectedRide = ref(null);
-const canLoadMore = ref(false);  // placeholder for pagination later
+const canLoadMore = ref(false);
 
 const filters = ref({
   searchId: "",
@@ -140,55 +132,40 @@ const filters = ref({
   dateTo: "",
 });
 
-
 async function loadInitialRides() {
-  if (!user.value?.email) return;
+  if (!user.value?.uid) return;
 
-  const ridersCol = collection(db, "riders");
-  const riderQuery = query(ridersCol, where("email", "==", user.value.email));
-  const riderSnap = await getDocs(riderQuery);
+  try {
+    const tripsCol = collection(db, "trips");
+    const tripsQuery = query(
+      tripsCol,
+      where("riderId", "==", user.value.uid),
+      orderBy("startTime", "desc"),
+      limit(20)
+    );
 
-  if (riderSnap.empty) {
-    console.warn("No rider found for email:", user.value.email);
+
+    const tripsSnap = await getDocs(tripsQuery);
+
+    allRides.value = tripsSnap.docs.map(doc => ({
+      _id: doc.id,
+      ...doc.data(),
+      startTime: doc.data().startTime?.toDate ? doc.data().startTime.toDate() : new Date(doc.data().startTime),
+      endTime: doc.data().endTime?.toDate ? doc.data().endTime.toDate() : new Date(doc.data().endTime),
+      riderName: doc.data().riderName || "Unknown Rider",
+      bikeType: doc.data().bikeType || "BIKE",
+      bill: doc.data().bill || null,
+    }));
+
+    if (allRides.value.length > 0) selectedRide.value = allRides.value[0];
+    canLoadMore.value = false;
+
+  } catch (error) {
+    console.error("Error loading trips:", error);
     allRides.value = [];
-    return;
   }
-
-  // Get the rider's document ID 
-  const riderDocId = riderSnap.docs[0].id;
-  console.log("Found rider document:", riderDocId);
-
-
-  const ridesCol = collection(db, "riders", riderDocId, "rides");
-  const ridesQuery = query(ridesCol, orderBy("startTime", "desc"), limit(20));
-
-  const ridesSnap = await getDocs(ridesQuery);
-  allRides.value = ridesSnap.docs.map((doc) => ({
-    _id: doc.id,
-    ...doc.data(),
-  }));
-
-  console.log("Loaded rides:", allRides.value);
-
-  if (allRides.value.length > 0) {
-    selectedRide.value = allRides.value[0]; // most recent
-  }
-
-  canLoadMore.value = false;
 }
 
-
-function formatDateTime(ts) {
-  if (!ts) return "Unknown";
-  const date = ts.toDate ? ts.toDate() : new Date(ts);
-  return date.toLocaleString();
-}
-
-function formatDate(ts) {
-  if (!ts) return "Unknown";
-  const date = ts.toDate ? ts.toDate() : new Date(ts);
-  return date.toLocaleDateString();
-}
 
 function selectRide(ride) {
   selectedRide.value = ride;
@@ -204,68 +181,70 @@ function clearFilters() {
 }
 
 function reportProblem(ride) {
-  // For now, just log, maybe later we can use it to navigate to a report page, or open a modal with a form
-  console.log("Report problem for ride:", ride.rideId);
-}
+  const issue = prompt("Describe the problem with this bike:");
+  if (!issue) return;
 
-function loadMore() {
-  // Placeholder for now
-  console.log("Load more clicked");
+  tripApi.reportProblem(ride.tripId, issue)
+    .then((res) => {
+      if (res.success) alert("Problem reported successfully!");
+      else alert("Failed to report problem: " + res.error);
+    })
+    .catch(() => alert("Error reporting problem, check console."));
 }
-
 
 const filteredRides = computed(() => {
   return allRides.value.filter((ride) => {
-    // Search by rideId
-    if (
-      filters.value.searchId &&
-      !ride.rideId.toLowerCase().includes(filters.value.searchId.toLowerCase())
-    ) {
-      return false;
-    }
+    if (filters.value.searchId && !ride.tripId.toLowerCase().includes(filters.value.searchId.toLowerCase())) return false;
 
-    // Bike type filter
-    if (filters.value.bikeType && ride.bikeType !== filters.value.bikeType) {
-      return false;
-    }
+    if (filters.value.bikeType && ride.bikeType !== filters.value.bikeType) return false;
 
-    // Date range
-    const rideDate = ride.startTime?.toDate
-      ? ride.startTime.toDate()
-      : ride.startTime
-        ? new Date(ride.startTime)
-        : null;
+      if (ride.startTime) {
+      const rideDate = new Date(ride.startTime);
+      const rideLocalDate = new Date(rideDate.getFullYear(), rideDate.getMonth(), rideDate.getDate());
 
-    if (rideDate) {
+      // Inclusive start date
       if (filters.value.dateFrom) {
-        const from = new Date(filters.value.dateFrom);
-        from.setHours(0, 0, 0, 0);
-        if (rideDate < from) return false;
+        const fromDate = new Date(filters.value.dateFrom);
+        const fromLocalDate = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+        if (rideLocalDate < fromLocalDate - 1) return false; // ride is before start date
       }
 
+      // Inclusive end date
       if (filters.value.dateTo) {
-        const to = new Date(filters.value.dateTo);
-        to.setHours(23, 59, 59, 999);
-        if (rideDate > to) return false;
+        const toDate = new Date(filters.value.dateTo);
+        const toLocalDate = new Date(toDate.getFullYear(), toDate.getMonth(), toDate.getDate());
+        if (rideLocalDate > toLocalDate) return false; // ride is after end date
       }
-    }
+      }
 
     return true;
   });
 });
 
+function formatDateTime(date) {
+  if (!date) return "Unknown";
+  return date.toLocaleString();
+}
+
+function formatDate(date) {
+  if (!date) return "Unknown";
+  return date.toLocaleDateString();
+}
+
 onMounted(() => {
+  const auth = getAuth();
   onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
       user.value = firebaseUser;
       await loadInitialRides();
     } else {
-      console.warn("No user logged in, cannot load ride history.");
-    }
-  });
+      console.warn("No user logged in");
+    };
+},
+)
 });
-
 </script>
+
 
 <style scoped>
 .ride-history-page {

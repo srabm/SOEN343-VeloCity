@@ -18,7 +18,9 @@ public class StationObserverTest {
                 8,   // numDockedBikes
                 10,  // reservationHoldTime
                 Arrays.asList("D001","D002","D003","D004","D005","D006","D007","D008","D009","D010"),
-                Arrays.asList("B001","B002","B003","B004","B005","B006","B007","B008")
+                Arrays.asList("B001","B002","B003","B004","B005","B006","B007","B008"),
+                2,
+                8
         );
 
         // Create and attach observers 
