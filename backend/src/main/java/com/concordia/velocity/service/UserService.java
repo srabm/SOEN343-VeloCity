@@ -3,6 +3,7 @@ package com.concordia.velocity.service;
 import com.concordia.velocity.model.User;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.DocumentReference;    
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.cloud.firestore.SetOptions;
 import org.springframework.stereotype.Service;
@@ -51,4 +52,27 @@ public class UserService {
         response.put("email", user.getEmail());
         return response;
     }
+
+    public Map<String, Object> updateUser(String userId, Map<String, Object> updates) throws ExecutionException, InterruptedException {
+        Map<String, Object> response = new HashMap<>();
+
+        DocumentReference docRef = db.collection("users").document(userId);
+        docRef.set(updates, SetOptions.merge()).get();
+
+        response.put("message", "User updated successfully");
+        response.put("userId", userId);
+        return response;
+    }
+
+    public Map<String, Object> deleteUser(String userId) throws ExecutionException, InterruptedException {
+        Map<String, Object> response = new HashMap<>();
+
+        db.collection("users").document(userId).delete().get();
+        response.put("message", "User deleted successfully");
+        response.put("userId", userId);
+        return response;
+    }
+
+
+}
 

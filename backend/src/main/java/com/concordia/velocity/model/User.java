@@ -1,6 +1,6 @@
 package com.concordia.velocity.model;
 
-abstract class User {
+public class User {
     private String id;
     private String firstName;
     private String lastName;
@@ -10,7 +10,13 @@ abstract class User {
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
 
-    public User() {}
+    public User(String firstName, String lastName, String address, String email, String phoneNumber) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.address = address;
+    this.email = email;
+    this.phoneNumber = phoneNumber;
+}
 
     public String getId() {return id;}
     public void setId(String id) {this.id = id;}
@@ -70,3 +76,4 @@ abstract class User {
         public String getExpiryDate() { return expiryDate; }
         public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
     }
+}
