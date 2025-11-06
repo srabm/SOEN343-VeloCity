@@ -4,7 +4,6 @@ import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.model.Dock;
 import com.concordia.velocity.model.Station;
 import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.NotificationObserver;
 import com.concordia.velocity.observer.Observer;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -147,18 +146,12 @@ public class TransferService {
         // ==================== Step 6: Perform the move ====================
         // Attach observers
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
 
         bike.attach(dashboardObserver);
-        bike.attach(notificationObserver);
         sourceDock.attach(dashboardObserver);
-        sourceDock.attach(notificationObserver);
         destinationDock.attach(dashboardObserver);
-        destinationDock.attach(notificationObserver);
         sourceStation.attach(dashboardObserver);
-        sourceStation.attach(notificationObserver);
         destinationStation.attach(dashboardObserver);
-        destinationStation.attach(notificationObserver);
 
         // Update bike location
         bike.setStationId(destinationStationId);
@@ -174,38 +167,8 @@ public class TransferService {
         destinationDock.setBikeId(bikeId);
         destinationDock.notifyObservers();
 
-        // Update station bike counts
-        sourceStation.setNumDockedBikes(Math.max(0, sourceStation.getNumDockedBikes() - 1));
-        if (bike.getType().equals("electric")) {
-            sourceStation.setNumElectricBikes(Math.max(0, sourceStation.getNumElectricBikes() - 1));
-        } else {
-            sourceStation.setNumStandardBikes(Math.max(0, sourceStation.getNumStandardBikes() - 1));
-        }
-
-        sourceStation.removeBike(bikeId);
-
-
-        destinationStation.setNumDockedBikes(destinationStation.getNumDockedBikes() + 1);
-        if (bike.getType().equals("electric")) {
-            destinationStation.setNumElectricBikes(Math.max(0, destinationStation.getNumElectricBikes() + 1));
-        } else {
-            destinationStation.setNumStandardBikes(Math.max(0, destinationStation.getNumStandardBikes() + 1));
-        }
-
-        destinationStation.addBike(bikeId);
-
-        // Update station statuses based on new counts
-        String newSourceStatus = sourceStation.determineStatusFromCapacity();
-        if (!newSourceStatus.equals(sourceStation.getStatus()) &&
-                !Station.STATUS_OUT_OF_SERVICE.equalsIgnoreCase(sourceStation.getStatus())) {
-            sourceStation.setStatus(newSourceStatus);
-        }
-
-        String newDestinationStatus = destinationStation.determineStatusFromCapacity();
-        if (!newDestinationStatus.equals(destinationStation.getStatus()) &&
-                !Station.STATUS_OUT_OF_SERVICE.equalsIgnoreCase(destinationStation.getStatus())) {
-            destinationStation.setStatus(newDestinationStatus);
-        }
+        sourceStation.removeBike(bike);
+        destinationStation.addBike(bike);
 
         // ==================== Step 7: Persist using Firestore Batch ====================
         // Using batch writes ensures all updates succeed or all fail (atomicity)
@@ -222,8 +185,6 @@ public class TransferService {
 
         // Notify observers
         dashboardObserver.update("Bike " + bikeId + " moved from " + sourceStation.getStationName() +
-                " to " + destinationStation.getStationName());
-        notificationObserver.update("Bike " + bikeId + " moved from " + sourceStation.getStationName() +
                 " to " + destinationStation.getStationName());
 
         return "Bike " + bikeId + " (" + bike.getType() + ") successfully moved from " +

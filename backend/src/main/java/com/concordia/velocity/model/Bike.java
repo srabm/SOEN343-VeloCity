@@ -1,6 +1,7 @@
 package com.concordia.velocity.model;
 
 import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
 import com.concordia.velocity.observer.Subject;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.Exclude;
@@ -54,6 +55,7 @@ public class Bike implements Subject {
         this.dockId = dockId;
         this.stationId = stationId;
         this.reservationExpiry = null;
+        attach(new StatusObserver());
     }
 
     @Override

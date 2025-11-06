@@ -2,17 +2,17 @@
 
 package com.concordia.velocity.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import com.concordia.velocity.model.Station;
 import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.NotificationObserver;
 import com.concordia.velocity.observer.Observer;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
-import com.google.cloud.firestore.DocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -31,10 +31,8 @@ public class StationService {
 
         // Attaches observers
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
 
         station.attach(dashboardObserver);
-        station.attach(notificationObserver);
 
         
         if (newStatus.equals("out_of_service")) {

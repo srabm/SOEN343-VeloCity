@@ -2,7 +2,6 @@ package com.concordia.velocity.service;
 
 import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.NotificationObserver;
 import com.concordia.velocity.observer.Observer;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -52,9 +51,7 @@ public class BikeService {
 
         // Attach observers
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
         bike.attach(dashboardObserver);
-        bike.attach(notificationObserver);
 
         // Start reservation (sets status to RESERVED and schedules auto-expiry)
         LocalDateTime expiryTime = bike.startReservationExpiry(station, userId);
@@ -82,9 +79,7 @@ public class BikeService {
 
         // Attach observers before making changes
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
         bike.attach(dashboardObserver);
-        bike.attach(notificationObserver);
 
         // Perform status change (this will validate and notify observers)
         bike.changeStatus(newStatus);
