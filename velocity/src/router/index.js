@@ -7,6 +7,7 @@ import Home from '../views/userHome.vue';
 import mapView  from '../views/mapView.vue';
 import Settings from '../views/settings.vue';
 import pricing from '../views/pricing.vue';
+import RideHistory from '../views/rideHistory.vue';
 
 
 const router = createRouter({
@@ -51,6 +52,12 @@ const router = createRouter({
       path: '/VeloCity/pricing',
       name: 'Pricing',
       component: pricing
+    },
+
+    {
+      path: '/VeloCity/rides',
+      name: 'RideHistory',
+      component: RideHistory
     }
   ]
 });
