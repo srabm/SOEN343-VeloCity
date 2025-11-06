@@ -1,4 +1,5 @@
 <template>
+    <topbar />
     <div class="user-home-container">
         <h1>{{ greeting }}, {{ userName }}!</h1>
         <mapView/>
@@ -10,6 +11,7 @@ import { ref, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { firestore } from '../../firebaseAuth.js'
 import { doc, getDoc } from 'firebase/firestore'
+import topbar from './topbar.vue'
 import mapView from './mapView.vue'
 
 const userName = ref('Guest')
