@@ -8,6 +8,7 @@ import mapView  from '../views/mapView.vue';
 import Settings from '../views/settings.vue';
 import pricing from '../views/pricing.vue';
 import RideHistory from '../views/rideHistory.vue';
+import BillingHistory from '../views/billingHistory.vue';
 
 
 const router = createRouter({
@@ -58,6 +59,12 @@ const router = createRouter({
       path: '/VeloCity/rides',
       name: 'RideHistory',
       component: RideHistory
+    },
+
+    {
+      path: '/VeloCity/billing',
+      name: 'BillingHistory',
+      component: BillingHistory
     }
   ]
 });
