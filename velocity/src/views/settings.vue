@@ -41,17 +41,16 @@
         <!-- Payment Info Card -->
         <div class="self-start rounded-xl p-6 shadow-lg bg-white/50 backdrop-blur-md">
           <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
-          <div v-if="!editPaymentMode && profile?.paymentInfo" class="space-y-2 text-sm">
-            <p><strong>Cardholder Name:</strong> {{ profile.paymentInfo.cardholderName || 'Not set' }}</p>
-            <p><strong>Card Number:</strong> {{ profile.paymentInfo.cardNumber || 'Not set' }}</p>
-            <p><strong>Expiry Date:</strong> {{ profile.paymentInfo.expiryDate || 'Not set' }}</p>
-            <p><strong>CVC:</strong> {{ profile.paymentInfo.cvc || 'Not set' }}</p>
+          <div v-if="!editPaymentMode" class="space-y-2 text-sm">
+            <p><strong>Cardholder Name:</strong> {{ profile?.paymentInfo?.cardholderName || 'Not set' }}</p>
+            <p><strong>Card Number:</strong> {{ profile?.paymentInfo?.cardNumber || 'Not set' }}</p>
+            <p><strong>Expiry Date:</strong> {{ profile?.paymentInfo?.expiryDate || 'Not set' }}</p>
+            <p><strong>CVC:</strong> {{ profile?.paymentInfo?.cvc || 'Not set' }}</p>
             <button @click="togglePaymentEdit(true)"
-              class="mt-3 bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-400 duration-300">Edit Payment
-              Info</button>
+              class="mt-3 bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-400 duration-300">{{ profile?.paymentInfo ? 'Edit Payment Info' : 'Add Payment Info' }}</button>
           </div>
           <!-- Edit payment info -->
-          <div v-else-if="editPaymentMode">
+          <div v-else>
             <div class="space-y-8 w-full">
               <!-- Front of card -->
               <div
