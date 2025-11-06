@@ -1,17 +1,6 @@
 package com.concordia.velocity.config;
 
-import com.concordia.velocity.model.Bike;
-import com.concordia.velocity.model.Dock;
-import com.concordia.velocity.model.Station;
-import com.google.cloud.firestore.Firestore;
-import com.google.firebase.cloud.FirestoreClient;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
+/*
 // @Component
 public class FirestoreDataSeederOld {
 
@@ -222,3 +211,4 @@ public class FirestoreDataSeederOld {
         };
     }
 }
+*/

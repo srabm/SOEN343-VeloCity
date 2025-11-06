@@ -273,7 +273,7 @@ export default {
         icon = this.icons.black;
       } else if (station.numDockedBikes === 0) {
         icon = this.icons.red;
-      } else if (station.numDockedBikes < 5) {
+      } else if (station.numDockedBikes < 4) {
         icon = this.icons.yellow;
       }
 
@@ -283,15 +283,21 @@ export default {
           station.status === 'out_of_service'
             ? `<b>Station ${station.stationName}</b><br><i>Temporarily Closed</i>`
             : `<b>Station ${station.stationName}</b><br>` +
-            `Available Regular Bikes: ${station.nbRegBikes || 0}<br>` +
-            `Available Electric Bikes: ${station.nbElectricBikes || 0}<br>` +
+            `Available Regular Bikes: ${station.numStandardBikes || 0}<br>` +
+            `Available Electric Bikes: ${station.numElectricBikes || 0}<br>` +
             `Available Docks: ${station.capacity - station.numDockedBikes || 0}<br>` +
-            (station.numDockedBikes > 0
+            (station.numStandardBikes > 0 
               ? `<button onclick="window.dispatchEvent(new CustomEvent('reserveBike', 
                       {detail: {stationId: '${station.id}', stationName: '${station.stationName}'}}))">
-                      Reserve Bike
+                      Reserve Standard Bike
                      </button>`
-              : '')
+              : '') +
+            (station.numElectricBikes > 0 
+            ? `<button onclick="window.dispatchEvent(new CustomEvent('reserveBike', 
+                    {detail: {stationId: '${station.id}', stationName: '${station.stationName}'}}))">
+                    Reserve Electric Bike
+                    </button>`
+            : '')
         );
     }
 

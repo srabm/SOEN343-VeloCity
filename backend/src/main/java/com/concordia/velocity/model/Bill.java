@@ -1,6 +1,6 @@
 package com.concordia.velocity.model;
 
-import java.time.LocalDateTime;
+import com.google.cloud.Timestamp;
 
 public class Bill {
 
@@ -10,7 +10,7 @@ public class Bill {
     private double tax;
     private double total;
     private String paymentMethodLastFour;  // Last 4 digits of payment method
-    private LocalDateTime billingDate;
+    private Timestamp billingDate;
     private String status;  // "pending", "paid", "failed"
 
     public Bill() {}
@@ -21,7 +21,7 @@ public class Bill {
         this.cost = cost;
         this.tax = tax;
         this.total = total;
-        this.billingDate = LocalDateTime.now();
+        this.billingDate = Timestamp.now();
         this.status = "pending";
     }
 
@@ -33,7 +33,7 @@ public class Bill {
         this.tax = tax;
         this.total = total;
         this.paymentMethodLastFour = paymentMethodLastFour;
-        this.billingDate = LocalDateTime.now();
+        this.billingDate = Timestamp.now();
         this.status = status;
     }
 
@@ -74,8 +74,8 @@ public class Bill {
         this.paymentMethodLastFour = paymentMethodLastFour;
     }
 
-    public LocalDateTime getBillingDate() { return billingDate; }
-    public void setBillingDate(LocalDateTime billingDate) { this.billingDate = billingDate; }
+    public Timestamp getBillingDate() { return billingDate; }
+    public void setBillingDate(Timestamp billingDate) { this.billingDate = billingDate; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

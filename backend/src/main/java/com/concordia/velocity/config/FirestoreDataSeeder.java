@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
  * To run: Uncomment @Component annotation above
  * Or manually call seedFirestoreData() bean
  */
-// @Component  // Uncomment to run on startup
+// @Component  // Uncomment to run on startup -> ./gradlew bootRun --args='--seed'
 public class FirestoreDataSeeder {
 
     private final Random random = new Random();
@@ -98,7 +98,9 @@ public class FirestoreDataSeeder {
                 8,   // numDockedBikes
                 15,  // reservationHoldTime (minutes)
                 Arrays.asList("D001","D002","D003","D004","D005","D006","D007","D008","D009","D010"),
-                Arrays.asList("B001","B002","B003","B004","B005","B006","B007","B008")
+                Arrays.asList("B001","B002","B003","B004","B005","B006","B007","B008"),
+                2,
+                6
         );
 
         // Station 2: Old Port (empty - 0 bikes)
@@ -113,7 +115,9 @@ public class FirestoreDataSeeder {
                 0,
                 15,
                 Arrays.asList("D011","D012","D013","D014","D015","D016","D017","D018","D019","D020"),
-                Arrays.asList()
+                Arrays.asList(),
+                2,
+                8
         );
 
         // Station 3: McGill University (full - 10 bikes)
@@ -128,7 +132,10 @@ public class FirestoreDataSeeder {
                 10,
                 15,
                 Arrays.asList("D021","D022","D023","D024","D025","D026","D027","D028","D029","D030"),
-                Arrays.asList("B014","B015","B016","B017","B018","B019","B020","B021","B022","B023")
+                Arrays.asList("B014","B015","B016","B017","B018","B019","B020","B021","B022","B023"),
+                2,
+                8
+
         );
 
         // Station 4: Atwater Market (occupied - 7 bikes)
@@ -143,7 +150,9 @@ public class FirestoreDataSeeder {
                 7,
                 15,
                 Arrays.asList("D031","D032","D033","D034","D035","D036","D037","D038","D039","D040"),
-                Arrays.asList("B024","B025","B026","B027","B028","B029","B030")
+                Arrays.asList("B024","B025","B026","B027","B028","B029","B030"),
+                2,
+                5
         );
 
         // Station 5: Plateau Mont-Royal (out_of_service - 4 bikes)
@@ -158,7 +167,9 @@ public class FirestoreDataSeeder {
                 4,
                 15,
                 Arrays.asList("D041","D042","D043","D044","D045","D046","D047","D048","D049","D050"),
-                Arrays.asList("B031","B032","B033","B034")
+                Arrays.asList("B031","B032","B033","B034"),
+                1,
+                3
         );
 
         // ===== NEW DOWNTOWN STATIONS =====
@@ -175,7 +186,9 @@ public class FirestoreDataSeeder {
                 6,
                 15,
                 Arrays.asList("D051","D052","D053","D054","D055","D056","D057","D058","D059","D060","D061","D062"),
-                Arrays.asList("B035","B036","B037","B038","B039","B040")
+                Arrays.asList("B035","B036","B037","B038","B039","B040"),
+                2,
+                4
         );
 
         // Station 7: Quartier des Spectacles (occupied - 8 bikes)
@@ -190,7 +203,9 @@ public class FirestoreDataSeeder {
                 8,
                 15,
                 Arrays.asList("D063","D064","D065","D066","D067","D068","D069","D070","D071","D072","D073","D074","D075","D076","D077"),
-                Arrays.asList("B041","B042","B043","B044","B045","B046","B047","B048")
+                Arrays.asList("B041","B042","B043","B044","B045","B046","B047","B048"),
+                3,
+                5
         );
 
         // Station 8: Complexe Desjardins (occupied - 9 bikes)
@@ -205,7 +220,9 @@ public class FirestoreDataSeeder {
                 9,
                 15,
                 Arrays.asList("D078","D079","D080","D081","D082","D083","D084","D085","D086","D087","D088","D089"),
-                Arrays.asList("B049","B050","B051","B052","B053","B054","B055","B056","B057")
+                Arrays.asList("B049","B050","B051","B052","B053","B054","B055","B056","B057"),
+                3,
+                6
         );
 
         // Station 9: Place Ville Marie (occupied - 11 bikes)
@@ -220,7 +237,9 @@ public class FirestoreDataSeeder {
                 11,
                 15,
                 Arrays.asList("D090","D091","D092","D093","D094","D095","D096","D097","D098","D099","D100","D101","D102","D103","D104"),
-                Arrays.asList("B058","B059","B060","B061","B062","B063","B064","B065","B066","B067","B068")
+                Arrays.asList("B058","B059","B060","B061","B062","B063","B064","B065","B066","B067","B068"),
+                4,
+                7
         );
 
         // Station 10: Square Victoria (occupied - 5 bikes)
@@ -235,7 +254,9 @@ public class FirestoreDataSeeder {
                 5,
                 15,
                 Arrays.asList("D105","D106","D107","D108","D109","D110","D111","D112","D113","D114"),
-                Arrays.asList("B069","B070","B071","B072","B073")
+                Arrays.asList("B069","B070","B071","B072","B073"),
+                2,
+                3
         );
 
         // Station 11: Chinatown (occupied - 7 bikes)
@@ -250,7 +271,9 @@ public class FirestoreDataSeeder {
                 7,
                 15,
                 Arrays.asList("D115","D116","D117","D118","D119","D120","D121","D122","D123","D124","D125","D126"),
-                Arrays.asList("B074","B075","B076","B077","B078","B079","B080")
+                Arrays.asList("B074","B075","B076","B077","B078","B079","B080"),
+                3,
+                4
         );
 
         List<Station> stations = Arrays.asList(

@@ -32,6 +32,9 @@ public class Station implements Subject {
     private List<String> dockIds;
     private List<String> bikeIds;
 
+    private int numElectricBikes;
+    private int numStandardBikes;
+
     private transient final List<Observer> observers = new ArrayList<>();
 
     public Station() {}
@@ -46,7 +49,9 @@ public class Station implements Subject {
                    int numDockedBikes,
                    int reservationHoldTime,
                    List<String> dockIds,
-                   List<String> bikeIds) {
+                   List<String> bikeIds,
+                   int numElectricBikes,
+                   int numStandardBikes) {
 
         this.stationId = stationId;
         this.stationName = stationName;
@@ -59,6 +64,8 @@ public class Station implements Subject {
         this.reservationHoldTime = reservationHoldTime;
         this.dockIds = dockIds;
         this.bikeIds = bikeIds;
+        this.numStandardBikes = numStandardBikes;
+        this.numElectricBikes = numElectricBikes;
     }
 
     /**
@@ -192,6 +199,30 @@ public class Station implements Subject {
 
     public List<String> getBikeIds() { return bikeIds; }
     public void setBikeIds(List<String> bikeIds) { this.bikeIds = bikeIds; }
+
+    public int getNumStandardBikes() { return numStandardBikes; }
+    public void setNumStandardBikes(int numStandardBikes) {
+        this.numStandardBikes = numStandardBikes;
+    }
+
+    public int getNumElectricBikes() { return numElectricBikes; }
+    public void setNumElectricBikes(int numElectricBikes) {
+        this.numElectricBikes = numElectricBikes;
+    }
+
+
+    // we could probably integrate the incrementing with this... so incrementing code does not repeat + maintained simultaneously
+    public void removeBike(String bikeID) {
+        this.bikeIds.remove(bikeID);
+    }
+
+    public void addBike(String bikeID) {
+        this.bikeIds.add(bikeID);
+    }
+
+
+
+
 
     @Override
     public String toString() {

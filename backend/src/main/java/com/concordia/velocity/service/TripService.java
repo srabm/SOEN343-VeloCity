@@ -128,6 +128,13 @@ public class TripService {
 
         // Update station - decrement bike count
         station.setNumDockedBikes(Math.max(0, station.getNumDockedBikes() - 1));
+        if (bike.getType().equals("electric")) {
+            station.setNumElectricBikes(Math.max(0, station.getNumElectricBikes() - 1));
+        } else {
+            station.setNumStandardBikes(Math.max(0, station.getNumStandardBikes() - 1));
+        }
+
+        station.removeBike(bikeId);
 
         // Update station status based on new count
         String newStationStatus = station.determineStatusFromCapacity();
@@ -232,6 +239,13 @@ public class TripService {
 
         // Update station - decrement bike count
         station.setNumDockedBikes(Math.max(0, station.getNumDockedBikes() - 1));
+        if (bike.getType().equals("electric")) {
+            station.setNumElectricBikes(Math.max(0, station.getNumElectricBikes() - 1));
+        } else {
+            station.setNumStandardBikes(Math.max(0, station.getNumStandardBikes() - 1));
+        }
+
+        station.removeBike(bikeId);
 
         // Update station status based on new count
         String newStationStatus = station.determineStatusFromCapacity();
@@ -350,6 +364,13 @@ public class TripService {
 
         // Update station - increment bike count
         station.setNumDockedBikes(station.getNumDockedBikes() + 1);
+        if (bike.getType().equals("electric")) {
+            station.setNumElectricBikes(Math.max(0, station.getNumElectricBikes() + 1));
+        } else {
+            station.setNumStandardBikes(Math.max(0, station.getNumStandardBikes() + 1));
+        }
+
+        station.addBike(bikeId);
 
         // Update station status based on new count
         String newStationStatus = station.determineStatusFromCapacity();

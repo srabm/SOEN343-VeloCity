@@ -176,7 +176,23 @@ public class TransferService {
 
         // Update station bike counts
         sourceStation.setNumDockedBikes(Math.max(0, sourceStation.getNumDockedBikes() - 1));
+        if (bike.getType().equals("electric")) {
+            sourceStation.setNumElectricBikes(Math.max(0, sourceStation.getNumElectricBikes() - 1));
+        } else {
+            sourceStation.setNumStandardBikes(Math.max(0, sourceStation.getNumStandardBikes() - 1));
+        }
+
+        sourceStation.removeBike(bikeId);
+
+
         destinationStation.setNumDockedBikes(destinationStation.getNumDockedBikes() + 1);
+        if (bike.getType().equals("electric")) {
+            destinationStation.setNumElectricBikes(Math.max(0, destinationStation.getNumElectricBikes() + 1));
+        } else {
+            destinationStation.setNumStandardBikes(Math.max(0, destinationStation.getNumStandardBikes() + 1));
+        }
+
+        destinationStation.addBike(bikeId);
 
         // Update station statuses based on new counts
         String newSourceStatus = sourceStation.determineStatusFromCapacity();
