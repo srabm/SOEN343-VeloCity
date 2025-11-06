@@ -1,4 +1,5 @@
 <template>
+  <topbar />
     <div class="login-container">
         <h2>Login</h2>
         <form @submit.prevent="handleLogin">
@@ -27,6 +28,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '../../firebaseAuth.js'
+import topbar from './topbar.vue'
 
 const email = ref('')
 const password = ref('')
