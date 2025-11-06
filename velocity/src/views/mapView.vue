@@ -4,7 +4,9 @@
 
 <script>
 import L from "leaflet";
-import { collection, firestore, getDocs } from '../../firebaseAuth.js'
+import { collection, firestore, getDocs } from '../../firebaseAuth.js';
+import { getAuth } from 'firebase/auth';
+import { bikeApi } from '../services/api';
 
 let stations = [];
 try {
@@ -18,8 +20,6 @@ try {
 } catch (error) {
   console.error('Error fetching stations:', error);
 }
-
-
 
 export default {
   name: "MapView",
@@ -66,12 +66,160 @@ export default {
     };
   },
 
-
   methods: {
-    handleReserveBike(event) {
+    async handleReserveBike(event) {
       const { stationId, stationName } = event.detail;
-      console.log(`Reserving bike at station ${stationName} (ID: ${stationId})`);
+      
+      console.log('=================================');
+      console.log('🚴 RESERVE BIKE DEBUG START');
+      console.log('=================================');
+      console.log('Station ID:', stationId);
+      console.log('Station Name:', stationName);
 
+      // Get Firebase auth instance
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+
+      console.log('Current User:', currentUser);
+      console.log('User ID:', currentUser?.uid);
+      console.log('User Email:', currentUser?.email);
+
+      // Check if user is logged in
+      if (!currentUser) {
+        console.log('❌ User not logged in - redirecting to login');
+        alert('Please log in to reserve a bike.');
+        this.$router.push({ name: 'Login' });
+        return;
+      }
+
+      console.log('✅ User is logged in');
+
+      try {
+        console.log('---');
+        console.log('Step 1: Calling API to get available bikes...');
+        console.log('API URL:', import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api');
+        console.log('Requesting bikes for stationId:', stationId);
+        
+        // Get available bikes at this station
+        const response = await bikeApi.getAvailableBikes(stationId);
+        
+        console.log('---');
+        console.log('Step 2: API Response received');
+        console.log('Full response object:', JSON.stringify(response, null, 2));
+        console.log('response.success:', response.success);
+        console.log('response.bikes:', response.bikes);
+        console.log('response.count:', response.count);
+        console.log('response.error:', response.error);
+
+        // Check if response has the expected structure
+        if (typeof response !== 'object') {
+          console.error('❌ Response is not an object:', typeof response);
+          alert('Invalid response from server. Check console for details.');
+          return;
+        }
+
+        // Check for error in response
+        if (response.error) {
+          console.error('❌ API returned an error:', response.error);
+          alert('Error: ' + response.error);
+          return;
+        }
+
+        // Check success flag
+        if (response.success === false) {
+          console.error('❌ API returned success=false');
+          alert('Failed to get available bikes. Check console for details.');
+          return;
+        }
+
+        // Check if bikes array exists
+        if (!response.bikes) {
+          console.error('❌ response.bikes is undefined or null');
+          console.log('Response keys:', Object.keys(response));
+          alert('Invalid response structure. Missing bikes array.');
+          return;
+        }
+
+        // Check if bikes array is empty
+        if (!Array.isArray(response.bikes)) {
+          console.error('❌ response.bikes is not an array:', typeof response.bikes);
+          alert('Invalid bikes data. Expected array.');
+          return;
+        }
+
+        console.log('Bikes array length:', response.bikes.length);
+
+        if (response.bikes.length === 0) {
+          console.log('❌ No available bikes at this station');
+          alert('No available bikes at this station. Please try another station.');
+          return;
+        }
+
+        console.log('✅ Found', response.bikes.length, 'available bikes');
+        console.log('Bikes:', response.bikes);
+
+        // Select first available bike
+        const selectedBike = response.bikes[0];
+        console.log('---');
+        console.log('Step 3: Selected bike:', selectedBike);
+        console.log('Bike ID:', selectedBike.bikeId);
+        console.log('Bike Type:', selectedBike.type);
+        console.log('Bike Status:', selectedBike.status);
+
+        console.log('---');
+        console.log('Step 4: Calling API to reserve bike...');
+        
+        // Reserve the bike
+        const reservationResponse = await bikeApi.reserveBike(
+          selectedBike.bikeId,
+          currentUser.uid,
+          stationId
+        );
+
+        console.log('Reservation response:', JSON.stringify(reservationResponse, null, 2));
+
+        if (reservationResponse.success) {
+          console.log('✅ Bike reserved successfully!');
+          console.log('Navigating to reservation page...');
+          
+          // Navigate to reservation page
+          this.$router.push({
+            name: 'BikeReservation',
+            query: {
+              bikeId: selectedBike.bikeId,
+              stationName: stationName,
+              stationId: stationId
+            }
+          });
+        } else {
+          console.error('❌ Reservation failed');
+          console.error('Error:', reservationResponse.error);
+          alert('Failed to reserve bike: ' + (reservationResponse.error || 'Unknown error'));
+        }
+
+      } catch (error) {
+        console.log('---');
+        console.error('❌ EXCEPTION CAUGHT:');
+        console.error('Error object:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        
+        if (error.response) {
+          console.error('Error response:', error.response);
+          console.error('Error response data:', error.response.data);
+          console.error('Error response status:', error.response.status);
+        }
+        
+        if (error.error) {
+          console.error('Error.error:', error.error);
+        }
+        
+        alert('Failed to reserve bike. Check browser console for detailed error information.');
+      }
+      
+      console.log('=================================');
+      console.log('🚴 RESERVE BIKE DEBUG END');
+      console.log('=================================');
     },
 
     resetViewAnimated() {
@@ -95,7 +243,7 @@ export default {
     });
 
     // Create map
-    this.map = L.map("map").setView(this.initialCenter, this.initialZoom); // Montreal
+    this.map = L.map("map").setView(this.initialCenter, this.initialZoom);
 
     // Add home button control
     L.Control.HomeButton = L.Control.extend({

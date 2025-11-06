@@ -9,6 +9,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -56,7 +57,7 @@ public class BikeService {
         bike.attach(notificationObserver);
 
         // Start reservation (sets status to RESERVED and schedules auto-expiry)
-        java.time.LocalDateTime expiryTime = bike.startReservationExpiry(station, userId);
+        LocalDateTime expiryTime = bike.startReservationExpiry(station, userId);
 
         // Persist to Firestore
         db.collection("bikes").document(bikeId).set(bike).get();
@@ -102,7 +103,10 @@ public class BikeService {
     public List<Bike> getAllBikes() throws ExecutionException, InterruptedException {
         List<Bike> bikes = new ArrayList<>();
         for (DocumentSnapshot doc : db.collection("bikes").get().get().getDocuments()) {
-            bikes.add(doc.toObject(Bike.class));
+            Bike bike = doc.toObject(Bike.class);
+            if (bike != null) {
+                bikes.add(bike);
+            }
         }
         return bikes;
     }

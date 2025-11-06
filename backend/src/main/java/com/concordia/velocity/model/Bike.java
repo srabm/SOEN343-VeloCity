@@ -2,8 +2,12 @@ package com.concordia.velocity.model;
 
 import com.concordia.velocity.observer.Observer;
 import com.concordia.velocity.observer.Subject;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.annotation.Exclude;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +15,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
+/**
+ * Bike model with proper Firestore serialization
+ * Uses Timestamp for Firestore storage but provides LocalDateTime interface
+ */
 public class Bike implements Subject {
 
     // Valid bike statuses
@@ -27,8 +34,11 @@ public class Bike implements Subject {
     private String bikeId;
     private String status;
     private String type;
-    private LocalDateTime reservationExpiry;
-    private String reservedByUserId;  // Tracks who reserved the bike
+
+    // Store as Timestamp for Firestore compatibility
+    private Timestamp reservationExpiry;
+
+    private String reservedByUserId;
     private String dockId;
     private String stationId;
     private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
@@ -67,21 +77,11 @@ public class Bike implements Subject {
         }
     }
 
-    /**
-     * Validates if a status string is valid
-     */
     public static boolean isValidStatus(String status) {
         if (status == null) return false;
         return VALID_STATUSES.contains(status.toUpperCase());
     }
 
-    /**
-     * Changes the bike status with validation and business rules
-     * @param newStatus the new status to set
-     * @return true if status was changed, false otherwise
-     * @throws IllegalArgumentException if the status is invalid
-     * @throws IllegalStateException if the status transition is not allowed
-     */
     public boolean changeStatus(String newStatus) {
         if (!isValidStatus(newStatus)) {
             throw new IllegalArgumentException("Invalid status: " + newStatus +
@@ -91,13 +91,11 @@ public class Bike implements Subject {
         String normalizedNewStatus = newStatus.toUpperCase();
         String normalizedCurrentStatus = this.status.toUpperCase();
 
-        // Business rule: cannot modify if bike is ON_TRIP
         if (STATUS_ON_TRIP.equals(normalizedCurrentStatus)) {
             throw new IllegalStateException(
                     "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
         }
 
-        // If already at target status, no change needed
         if (normalizedCurrentStatus.equals(normalizedNewStatus)) {
             return false;
         }
@@ -107,31 +105,24 @@ public class Bike implements Subject {
         return true;
     }
 
-    /**
-     * Checks if this bike is currently on an active reservation
-     */
     public boolean isReservedActive() {
         if (!STATUS_RESERVED.equalsIgnoreCase(this.status)) return false;
         if (reservationExpiry == null) return false;
-        return reservationExpiry.isAfter(LocalDateTime.now());
+
+        LocalDateTime expiryTime = timestampToLocalDateTime(reservationExpiry);
+        return expiryTime != null && expiryTime.isAfter(LocalDateTime.now());
     }
 
-    /**
-     * Starts a reservation with expiry based on station's hold time
-     * @param station the station where bike is located
-     * @param userId the user making the reservation
-     * @return the expiry time
-     */
     public LocalDateTime startReservationExpiry(Station station, String userId) {
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(station.getReservationHoldTime());
-        setReservationExpiry(expiryTime);
+        setReservationExpiryFromLocalDateTime(expiryTime);
         setReservedByUserId(userId);
         setStatus(STATUS_RESERVED);
 
         RESERVATION_SCHEDULER.schedule(() -> {
             if (STATUS_RESERVED.equalsIgnoreCase(getStatus()) &&
                     getReservationExpiry() != null &&
-                    !LocalDateTime.now().isBefore(getReservationExpiry())) {
+                    !LocalDateTime.now().isBefore(getReservationExpiryAsLocalDateTime())) {
 
                 setStatus(STATUS_AVAILABLE);
                 setReservationExpiry(null);
@@ -144,15 +135,35 @@ public class Bike implements Subject {
         return expiryTime;
     }
 
-    /**
-     * Clears reservation data when trip starts
-     */
     public void clearReservation() {
         this.reservationExpiry = null;
         this.reservedByUserId = null;
     }
 
-    // Getters and setters
+    // ============ Conversion Helpers ============
+
+    /**
+     * Convert LocalDateTime to Timestamp
+     */
+    private Timestamp localDateTimeToTimestamp(LocalDateTime localDateTime) {
+        if (localDateTime == null) return null;
+        Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
+        return Timestamp.ofTimeSecondsAndNanos(instant.getEpochSecond(), instant.getNano());
+    }
+
+    /**
+     * Convert Timestamp to LocalDateTime
+     */
+    private LocalDateTime timestampToLocalDateTime(Timestamp timestamp) {
+        if (timestamp == null) return null;
+        return LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()),
+                ZoneId.systemDefault()
+        );
+    }
+
+    // ============ Getters and Setters ============
+
     public String getBikeId() { return bikeId; }
     public void setBikeId(String bikeId) { this.bikeId = bikeId; }
 
@@ -162,8 +173,20 @@ public class Bike implements Subject {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public LocalDateTime getReservationExpiry() { return reservationExpiry; }
-    public void setReservationExpiry(LocalDateTime reservationExpiry) { this.reservationExpiry = reservationExpiry; }
+    // Firestore uses this
+    public Timestamp getReservationExpiry() { return reservationExpiry; }
+    public void setReservationExpiry(Timestamp reservationExpiry) { this.reservationExpiry = reservationExpiry; }
+
+    // Convenience methods for LocalDateTime (marked with @Exclude so Firestore ignores them)
+    @Exclude
+    public LocalDateTime getReservationExpiryAsLocalDateTime() {
+        return timestampToLocalDateTime(reservationExpiry);
+    }
+
+    @Exclude
+    public void setReservationExpiryFromLocalDateTime(LocalDateTime localDateTime) {
+        this.reservationExpiry = localDateTimeToTimestamp(localDateTime);
+    }
 
     public String getReservedByUserId() { return reservedByUserId; }
     public void setReservedByUserId(String reservedByUserId) { this.reservedByUserId = reservedByUserId; }
@@ -182,7 +205,7 @@ public class Bike implements Subject {
                 ", type='" + type + '\'' +
                 ", dockId='" + dockId + '\'' +
                 ", stationId='" + stationId + '\'' +
-                ", reservationExpiry=" + reservationExpiry +
+                ", reservationExpiry=" + (reservationExpiry != null ? getReservationExpiryAsLocalDateTime() : null) +
                 ", reservedByUserId='" + reservedByUserId + '\'' +
                 '}';
     }

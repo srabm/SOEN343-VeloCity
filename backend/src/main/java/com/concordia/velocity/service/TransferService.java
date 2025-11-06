@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ExecutionException;
 
+// todo full review of this class / the move bike method
+
 @Service
 public class TransferService {
 

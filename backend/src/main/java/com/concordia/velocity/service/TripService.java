@@ -21,12 +21,31 @@ public class TripService {
     private final Firestore db = FirestoreClient.getFirestore();
 
     /**
+     * Wrapper method for docking bike and ending trip
+     * This method signature matches what the TripController expects
+     *
+     * @param bikeId the bike to dock
+     * @param riderId the rider ending the trip
+     * @param dockId the dock to return bike to
+     * @param dockCode the code to lock the dock
+     * @return trip completion message
+     */
+    public String dockBikeAndEndTrip(String bikeId, String riderId, String dockId, String dockCode)
+            throws ExecutionException, InterruptedException {
+        // Call the existing endTrip method with parameters in the correct order
+        return endTrip(bikeId, dockId, dockCode, riderId);
+    }
+
+    /**
      * Undocks a reserved bike and starts a trip
+     * Updated to include dockCode validation
+     *
      * @param bikeId the bike to undock
      * @param riderId the rider undocking the bike
+     * @param dockCode the code to unlock the dock
      * @return trip confirmation message
-     */ // todo add the dockCode to this method
-    public String undockReservedBike(String bikeId, String riderId)
+     */
+    public String undockReservedBike(String bikeId, String riderId, String dockCode)
             throws ExecutionException, InterruptedException {
 
         // Retrieve bike from Firestore
@@ -60,19 +79,23 @@ public class TripService {
             throw new IllegalStateException("Bike has invalid dock or station assignment");
         }
 
-        // Validate bike is at the dock
-        validateBikeAtDock(bike, previousDockId);
-
-        // Retrieve dock and station
+        // Retrieve dock
         DocumentSnapshot dockDoc = db.collection("docks").document(previousDockId).get().get();
         Dock dock = dockDoc.toObject(Dock.class);
-
-        DocumentSnapshot stationDoc = db.collection("stations").document(stationId).get().get();
-        Station station = stationDoc.toObject(Station.class);
 
         if (dock == null) {
             throw new IllegalArgumentException("Dock not found: " + previousDockId);
         }
+
+        // Validate dock code before allowing bike to be undocked
+        validateDockCode(dock, dockCode);
+
+        // Validate bike is at the dock
+        validateBikeAtDock(bike, previousDockId);
+
+        // Retrieve station
+        DocumentSnapshot stationDoc = db.collection("stations").document(stationId).get().get();
+        Station station = stationDoc.toObject(Station.class);
 
         if (station == null) {
             throw new IllegalArgumentException("Station not found: " + stationId);
@@ -231,12 +254,12 @@ public class TripService {
     }
 
     /**
-     * Ends a trip and docks the bike at a station
+     * Ends a trip by docking the bike
      * @param bikeId the bike being docked
-     * @param dockId the dock where bike is being returned
-     * @param dockCode the code to unlock the dock
+     * @param dockId the dock to return to
+     * @param dockCode the code to lock the dock
      * @param riderId the rider ending the trip
-     * @return trip summary message
+     * @return trip completion message
      */
     public String endTrip(String bikeId, String dockId, String dockCode, String riderId)
             throws ExecutionException, InterruptedException {
