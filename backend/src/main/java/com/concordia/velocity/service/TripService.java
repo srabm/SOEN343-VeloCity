@@ -2,7 +2,7 @@ package com.concordia.velocity.service;
 
 import com.concordia.velocity.model.*;
 import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.NotificationObserver;
+import com.concordia.velocity.observer.StatusObserver;
 import com.concordia.velocity.observer.Observer;
 import com.concordia.velocity.strategy.OneTimeElectricPayment;
 import com.concordia.velocity.strategy.OneTimeStandardPayment;
@@ -112,13 +112,9 @@ public class TripService {
 
         // Attach observers
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
         bike.attach(dashboardObserver);
-        bike.attach(notificationObserver);
         dock.attach(dashboardObserver);
-        dock.attach(notificationObserver);
         station.attach(dashboardObserver);
-        station.attach(notificationObserver);
 
         // Start trip - change bike status to ON_TRIP
         bike.changeStatus(Bike.STATUS_ON_TRIP);
@@ -227,13 +223,9 @@ public class TripService {
 
         // Attach observers
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
         bike.attach(dashboardObserver);
-        bike.attach(notificationObserver);
         dock.attach(dashboardObserver);
-        dock.attach(notificationObserver);
         station.attach(dashboardObserver);
-        station.attach(notificationObserver);
 
         // Start trip - change bike status to ON_TRIP
         bike.changeStatus(Bike.STATUS_ON_TRIP);
@@ -353,7 +345,7 @@ public class TripService {
 
         // Attach observers
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
+        Observer notificationObserver = new StatusObserver();
         bike.attach(dashboardObserver);
         bike.attach(notificationObserver);
         dock.attach(dashboardObserver);

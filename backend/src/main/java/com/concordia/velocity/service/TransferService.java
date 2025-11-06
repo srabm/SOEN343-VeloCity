@@ -4,7 +4,6 @@ import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.model.Dock;
 import com.concordia.velocity.model.Station;
 import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.NotificationObserver;
 import com.concordia.velocity.observer.Observer;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
@@ -147,18 +146,12 @@ public class TransferService {
         // ==================== Step 6: Perform the move ====================
         // Attach observers
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
 
         bike.attach(dashboardObserver);
-        bike.attach(notificationObserver);
         sourceDock.attach(dashboardObserver);
-        sourceDock.attach(notificationObserver);
         destinationDock.attach(dashboardObserver);
-        destinationDock.attach(notificationObserver);
         sourceStation.attach(dashboardObserver);
-        sourceStation.attach(notificationObserver);
         destinationStation.attach(dashboardObserver);
-        destinationStation.attach(notificationObserver);
 
         // Update bike location
         bike.setStationId(destinationStationId);
@@ -222,8 +215,6 @@ public class TransferService {
 
         // Notify observers
         dashboardObserver.update("Bike " + bikeId + " moved from " + sourceStation.getStationName() +
-                " to " + destinationStation.getStationName());
-        notificationObserver.update("Bike " + bikeId + " moved from " + sourceStation.getStationName() +
                 " to " + destinationStation.getStationName());
 
         return "Bike " + bikeId + " (" + bike.getType() + ") successfully moved from " +
