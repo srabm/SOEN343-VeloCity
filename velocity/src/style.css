@@ -16,4 +16,41 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+
+  body {
+    font-family: 'Roboto', sans-serif;
+  }
+
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('./assets/Fonts/Roboto-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900; 
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('./assets/Fonts/Roboto-Italic-VariableFont_wdth,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('./assets/Fonts/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900; 
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Varela Round';
+  src: url('./assets/Fonts/VarelaRound-Regular.ttf') format('truetype');
+  font-weight: 100 900; 
+  font-style: normal;
+  font-display: swap;
 }

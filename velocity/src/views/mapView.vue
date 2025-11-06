@@ -1,25 +1,68 @@
 <template>
   <div id="map"></div>
+
+  <!-- Reserve modal: the reservation content will be inside this container -->
+  <div id="reserveBikeModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close" id="reserveClose">&times;</span>
+        <h2 id="reserveTitle">Reserve Bike</h2>
+      </div>
+      <div class="modal-body" id="reserveBody">
+        <p id="reserveInfo">Reserve details will appear here.</p>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script>
 import L from "leaflet";
-import { collection, firestore, getDocs } from '../../firebaseAuth.js';
+import { collection, firestore, getDocs, doc, updateDoc, onSnapshot } from '../../firebaseAuth.js';
 import { getAuth } from 'firebase/auth';
 import { bikeApi } from '../services/api';
 
 let stations = [];
-try {
-  const stationsRef = collection(firestore, 'stations');
-  const stationsSnapshot = await getDocs(stationsRef);
-  stations = stationsSnapshot.docs.map(doc => ({
+let bikes = {};
+let stationsUnsubscribe = null;
+let bikesUnsubscribe = null;
+
+// Set up real-time listener for stations
+const stationsRef = collection(firestore, 'stations');
+stationsUnsubscribe = onSnapshot(stationsRef, (snapshot) => {
+  stations = snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data()
   }));
-  console.log('Successfully loaded', stations.length, 'stations');
-} catch (error) {
-  console.error('Error fetching stations:', error);
-}
+  console.log('Stations updated:', stations.length);
+
+  // Trigger map refresh if map exists
+  if (window.mapInstance) {
+    window.dispatchEvent(new Event('dataUpdated'));
+  }
+}, (error) => {
+  console.error('Error listening to stations:', error);
+});
+
+// Set up real-time listener for bikes
+const bikesRef = collection(firestore, 'bikes');
+bikesUnsubscribe = onSnapshot(bikesRef, (snapshot) => {
+  bikes = {};
+  snapshot.docs.forEach(doc => {
+    bikes[doc.id] = {
+      id: doc.id,
+      ...doc.data()
+    };
+  });
+  console.log('Bikes updated:', Object.keys(bikes).length);
+
+  // Trigger map refresh if map exists
+  if (window.mapInstance) {
+    window.dispatchEvent(new Event('dataUpdated'));
+  }
+}, (error) => {
+  console.error('Error listening to bikes:', error);
+});
 
 export default {
   name: "MapView",
@@ -28,6 +71,7 @@ export default {
     return {
       initialCenter: [45.5017, -73.5673], // Montreal coordinates
       initialZoom: 13,
+      markers: [], // Store markers so we can update them
       //custom colored icons
       icons: {
         red: L.icon({
@@ -66,160 +110,94 @@ export default {
     };
   },
 
+
   methods: {
-    async handleReserveBike(event) {
+    handleReserveBike(event) {
       const { stationId, stationName } = event.detail;
-      
-      console.log('=================================');
-      console.log('🚴 RESERVE BIKE DEBUG START');
-      console.log('=================================');
-      console.log('Station ID:', stationId);
-      console.log('Station Name:', stationName);
+      console.log(`Reserving bike at station ${stationName} (ID: ${stationId})`);
 
-      // Get Firebase auth instance
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
+      // Find the specific station
+      const station = stations.find(s => s.id === stationId);
 
-      console.log('Current User:', currentUser);
-      console.log('User ID:', currentUser?.uid);
-      console.log('User Email:', currentUser?.email);
-
-      // Check if user is logged in
-      if (!currentUser) {
-        console.log('❌ User not logged in - redirecting to login');
-        alert('Please log in to reserve a bike.');
-        this.$router.push({ name: 'Login' });
+      if (!station) {
+        console.error('Station not found:', stationId);
         return;
       }
 
-      console.log('✅ User is logged in');
+      const modal = document.getElementById('reserveBikeModal');
+      const title = document.getElementById('reserveTitle');
+      const info = document.getElementById('reserveInfo');
 
-      try {
-        console.log('---');
-        console.log('Step 1: Calling API to get available bikes...');
-        console.log('API URL:', import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api');
-        console.log('Requesting bikes for stationId:', stationId);
-        
-        // Get available bikes at this station
-        const response = await bikeApi.getAvailableBikes(stationId);
-        
-        console.log('---');
-        console.log('Step 2: API Response received');
-        console.log('Full response object:', JSON.stringify(response, null, 2));
-        console.log('response.success:', response.success);
-        console.log('response.bikes:', response.bikes);
-        console.log('response.count:', response.count);
-        console.log('response.error:', response.error);
+      if (!modal || !title || !info) {
+        console.warn('Reserve modal elements not found');
+        return;
+      }
 
-        // Check if response has the expected structure
-        if (typeof response !== 'object') {
-          console.error('❌ Response is not an object:', typeof response);
-          alert('Invalid response from server. Check console for details.');
-          return;
-        }
+      title.innerHTML = `Bikes available at <strong>${stationName}</strong>`;
+      if (station.bikeIds && station.bikeIds.length > 0) {
+        info.innerHTML = station.bikeIds.map(bikeId => {
+          const bike = bikes[bikeId];
+          const bikeType = bike ? ((bike.type === 'e-bike' || bike.type === 'electric') ? 'Electric' : 'Regular') : 'Unknown';
+          const bikeStatus = bike ? bike.status : 'unknown';
 
-        // Check for error in response
-        if (response.error) {
-          console.error('❌ API returned an error:', response.error);
-          alert('Error: ' + response.error);
-          return;
-        }
+          // Only show available bikes
+          if (bikeStatus !== 'available') {
+            return '';
+          }
 
-        // Check success flag
-        if (response.success === false) {
-          console.error('❌ API returned success=false');
-          alert('Failed to get available bikes. Check console for details.');
-          return;
-        }
+          return `<div class="bike-item">
+            <span class="bike-id">${bikeId} <span class="bike-type">(${bikeType})</span></span>
+            <button class="reserve-bike-button" data-bike-id="${bikeId}" data-station-id="${stationId}">Reserve</button>
+          </div>`;
+        }).filter(html => html !== '').join('');
 
-        // Check if bikes array exists
-        if (!response.bikes) {
-          console.error('❌ response.bikes is undefined or null');
-          console.log('Response keys:', Object.keys(response));
-          alert('Invalid response structure. Missing bikes array.');
-          return;
-        }
+        // Add click handlers to all reserve buttons
+        const reserveButtons = info.querySelectorAll('.reserve-bike-button');
+        reserveButtons.forEach(button => {
+          button.addEventListener('click', async () => {
+            const bikeId = button.getAttribute('data-bike-id');
+            const stationId = button.getAttribute('data-station-id');
+            console.log(`Reserving bike ${bikeId} from station ${stationId}`);
 
-        // Check if bikes array is empty
-        if (!Array.isArray(response.bikes)) {
-          console.error('❌ response.bikes is not an array:', typeof response.bikes);
-          alert('Invalid bikes data. Expected array.');
-          return;
-        }
+            try {
+              // Update bike status to reserved
+              const bikeRef = doc(firestore, 'bikes', bikeId);
+              await updateDoc(bikeRef, {
+                status: 'reserved',
+                reservedActive: true,
+                reservationExpiry: new Date(Date.now() + 15 * 60 * 1000) // 15 minutes from now
+              });
 
-        console.log('Bikes array length:', response.bikes.length);
-
-        if (response.bikes.length === 0) {
-          console.log('❌ No available bikes at this station');
-          alert('No available bikes at this station. Please try another station.');
-          return;
-        }
-
-        console.log('✅ Found', response.bikes.length, 'available bikes');
-        console.log('Bikes:', response.bikes);
-
-        // Select first available bike
-        const selectedBike = response.bikes[0];
-        console.log('---');
-        console.log('Step 3: Selected bike:', selectedBike);
-        console.log('Bike ID:', selectedBike.bikeId);
-        console.log('Bike Type:', selectedBike.type);
-        console.log('Bike Status:', selectedBike.status);
-
-        console.log('---');
-        console.log('Step 4: Calling API to reserve bike...');
-        
-        // Reserve the bike
-        const reservationResponse = await bikeApi.reserveBike(
-          selectedBike.bikeId,
-          currentUser.uid,
-          stationId
-        );
-
-        console.log('Reservation response:', JSON.stringify(reservationResponse, null, 2));
-
-        if (reservationResponse.success) {
-          console.log('✅ Bike reserved successfully!');
-          console.log('Navigating to reservation page...');
-          
-          // Navigate to reservation page
-          this.$router.push({
-            name: 'BikeReservation',
-            query: {
-              bikeId: selectedBike.bikeId,
-              stationName: stationName,
-              stationId: stationId
+              console.log(`Successfully reserved bike ${bikeId}`);
+              alert(`Bike ${bikeId} reserved successfully!`);
+              modal.style.display = 'none';
+            } catch (error) {
+              console.error('Error reserving bike:', error);
+              alert('Please login or create an account to reserve a bike.');
             }
           });
-        } else {
-          console.error('❌ Reservation failed');
-          console.error('Error:', reservationResponse.error);
-          alert('Failed to reserve bike: ' + (reservationResponse.error || 'Unknown error'));
-        }
+        });
 
-      } catch (error) {
-        console.log('---');
-        console.error('❌ EXCEPTION CAUGHT:');
-        console.error('Error object:', error);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        
-        if (error.response) {
-          console.error('Error response:', error.response);
-          console.error('Error response data:', error.response.data);
-          console.error('Error response status:', error.response.status);
+        if (info.innerHTML === '') {
+          info.innerHTML = 'No bikes currently available';
         }
-        
-        if (error.error) {
-          console.error('Error.error:', error.error);
-        }
-        
-        alert('Failed to reserve bike. Check browser console for detailed error information.');
+      } else {
+        info.innerHTML = 'No bikes currently available';
       }
-      
-      console.log('=================================');
-      console.log('🚴 RESERVE BIKE DEBUG END');
-      console.log('=================================');
+
+      modal.style.display = 'block';
+
+      // close button handler
+      const closeBtn = document.getElementById('reserveClose');
+      const closeHandler = () => { modal.style.display = 'none'; };
+      if (closeBtn) closeBtn.addEventListener('click', closeHandler);
+
+      // click outside to close
+      this._modalOutsideClick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+      window.addEventListener('click', this._modalOutsideClick);
+
+      // store handlers so we can remove them on unmount
+      this._modalCloseHandler = closeHandler;
     },
 
     resetViewAnimated() {
@@ -231,8 +209,16 @@ export default {
   },
 
   mounted() {
-    // Add event listener for reserve button clicks
-    window.addEventListener('reserveBike', this.handleReserveBike);
+    // Store map instance globally for data update events
+    window.mapInstance = true;
+
+    // Add event listener for reserve button clicks (bound so `this` works inside handler)
+    this._boundReserveHandler = this.handleReserveBike.bind(this);
+    window.addEventListener('reserveBike', this._boundReserveHandler);
+
+    // Add event listener for data updates
+    this._boundDataUpdateHandler = this.refreshMarkers.bind(this);
+    window.addEventListener('dataUpdated', this._boundDataUpdateHandler);
 
     //default marker icon fix
     delete L.Icon.Default.prototype._getIconUrl;
@@ -265,41 +251,8 @@ export default {
       attribution: '<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>',
     }).addTo(this.map);
 
-    // Add markers for all stations
-    for (const station of stations) {
-      // icon color based on station status
-      let icon = this.icons.green; // default
-      if (station.status === 'out_of_service') {
-        icon = this.icons.black;
-      } else if (station.numDockedBikes === 0) {
-        icon = this.icons.red;
-      } else if (station.numDockedBikes < 4) {
-        icon = this.icons.yellow;
-      }
-
-      L.marker([station.latitude, station.longitude], { icon })
-        .addTo(this.map)
-        .bindPopup(
-          station.status === 'out_of_service'
-            ? `<b>Station ${station.stationName}</b><br><i>Temporarily Closed</i>`
-            : `<b>Station ${station.stationName}</b><br>` +
-            `Available Regular Bikes: ${station.numStandardBikes || 0}<br>` +
-            `Available Electric Bikes: ${station.numElectricBikes || 0}<br>` +
-            `Available Docks: ${station.capacity - station.numDockedBikes || 0}<br>` +
-            (station.numStandardBikes > 0 
-              ? `<button onclick="window.dispatchEvent(new CustomEvent('reserveBike', 
-                      {detail: {stationId: '${station.id}', stationName: '${station.stationName}'}}))">
-                      Reserve Standard Bike
-                     </button>`
-              : '') +
-            (station.numElectricBikes > 0 
-            ? `<button onclick="window.dispatchEvent(new CustomEvent('reserveBike', 
-                    {detail: {stationId: '${station.id}', stationName: '${station.stationName}'}}))">
-                    Reserve Electric Bike
-                    </button>`
-            : '')
-        );
-    }
+    // Initial marker rendering
+    this.refreshMarkers();
 
     setTimeout(() => {
       this.map.invalidateSize();
@@ -307,11 +260,36 @@ export default {
   },
 
   beforeUnmount() {
+    // Clean up Firestore listeners
+    if (stationsUnsubscribe) {
+      stationsUnsubscribe();
+    }
+    if (bikesUnsubscribe) {
+      bikesUnsubscribe();
+    }
+
+    // Clean up map
     if (this.map) {
       this.map.remove();
     }
-    // Remove the event listener
-    window.removeEventListener('reserveBike', this.handleReserveBike);
+
+    // Clean up global reference
+    window.mapInstance = null;
+
+    // Remove event listeners
+    if (this._boundReserveHandler) {
+      window.removeEventListener('reserveBike', this._boundReserveHandler);
+    }
+    if (this._boundDataUpdateHandler) {
+      window.removeEventListener('dataUpdated', this._boundDataUpdateHandler);
+    }
+    if (this._modalOutsideClick) {
+      window.removeEventListener('click', this._modalOutsideClick);
+    }
+    const closeBtn = document.getElementById('reserveClose');
+    if (closeBtn && this._modalCloseHandler) {
+      closeBtn.removeEventListener('click', this._modalCloseHandler);
+    }
   }
 
 };
@@ -361,5 +339,87 @@ export default {
 
 #map :deep(.home-button:hover) {
   background: #f4f4f4;
+}
+
+/* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  position: relative;
+  z-index: 10051;
+  border-radius: 8px;
+}
+
+.modal-header {
+  margin-bottom: 15px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 20px;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Bike list styles */
+.modal-body :deep(.bike-item) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-body :deep(.bike-item:last-child) {
+  border-bottom: none;
+}
+
+.modal-body :deep(.bike-id) {
+  flex: 1;
+  font-weight: 500;
+}
+
+.modal-body :deep(.bike-type) {
+  color: #666;
+  font-weight: normal;
+  font-size: 0.9em;
+}
+
+.modal-body :deep(.reserve-bike-button) {
+  padding: 6px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-body :deep(.reserve-bike-button:hover) {
+  background-color: #45a049;
 }
 </style>
