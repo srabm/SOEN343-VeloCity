@@ -1,133 +1,99 @@
 <template>
+  <topbar />
   <div class="settings-page">
-    <!-- Tabs header -->
-    <div class="tabs-header">
-      <button
-        class="tab-button"
-        :class="{ active: activeTab === 'settings' }"
-        @click="activeTab = 'settings'"
-      >
-        User Settings
-      </button>
+    <h1>User Settings</h1>
 
-      <button
-        class="tab-button"
-        :class="{ active: activeTab === 'billing' }"
-        @click="activeTab = 'billing'"
-      >
-        Billing History
+
+    <!-- Basic profile info -->
+    <p>
+      <strong>Full Name:</strong>
+      {{ profile?.firstName ? profile.firstName + " " + profile.lastName : "Not set" }}
+    </p>
+
+    <p>
+      <strong>Email:</strong>
+      {{ user?.email }}
+    </p>
+
+    <p>
+      <strong>Address:</strong>
+      {{ profile?.address || "Not set" }}
+    </p>
+
+    <p>
+      <strong>Phone Number:</strong>
+      {{ profile?.phoneNumber || "Not set" }}
+    </p>
+
+    <p>
+      <strong>Role:</strong>
+      {{ profile?.isOperator ? "Operator" : "Rider" }}
+    </p>
+
+    <!-- Edit Profile -->
+    <div class="profile-actions">
+      <button @click="startProfileEdit" class="edit-profile-btn">
+        Edit Profile
       </button>
     </div>
 
-    <!-- TAB 1: User Settings -->
-    <div v-if="activeTab === 'settings'">
-      <h1>User Settings</h1>
+    <!-- Edit Profile (only address and phone can be changed) -->
+    <div v-if="editProfileMode" class="profile-edit-form">
+      <h2 class="section-title">Edit Profile</h2>
 
-      <div v-if="user">
-        <!-- Basic profile info -->
-        <p>
-          <strong>Full Name:</strong>
-          {{ profile?.firstName ? profile.firstName + " " + profile.lastName : "Not set" }}
-        </p>
+      <label>Address:</label>
+      <input v-model="profileEditForm.address" placeholder="Enter your address" />
 
-        <p>
-          <strong>Email:</strong>
-          {{ user.email }}
-        </p>
+      <label>Phone Number:</label>
+      <input v-model="profileEditForm.phoneNumber" placeholder="514-123-4567" />
 
-        <p>
-          <strong>Address:</strong>
-          {{ profile?.address || "Not set" }}
-        </p>
-
-        <p>
-          <strong>Phone Number:</strong>
-          {{ profile?.phoneNumber || "Not set" }}
-        </p>
-
-        <p>
-          <strong>Role:</strong>
-          {{ profile?.isOperator ? "Operator" : "Rider" }}
-        </p>
-
-        <!-- Edit Profile + Log Out buttons -->
-        <div class="profile-actions">
-          <button @click="startProfileEdit" class="edit-profile-btn">
-            Edit Profile
-          </button>
-          <button @click="logout" class="logout-btn">
-            Log Out
-          </button>
-        </div>
-
-        <!-- Edit Profile (only address and phone can be changed) -->
-        <div v-if="editProfileMode" class="profile-edit-form">
-          <h2 class="section-title">Edit Profile</h2>
-
-          <label>Address:</label>
-          <input v-model="profileEditForm.address" placeholder="Enter your address" />
-
-          <label>Phone Number:</label>
-          <input v-model="profileEditForm.phoneNumber" placeholder="514-123-4567" />
-
-          <div class="btn-row">
-            <button @click="saveProfileInfo" class="save-btn">Save</button>
-            <button @click="cancelProfileEdit" class="cancel-btn">Cancel</button>
-          </div>
-        </div>
-
-        <!-- Payment Information -->
-        <h2 class="section-title">Payment Information</h2>
-
-        <!-- View mode -->
-        <div v-if="!editPaymentMode && profile?.paymentInfo">
-          <p><strong>Cardholder Name:</strong> {{ profile.paymentInfo.cardholderName || 'Not set' }}</p>
-          <p><strong>Card Number:</strong> {{ profile.paymentInfo.cardNumber || 'Not set' }}</p>
-          <p><strong>Expiry Date:</strong> {{ profile.paymentInfo.expiryDate || 'Not set' }}</p>
-          <p><strong>CVC:</strong> {{ profile.paymentInfo.cvc || 'Not set' }}</p>
-
-          <button @click="togglePaymentEdit(true)" class="edit-btn">
-            Edit Payment Info
-          </button>
-        </div>
-
-        <!-- Edit payment info -->
-        <div v-else-if="editPaymentMode" class="payment-edit-form">
-          <label>Cardholder Name:</label>
-          <input v-model="paymentForm.cardholderName" placeholder="Full name" />
-
-          <label>Card Number:</label>
-          <input v-model="paymentForm.cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" />
-
-          <label>Expiry Date:</label>
-          <input v-model="paymentForm.expiryDate" placeholder="MM/YY" />
-
-          <label>CVC:</label>
-          <input v-model="paymentForm.cvc" maxlength="4" placeholder="123" />
-
-          <div class="btn-row">
-            <button @click="savePaymentInfo" class="save-btn">Save</button>
-            <button @click="togglePaymentEdit(false)" class="cancel-btn">Cancel</button>
-          </div>
-        </div>
-
-        <!-- No payment info yet -->
-        <div v-else>
-          <p>No payment method on file.</p>
-          <button @click="togglePaymentEdit(true)" class="add-btn">
-            Add Payment Info
-          </button>
-        </div>
-      </div>
-
-      <div v-else>
-        <p>Loading user info...</p>
+      <div class="btn-row">
+        <button @click="saveProfileInfo" class="save-btn">Save</button>
+        <button @click="cancelProfileEdit" class="cancel-btn">Cancel</button>
       </div>
     </div>
 
-    <!-- TAB 2: Billing History -->
-    <div v-else-if="activeTab === 'billing'">
-      <BillingHistory />
+    <!-- Payment Information -->
+    <h2 class="section-title">Payment Information</h2>
+
+    <!-- View mode -->
+    <div v-if="!editPaymentMode && profile?.paymentInfo">
+      <p><strong>Cardholder Name:</strong> {{ profile.paymentInfo.cardholderName || 'Not set' }}</p>
+      <p><strong>Card Number:</strong> {{ profile.paymentInfo.cardNumber || 'Not set' }}</p>
+      <p><strong>Expiry Date:</strong> {{ profile.paymentInfo.expiryDate || 'Not set' }}</p>
+      <p><strong>CVC:</strong> {{ profile.paymentInfo.cvc || 'Not set' }}</p>
+
+      <button @click="togglePaymentEdit(true)" class="edit-btn">
+        Edit Payment Info
+      </button>
+    </div>
+
+    <!-- Edit payment info -->
+    <div v-else-if="editPaymentMode" class="payment-edit-form">
+      <label>Cardholder Name:</label>
+      <input v-model="paymentForm.cardholderName" placeholder="Full name" />
+
+      <label>Card Number:</label>
+      <input v-model="paymentForm.cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" />
+
+      <label>Expiry Date:</label>
+      <input v-model="paymentForm.expiryDate" placeholder="MM/YY" />
+
+      <label>CVC:</label>
+      <input v-model="paymentForm.cvc" maxlength="4" placeholder="123" />
+
+      <div class="btn-row">
+        <button @click="savePaymentInfo" class="save-btn">Save</button>
+        <button @click="togglePaymentEdit(false)" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+
+    <!-- No payment info yet -->
+    <div v-else>
+      <p>No payment method on file.</p>
+      <button @click="togglePaymentEdit(true)" class="add-btn">
+        Add Payment Info
+      </button>
     </div>
   </div>
 </template>
@@ -135,10 +101,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 import app from "../../firebase-config.js";
-import BillingHistory from "../views/billingHistory.vue";
+import topbar from './topbar.vue'
 
 const router = useRouter();
 const auth = getAuth(app);
@@ -146,8 +112,6 @@ const db = getFirestore(app);
 
 const user = ref(null);
 const profile = ref(null);
-
-const activeTab = ref("settings"); // 'settings' | 'billing'
 
 // Profile edit (address + phone)
 const editProfileMode = ref(false);
@@ -257,15 +221,6 @@ async function savePaymentInfo() {
   }
 }
 
-// ----- Logout -----
-async function logout() {
-  try {
-    await signOut(auth);
-    router.push("/velocity/login");
-  } catch (err) {
-    console.error("Error logging out:", err);
-  }
-}
 </script>
 
 <style scoped>
@@ -276,28 +231,6 @@ async function logout() {
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Tabs */
-.tabs-header {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #ddd;
-}
-
-.tab-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-weight: 600;
-  border-bottom: 3px solid transparent;
-}
-
-.tab-button.active {
-  border-bottom-color: #3490dc;
-  color: #3490dc;
 }
 
 /* Sections */
@@ -343,15 +276,6 @@ button {
 
 .edit-profile-btn:hover {
   background-color: #2d3748;
-}
-
-.logout-btn {
-  background-color: #e3342f;
-  color: white;
-}
-
-.logout-btn:hover {
-  background-color: #cc1f1a;
 }
 
 /* Save / cancel / edit / add */
