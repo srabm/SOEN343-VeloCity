@@ -193,11 +193,13 @@ export default {
     };
 
     // Check if reservation has expired
-    const checkExpiry = () => {
+    const checkExpiry = async () => {
       if (!expiryDate.value) return;
       
       const now = new Date();
       if (now >= expiryDate.value) {
+        await bikeApi.updateBikeStatus(bike.value.bikeId, 'available');
+        bike.value.reservedByUserId = null;
         reservationExpired.value = true;
         if (checkExpiryInterval) {
           clearInterval(checkExpiryInterval);
@@ -309,8 +311,8 @@ export default {
 
       try {
         // Update bike status back to available
-        await bikeApi.updateBikeStatus(bike.value.bikeId, 'AVAILABLE');
-        router.push({ name: 'MapView' });
+        await bikeApi.updateBikeStatus(bike.value.bikeId, 'available');
+        router.push({ name: 'Home' });
       } catch (err) {
         console.error('Error canceling reservation:', err);
         alert('Failed to cancel reservation. Please try again.');
@@ -319,7 +321,7 @@ export default {
 
     // Navigate to map
     const goToMap = () => {
-      router.push({ name: 'MapView' });
+      router.push({ name: 'Home' });
     };
 
     // Lifecycle

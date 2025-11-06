@@ -124,7 +124,7 @@ public class BikeController {
     /**
      * Update bike status
      * PATCH /api/bikes/{bikeId}/status
-     * Body: { "status": "AVAILABLE|RESERVED|MAINTENANCE|ON_TRIP" }
+     * Body: { "status": "available|reserved|maintenance|on_trip" }
      */
     @PatchMapping("/{bikeId}/status")
     public ResponseEntity<Map<String, Object>> updateBikeStatus(

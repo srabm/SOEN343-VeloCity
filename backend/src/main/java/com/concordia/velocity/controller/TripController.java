@@ -163,6 +163,8 @@ public class TripController {
         }
     }
 
+
+
     /**
      * Get bill by ID
      * GET /api/trips/bills/{billId}
@@ -239,5 +241,45 @@ public class TripController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+
+    /**
+     * Report an issue with a bike and put it in maintenance
+     * POST /api/trips/tripId/report
+     * Body:
+     */
+    @PostMapping("/{tripId}/report")
+    public ResponseEntity<Map<String, Object>> reportBike(
+            @PathVariable String tripId,
+            @RequestBody Map<String, String> request) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String issue = request.get("issue");
+
+            String message = tripService.reportBike(tripId, issue);
+
+            response.put("success", true);
+            response.put("message", message);
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+
+        } catch (IllegalStateException e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", "An unexpected error occurred: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
 
 }

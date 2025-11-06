@@ -8,10 +8,17 @@ import com.concordia.velocity.strategy.OneTimeElectricPayment;
 import com.concordia.velocity.strategy.OneTimeStandardPayment;
 import com.concordia.velocity.strategy.PaymentStrategy;
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -26,9 +33,9 @@ public class TripService {
      * Wrapper method for docking bike and ending trip
      * This method signature matches what the TripController expects
      *
-     * @param bikeId the bike to dock
-     * @param riderId the rider ending the trip
-     * @param dockId the dock to return bike to
+     * @param bikeId   the bike to dock
+     * @param riderId  the rider ending the trip
+     * @param dockId   the dock to return bike to
      * @param dockCode the code to lock the dock
      * @return trip completion message
      */
@@ -42,8 +49,8 @@ public class TripService {
      * Undocks a reserved bike and starts a trip
      * Updated to include dockCode validation
      *
-     * @param bikeId the bike to undock
-     * @param riderId the rider undocking the bike
+     * @param bikeId   the bike to undock
+     * @param riderId  the rider undocking the bike
      * @param dockCode the code to unlock the dock
      * @return trip confirmation message
      */
@@ -160,9 +167,10 @@ public class TripService {
 
     /**
      * Undocks an available bike by entering dock code and starts a trip
-     * @param dockId the dock where the bike is located
+     *
+     * @param dockId   the dock where the bike is located
      * @param dockCode the code to unlock the dock
-     * @param riderId the rider undocking the bike
+     * @param riderId  the rider undocking the bike
      * @return trip confirmation message
      */
     public String undockAvailableBike(String dockId, String dockCode, String riderId)
@@ -271,10 +279,11 @@ public class TripService {
 
     /**
      * Ends a trip by docking the bike
-     * @param bikeId the bike being docked
-     * @param dockId the dock to return to
+     *
+     * @param bikeId   the bike being docked
+     * @param dockId   the dock to return to
      * @param dockCode the code to lock the dock
-     * @param riderId the rider ending the trip
+     * @param riderId  the rider ending the trip
      * @return trip completion message
      */
     public String endTrip(String bikeId, String dockId, String dockCode, String riderId)
@@ -453,6 +462,7 @@ public class TripService {
 
     /**
      * Selects the appropriate payment strategy based on bike type
+     *
      * @param bikeType the type of bike used for the trip
      * @return the appropriate payment strategy
      */
@@ -552,10 +562,10 @@ public class TripService {
     /**
      * Validates the dock code entered by the user
      *
-     * @param dock the dock being accessed
+     * @param dock        the dock being accessed
      * @param enteredCode the code entered by the user
      * @throws IllegalArgumentException if the dock has no code set
-     * @throws IllegalStateException if the entered code doesn't match
+     * @throws IllegalStateException    if the entered code doesn't match
      */
     private void validateDockCode(Dock dock, String enteredCode) {
         if (dock.getDockCode() == null || dock.getDockCode().isEmpty()) {
@@ -617,5 +627,53 @@ public class TripService {
                             ". Current station: " + dock.getStationId()
             );
         }
+    }
+
+    public String reportBike(String tripId, String issue) throws ExecutionException, InterruptedException, IOException {
+        // Get trip document
+        DocumentSnapshot tripDoc = db.collection("trips").document(tripId).get().get();
+        if (!tripDoc.exists()) {
+            throw new IllegalArgumentException("Trip not found: " + tripId);
+        }
+
+        // Extract bikeId from the trip
+        String bikeId = tripDoc.getString("bikeId");
+        if (bikeId == null || bikeId.isEmpty()) {
+            throw new IllegalArgumentException("Trip " + tripId + " does not contain a valid bikeId");
+        }
+
+        // Get the corresponding bike document
+        DocumentReference bikeRef = db.collection("bikes").document(bikeId);
+        DocumentSnapshot bikeDoc = bikeRef.get().get();
+        if (!bikeDoc.exists()) {
+            throw new IllegalArgumentException("Bike not found: " + bikeId);
+        }
+
+        // Update bike status to maintenance
+        Bike bike = bikeDoc.toObject(Bike.class);
+        System.out.println(bike);
+        if (bike == null)
+            throw new NullPointerException("BikeId " + bikeId + " leads to null");
+
+        bike.changeStatus(Bike.STATUS_MAINTENANCE);
+
+        // persist changes
+        db.collection("bikes").document(bikeId).set(bike).get();
+
+        // Log the issue to a local file
+        String logEntry = String.format(
+                "[%s] TripID: %s | BikeID: %s | Issue: %s%n\n",
+                Timestamp.now(),
+                tripId,
+                bikeId,
+                issue
+        );
+
+        Path logFilePath = Paths.get("bike_issues.log");
+        Files.write(logFilePath, logEntry.getBytes(StandardCharsets.UTF_8),
+                StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+
+
+        return "Bike " + bikeId + " marked as maintenance. Issue logged.";
     }
 }

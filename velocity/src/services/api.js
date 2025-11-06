@@ -97,7 +97,7 @@ export const bikeApi = {
   /**
    * Update bike status
    * @param {string} bikeId - ID of the bike
-   * @param {string} status - New status (AVAILABLE, RESERVED, MAINTENANCE, ON_TRIP)
+   * @param {string} status - New status (available, reserved, maintenance, on_trip)
    */
   async updateBikeStatus(bikeId, status) {
     try {

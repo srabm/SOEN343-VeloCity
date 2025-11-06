@@ -116,8 +116,8 @@ public class FirestoreDataSeeder {
                 15,
                 Arrays.asList("D011","D012","D013","D014","D015","D016","D017","D018","D019","D020"),
                 Arrays.asList(),
-                2,
-                8
+                0,
+                0
         );
 
         // Station 3: McGill University (full - 10 bikes)
