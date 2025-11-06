@@ -1,7 +1,7 @@
 <template>
     <div class="user-home-container">
         <h1>{{ greeting }}, {{ userName }}!</h1>
-        <div>This is your temporary empty home page.</div>
+        <mapView/>
     </div>
 </template>
 
@@ -10,6 +10,7 @@ import { ref, onMounted } from 'vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { firestore } from '../../firebaseAuth.js'
 import { doc, getDoc } from 'firebase/firestore'
+import mapView from './mapView.vue'
 
 const userName = ref('Guest')
 const greeting = ref('Welcome')
@@ -32,7 +33,8 @@ onMounted(() => {
         }
         greeting.value = computeGreeting()
     })
-})
+}
+)
 </script>
 
 <style scoped></style>
