@@ -21,7 +21,7 @@
 
     <!-- TAB 1: User Settings -->
     <div v-if="activeTab === 'settings'">
-      <h1>User Settings</h1>
+      <h2 class="section-title">User Settings</h2>
 
       <div v-if="user">
         <!-- Basic profile info -->
