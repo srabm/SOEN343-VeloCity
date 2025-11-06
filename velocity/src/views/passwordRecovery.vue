@@ -1,4 +1,5 @@
 <template>
+
   <div class="password-recovery-container">
     <h2>Password Reset</h2>
 
@@ -18,7 +19,7 @@
     <button @click="handleResetPassword">Reset My Password</button>
 
     <div class="back-to-login">
-      <router-link to="/login">Back to Login</router-link>
+      <router-link to="/VeloCity/login">Back to Login</router-link>
     </div>
   </div>
 </template>

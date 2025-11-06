@@ -9,32 +9,32 @@ import pricing from '../views/pricing.vue';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: '/home' },
+    { path: '/', redirect: '/VeloCity/home' },
     {
-      path: '/login',
+      path: '/VeloCity/login',
       name: 'Login',
       component: Login,
       meta: { requiresGuest: true }
     },
     {
-      path: '/password-recovery',
+      path: '/VeloCity/password-recovery',
       name: 'PasswordRecovery',
       component: PasswordRecovery,
       meta: { requiresGuest: true }
     },
     {
-      path: '/register',
+      path: '/VeloCity/register',
       name: 'Register',
       component: Register,
       meta: { requiresGuest: true }
     },
     {
-      path: '/home',
+      path: '/VeloCity/home',
       name: 'Home',
       component: Home
     },
     {
-      path: '/pricing',
+      path: '/VeloCity/pricing',
       name: 'Pricing',
       component: pricing
     }

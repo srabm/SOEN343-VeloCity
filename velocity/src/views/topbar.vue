@@ -8,10 +8,10 @@
 
             <!-- tabs -->
             <div class="justify-self-center h-full flex items-stretch">
-                <router-link to="/home" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
+                <router-link to="/VeloCity/home" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     Home
                 </router-link>
-                <router-link to="/pricing" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
+                <router-link to="/VeloCity/pricing" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     Pricing
                 </router-link>
             </div>
