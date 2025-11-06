@@ -196,6 +196,45 @@ export const tripApi = {
       throw error.response?.data || error;
     }
   },
+    /**
+   * Get all trips for the logged-in user
+   * @param {string} userId
+   */
+  getRiderTrips: async (userId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/trips/rider/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching rider trips:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get a single trip by ID
+   */
+  getTripById: async (tripId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/trips/${tripId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching trip:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Report a problem with a bike (placeholder)
+   */
+  reportProblem: async (tripId, issue) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/trips/${tripId}/report`, { issue });
+      return response.data;
+    } catch (error) {
+      console.error("Error reporting problem:", error);
+      throw error;
+    }
+  },
 };
 
 export default api;

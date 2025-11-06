@@ -7,11 +7,13 @@ import com.concordia.velocity.observer.Observer;
 import com.concordia.velocity.strategy.OneTimeElectricPayment;
 import com.concordia.velocity.strategy.OneTimeStandardPayment;
 import com.concordia.velocity.strategy.PaymentStrategy;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -504,6 +506,46 @@ public class TripService {
         }
         return doc.toObject(Bill.class);
     }
+
+    /**
+     * Get all trips
+     */
+    public List<Trip> getAllTrips() throws ExecutionException, InterruptedException {
+        CollectionReference tripsRef = db.collection("trips");
+        ApiFuture<QuerySnapshot> future = tripsRef.get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        List<Trip> trips = new ArrayList<>();
+
+        for (QueryDocumentSnapshot doc : documents) {
+            if (doc.exists()) {
+                Trip trip = doc.toObject(Trip.class);
+                if (trip != null) trips.add(trip);
+            }
+        }
+
+        return trips;
+    }
+
+    /**
+     * Get all trips for a specific rider (userId)
+     */
+    public List<Trip> getRiderTrips(String userId) throws ExecutionException, InterruptedException {
+        CollectionReference tripsRef = db.collection("trips");
+        ApiFuture<QuerySnapshot> future = tripsRef.whereArrayContains("riderId", userId).get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        List<Trip> trips = new ArrayList<>();
+        for (QueryDocumentSnapshot doc : documents) {
+            if (doc.exists()) {
+                Trip trip = doc.toObject(Trip.class);
+                if (trip != null) trips.add(trip);
+            }
+        }
+
+        return trips;
+    }
+
 
     // ==================== Validation Helper Methods ====================
 
