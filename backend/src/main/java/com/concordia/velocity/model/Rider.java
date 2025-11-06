@@ -5,4 +5,6 @@ public class Rider extends User {
         super(fullName, address, email, phoneNumber, username);
     }
 
+    // TODO either here or, more likely, in a service : report bike (turns status to maintenance)
+
 }
