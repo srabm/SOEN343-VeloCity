@@ -81,22 +81,10 @@
 
         <!-- View mode -->
         <div v-if="!editPaymentMode && profile?.paymentInfo">
-          <p>
-            <strong>Cardholder:</strong>
-            {{ profile.paymentInfo.cardholderName || "Not set" }}
-          </p>
-          <p>
-            <strong>Card Brand:</strong>
-            {{ profile.paymentInfo.cardBrand || "Not set" }}
-          </p>
-          <p>
-            <strong>Last 4 Digits:</strong>
-            {{ profile.paymentInfo.last4 || "Not set" }}
-          </p>
-          <p>
-            <strong>Billing Address:</strong>
-            {{ profile.paymentInfo.billingAddress || "Not set" }}
-          </p>
+          <p><strong>Cardholder Name:</strong> {{ profile.paymentInfo.cardholderName || 'Not set' }}</p>
+          <p><strong>Card Number:</strong> {{ profile.paymentInfo.cardNumber || 'Not set' }}</p>
+          <p><strong>Expiry Date:</strong> {{ profile.paymentInfo.expiryDate || 'Not set' }}</p>
+          <p><strong>CVC:</strong> {{ profile.paymentInfo.cvc || 'Not set' }}</p>
 
           <button @click="togglePaymentEdit(true)" class="edit-btn">
             Edit Payment Info
@@ -108,14 +96,14 @@
           <label>Cardholder Name:</label>
           <input v-model="paymentForm.cardholderName" placeholder="Full name" />
 
-          <label>Card Brand:</label>
-          <input v-model="paymentForm.cardBrand" placeholder="Visa / Mastercard" />
+          <label>Card Number:</label>
+          <input v-model="paymentForm.cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" />
 
-          <label>Last 4 Digits:</label>
-          <input v-model="paymentForm.last4" maxlength="4" placeholder="1234" />
+          <label>Expiry Date:</label>
+          <input v-model="paymentForm.expiryDate" placeholder="MM/YY" />
 
-          <label>Billing Address:</label>
-          <input v-model="paymentForm.billingAddress" placeholder="123 Sherbrooke St W" />
+          <label>CVC:</label>
+          <input v-model="paymentForm.cvc" maxlength="4" placeholder="123" />
 
           <div class="btn-row">
             <button @click="savePaymentInfo" class="save-btn">Save</button>
@@ -171,10 +159,10 @@ const profileEditForm = ref({
 // Payment edit
 const editPaymentMode = ref(false);
 const paymentForm = ref({
+  cardNumber: "",
   cardholderName: "",
-  cardBrand: "",
-  last4: "",
-  billingAddress: "",
+  expiryName: "",
+  cvc: "",
 });
 
 onMounted(() => {
@@ -242,10 +230,10 @@ function togglePaymentEdit(state) {
   if (state) {
     const pInfo = profile.value?.paymentInfo || {};
     paymentForm.value = {
+      cardNumber: pInfo.cardNumber || "",
       cardholderName: pInfo.cardholderName || "",
-      cardBrand: pInfo.cardBrand || "",
-      last4: pInfo.last4 || "",
-      billingAddress: pInfo.billingAddress || "",
+      expiryDate: pInfo.expiryDate || "",
+      cvc: pInfo.cvc || ""
     };
   }
 }

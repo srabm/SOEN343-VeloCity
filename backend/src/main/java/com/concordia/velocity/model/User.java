@@ -48,25 +48,25 @@ abstract class User {
 
     public static class PaymentInfo {
         private Boolean hasPaymentMethod;
-        private String cardBrand;
-        private String last4;
+        private String cardNumber;
+        private String cvc;
         private String cardholderName;
-        private String billingAddress;
+        private String expiryDate;
 
         public PaymentInfo() {}
 
         public Boolean getHasPaymentMethod() { return hasPaymentMethod; }
         public void setHasPaymentMethod(Boolean hasPaymentMethod) { this.hasPaymentMethod = hasPaymentMethod; }
 
-        public String getCardBrand() { return cardBrand; }
-        public void setCardBrand(String cardBrand) { this.cardBrand = cardBrand; }
+        public String getCardNumber() { return cardNumber; }
+        public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
 
-        public String getLast4() { return last4; }
-        public void setLast4(String last4) { this.last4 = last4; }
+        public String getCvc() { return cvc; }
+        public void setCvc(String cvc) { this.cvc = cvc; }
 
         public String getCardholderName() { return cardholderName; }
         public void setCardholderName(String cardholderName) { this.cardholderName = cardholderName; }
 
-        public String getBillingAddress() { return billingAddress; }
-        public void setBillingAddress(String billingAddress) { this.billingAddress = billingAddress; }
+        public String getExpiryDate() { return expiryDate; }
+        public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
     }
