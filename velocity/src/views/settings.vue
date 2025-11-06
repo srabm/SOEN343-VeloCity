@@ -161,7 +161,7 @@ const editPaymentMode = ref(false);
 const paymentForm = ref({
   cardNumber: "",
   cardholderName: "",
-  expiryName: "",
+  expiryDate: "",
   cvc: "",
 });
 
