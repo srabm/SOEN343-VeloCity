@@ -1,34 +1,83 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import Login from '../views/login.vue';
 import PasswordRecovery from '../views/passwordRecovery.vue';
 import Register from '../views/register.vue';
 import Home from '../views/userHome.vue';
+import mapView  from '../views/mapView.vue';
+import Settings from '../views/settings.vue';
+import pricing from '../views/pricing.vue';
+import RideHistory from '../views/rideHistory.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { path: '/', redirect: '/login' },
+    { path: '/', redirect: '/VeloCity/home' },
     {
-      path: '/login',
+      path: '/VeloCity/login',
       name: 'Login',
-      component: Login
+      component: Login,
+      meta: { requiresGuest: true }
     },
     {
-      path: '/password-recovery',
+      path: '/VeloCity/password-recovery',
       name: 'PasswordRecovery',
-      component: PasswordRecovery
+      component: PasswordRecovery,
+      meta: { requiresGuest: true }
     },
     {
-      path: '/register',
+      path: '/VeloCity/register',
       name: 'Register',
-      component: Register
+      component: Register,
+      meta: { requiresGuest: true }
     },
     {
-      path: '/home',
+      path: '/VeloCity/home',
       name: 'Home',
       component: Home
+    },
+    {
+      path: '/VeloCity/map',
+      name: 'MapView',
+      component: mapView
+    },
+
+    {
+      path: '/VeloCity/settings',
+      name: 'Settings',
+      component: Settings
+    },
+    {
+      path: '/VeloCity/pricing',
+      name: 'Pricing',
+      component: pricing
+    },
+
+    {
+      path: '/VeloCity/rides',
+      name: 'RideHistory',
+      component: RideHistory
     }
   ]
+});
+
+function getCurrentUser() {
+  return new Promise((resolve) => {
+    const auth = getAuth();
+    const removeListener = onAuthStateChanged(auth, (user) => {
+      removeListener();
+      resolve(user);
+    });
+  });
+}
+
+router.beforeEach(async (to) => {
+  if (to.matched.some((r) => r.meta?.requiresGuest)) {
+    const user = await getCurrentUser();
+    if (user) return { path: '/home' };
+  }
+  return true;
 });
 
 export default router;
