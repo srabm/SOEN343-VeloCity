@@ -91,10 +91,11 @@ public class Bike implements Subject {
         String normalizedNewStatus = newStatus.toUpperCase();
         String normalizedCurrentStatus = this.status.toUpperCase();
 
-        if (STATUS_ON_TRIP.equals(normalizedCurrentStatus)) {
-            throw new IllegalStateException(
-                    "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
+        if (STATUS_ON_TRIP.equalsIgnoreCase(this.status)
+                && !STATUS_AVAILABLE.equalsIgnoreCase(newStatus)) {
+            throw new IllegalStateException("Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
         }
+
 
         if (normalizedCurrentStatus.equals(normalizedNewStatus)) {
             return false;

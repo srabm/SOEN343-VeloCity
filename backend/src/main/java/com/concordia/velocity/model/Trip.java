@@ -1,5 +1,7 @@
 package com.concordia.velocity.model;
 
+import com.google.cloud.Timestamp;
+
 import java.time.LocalDateTime;
 import java.time.Duration;
 
@@ -12,8 +14,8 @@ public class Trip {
 
     private String tripId;
     private String riderId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private Timestamp startTime;
+    private Timestamp endTime;
     private String startStationId;      // Store station ID for Firestore
     private String startStationName;    // Store name for quick reference
     private String endStationId;        // Store station ID for Firestore
@@ -40,7 +42,7 @@ public class Trip {
         this.startStationId = startStationId;
         this.startStationName = startStationName;
         this.startDockId = startDockId;
-        this.startTime = LocalDateTime.now();
+        this.startTime = Timestamp.now();
         this.status = STATUS_ACTIVE;
     }
 
@@ -48,7 +50,7 @@ public class Trip {
      * Completes the trip by setting end information
      */
     public void completeTrip(String endStationId, String endStationName, String endDockId) {
-        this.endTime = LocalDateTime.now();
+        this.endTime = Timestamp.now();
         this.endStationId = endStationId;
         this.endStationName = endStationName;
         this.endDockId = endDockId;
@@ -61,7 +63,7 @@ public class Trip {
      */
     public void calculateDuration() {
         if (startTime != null && endTime != null) {
-            Duration duration = Duration.between(startTime, endTime);
+            Duration duration = Duration.between(startTime.toSqlTimestamp().toLocalDateTime(), endTime.toSqlTimestamp().toLocalDateTime());
             this.durationMinutes = duration.toMinutes();
         }
     }
@@ -81,9 +83,15 @@ public class Trip {
      */
     public Long getCurrentDurationMinutes() {
         if (startTime == null) return 0L;
-        LocalDateTime now = endTime != null ? endTime : LocalDateTime.now();
-        return Duration.between(startTime, now).toMinutes();
+
+        LocalDateTime start = startTime.toSqlTimestamp().toLocalDateTime();
+        LocalDateTime end = (endTime != null)
+                ? endTime.toSqlTimestamp().toLocalDateTime()
+                : LocalDateTime.now();
+
+        return Duration.between(start, end).toMinutes();
     }
+
 
     /**
      * Checks if trip is currently active
@@ -104,7 +112,7 @@ public class Trip {
      */
     public void cancelTrip() {
         this.status = STATUS_CANCELLED;
-        this.endTime = LocalDateTime.now();
+        this.endTime = Timestamp.now();
     }
 
     // Getters and setters
@@ -114,11 +122,11 @@ public class Trip {
     public String getRiderId() { return riderId; }
     public void setRiderId(String riderId) { this.riderId = riderId; }
 
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+    public Timestamp getStartTime() { return startTime; }
+    public void setStartTime(Timestamp startTime) { this.startTime = startTime; }
 
-    public LocalDateTime getEndTime() { return endTime; }
-    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+    public Timestamp getEndTime() { return endTime; }
+    public void setEndTime(Timestamp endTime) { this.endTime = endTime; }
 
     public String getStartStationId() { return startStationId; }
     public void setStartStationId(String startStationId) { this.startStationId = startStationId; }
