@@ -22,10 +22,10 @@ import java.util.concurrent.TimeUnit;
 public class Bike implements Subject {
 
     // Valid bike statuses
-    public static final String STATUS_AVAILABLE = "AVAILABLE";
-    public static final String STATUS_RESERVED = "RESERVED";
-    public static final String STATUS_MAINTENANCE = "MAINTENANCE";
-    public static final String STATUS_ON_TRIP = "ON_TRIP";
+    public static final String STATUS_AVAILABLE = "available";
+    public static final String STATUS_RESERVED = "reserved";
+    public static final String STATUS_MAINTENANCE = "maintenance";
+    public static final String STATUS_ON_TRIP = "on_trip";
 
     private static final List<String> VALID_STATUSES = Arrays.asList(
             STATUS_AVAILABLE, STATUS_RESERVED, STATUS_MAINTENANCE, STATUS_ON_TRIP
@@ -79,17 +79,17 @@ public class Bike implements Subject {
 
     public static boolean isValidStatus(String status) {
         if (status == null) return false;
-        return VALID_STATUSES.contains(status.toUpperCase());
+        return VALID_STATUSES.contains(status);
     }
 
     public boolean changeStatus(String newStatus) {
         if (!isValidStatus(newStatus)) {
             throw new IllegalArgumentException("Invalid status: " + newStatus +
-                    ". Valid options are: AVAILABLE, RESERVED, MAINTENANCE, ON_TRIP");
+                    ". Valid options are: available, reserved, maintenance, on_trip");
         }
 
-        String normalizedNewStatus = newStatus.toUpperCase();
-        String normalizedCurrentStatus = this.status.toUpperCase();
+        String normalizedNewStatus = newStatus.toLowerCase();
+        String normalizedCurrentStatus = this.status.toLowerCase();
 
         if (STATUS_ON_TRIP.equalsIgnoreCase(this.status)
                 && !STATUS_AVAILABLE.equalsIgnoreCase(newStatus)) {
