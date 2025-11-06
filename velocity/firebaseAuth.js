@@ -1,6 +1,6 @@
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut} from "firebase/auth";
 import app from './firebase-config.js'
-import  { getFirestore, doc, setDoc, collection, getDocs } from "firebase/firestore"
+import  { getFirestore, doc, setDoc, collection, getDocs, updateDoc, onSnapshot } from "firebase/firestore"
 
 const auth = getAuth(app);
 const firestore = getFirestore(app);
@@ -21,4 +21,4 @@ const signOutUser = () => {
     return signOut(auth);
 }
 
-export {signUp, login, resetPassword, signOutUser, firestore, doc, setDoc, collection, getDocs};
+export {signUp, login, resetPassword, signOutUser, firestore, doc, setDoc, collection, getDocs, updateDoc, onSnapshot};
