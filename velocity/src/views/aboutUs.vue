@@ -13,17 +13,16 @@
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">Our Mission</h2>
                     <p class="text-slate-600">
-                        add wtv yall want idc.
+                        TBD.
                     </p>
                 </div>
 
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">How It Works</h2>
                     <ul class="list-none space-y-1 text-slate-700">
-                        <li><strong>1.</strong> also.</li>
-                        <li><strong>2.</strong> add.</li>
-                        <li><strong>3.</strong> wtv.</li>
-                        <li><strong>4.</strong> here.</li>
+                        <li><strong>1.</strong> T.</li>
+                        <li><strong>2.</strong> B.</li>
+                        <li><strong>3.</strong> D.</li>
                     </ul>
                 </div>
 
