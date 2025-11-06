@@ -42,7 +42,7 @@
         </form>
         <h2>WELCOME!</h2>
 
-        <p>Already have an account? <router-link to="/login">Login</router-link></p>
+        <p>Already have an account? <router-link to="/VeloCity/login">Login</router-link></p>
     </div>
 </template>
 

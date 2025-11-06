@@ -1,4 +1,5 @@
 <template>
+  <topbar />
     <div class="login-container">
         <h2>Login</h2>
         <form @submit.prevent="handleLogin">
@@ -14,12 +15,12 @@
         </form>
 
     <div class="forgot-password">
-      <router-link to="/password-recovery">Forgot password?</router-link>
+      <router-link to="/VeloCity/password-recovery">Forgot password?</router-link>
     </div>
 
     <h2>WELCOME BACK!</h2>
 
-    <p>Don't have an account? <router-link to="/register">Sign up</router-link></p>
+    <p>Don't have an account? <router-link to="/VeloCity/register">Sign up</router-link></p>
   </div>
 </template>
 
@@ -27,6 +28,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { login } from '../../firebaseAuth.js'
+import topbar from './topbar.vue'
 
 const email = ref('')
 const password = ref('')
