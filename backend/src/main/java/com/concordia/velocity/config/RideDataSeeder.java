@@ -1,18 +1,20 @@
 package com.concordia.velocity.config;
 
 import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.cloud.Timestamp;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
-@Configuration
+// @Configuration
 public class RideDataSeeder {
 
     @Bean
@@ -38,12 +40,11 @@ public class RideDataSeeder {
                             .document(riderId)
                             .collection("rides");
 
-                    // Create a few sample rides per rider
+                    // 2Create a few sample rides per rider
                     for (int i = 1; i <= 3; i++) {
                         String rideId = String.format("RIDE%04d", i); // RIDE0001, RIDE0002, etc.
                         String bikeId = String.format("B%03d", new Random().nextInt(50) + 1);
 
-                        // --- BILL OBJECT ---
                         Map<String, Object> bill = new HashMap<>();
                         double price = 3.0 + (Math.random() * 2); // 3–5$
                         double tax = Math.round(price * 0.15 * 100.0) / 100.0;
@@ -53,15 +54,6 @@ public class RideDataSeeder {
                         bill.put("tax", tax);
                         bill.put("total", total);
 
-                        // Alternate payment statuses (every other ride paid)
-                        if (i % 2 == 0) {
-                            bill.put("paymentStatus", "PAID");
-                            bill.put("transactionId", "TXN-" + System.currentTimeMillis());
-                        } else {
-                            bill.put("paymentStatus", "NOT PAID");
-                        }
-
-                        // --- RIDE OBJECT ---
                         Map<String, Object> ride = new HashMap<>();
                         ride.put("rideId", rideId);
                         ride.put("riderName", riderDoc.getString("firstName") + " " + riderDoc.getString("lastName"));
@@ -73,7 +65,6 @@ public class RideDataSeeder {
                         ride.put("bikeType", i % 2 == 0 ? "E-BIKE" : "BIKE");
                         ride.put("bill", bill);
 
-                        // Save ride under each rider
                         ridesCol.document(rideId).set(ride, SetOptions.merge()).get();
                     }
                 }
