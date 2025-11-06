@@ -8,9 +8,10 @@ import mapView  from '../views/mapView.vue';
 import Settings from '../views/settings.vue';
 import pricing from '../views/pricing.vue';
 import RideHistory from '../views/rideHistory.vue';
+import BillingHistory from '../views/billingHistory.vue';
+import AboutUs from '../views/aboutUs.vue';
 import BikeReservation from '../views/bikeReservation.vue';
 import ActiveTrip from '../views/activeTrip.vue';
-import BillingHistory from '../views/billingHistory.vue';
 
 
 const router = createRouter({
@@ -67,18 +68,22 @@ const router = createRouter({
       name: 'Pricing',
       component: pricing
     },
-
     {
       path: '/VeloCity/rides',
       name: 'RideHistory',
       component: RideHistory
     },
-
     {
       path: '/VeloCity/billing',
       name: 'BillingHistory',
       component: BillingHistory
+    },
+    {
+      path: '/VeloCity/about',
+      name: 'AboutUs',
+      component: AboutUs
     }
+
   ]
 });
 
@@ -97,6 +102,7 @@ router.beforeEach(async (to) => {
 
   // Redirect authenticated users away from guest-only pages
   if (to.matched.some((r) => r.meta?.requiresGuest)) {
+    const user = await getCurrentUser();
     if (user) return { path: '/VeloCity/home' };
   }
 

@@ -1,4 +1,5 @@
 <template>
+  <topbar />
   <div class="billing-history">
     <h1>Billing History</h1>
 

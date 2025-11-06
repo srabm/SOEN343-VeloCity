@@ -1,4 +1,5 @@
 <template>
+  <topbar />
   <div class="ride-history-page">
     <!-- Left: Selected Ride Details -->
     <section class="ride-details" v-if="selectedRide">
@@ -23,17 +24,17 @@
       <p><strong>Bike ID:</strong> {{ selectedRide.bikeId }}</p>
       <p><strong>Bike Type:</strong> {{ selectedRide.bikeType }}</p>
 
-    
 
-     <h2>Bill Summary</h2>
-     <div v-if="selectedRide.bill">
-     <p><strong>Price:</strong> ${{ selectedRide.bill?.cost?.toFixed(2) || '0.00' }}</p>
-     <p><strong>Tax:</strong> ${{ selectedRide.bill?.tax?.toFixed(2) || '0.00' }}</p>
-     <p><strong>Total:</strong> ${{ selectedRide.bill?.total?.toFixed(2) || '0.00' }}</p>
-     </div>
-     <div v-else>
-     <p>No billing data available.</p>
-     </div>
+
+      <h2>Bill Summary</h2>
+      <div v-if="selectedRide.bill">
+        <p><strong>Price:</strong> ${{ selectedRide.bill?.price?.toFixed(2) || '0.00' }}</p>
+        <p><strong>Tax:</strong> ${{ selectedRide.bill?.tax?.toFixed(2) || '0.00' }}</p>
+        <p><strong>Total:</strong> ${{ selectedRide.bill?.total?.toFixed(2) || '0.00' }}</p>
+      </div>
+      <div v-else>
+        <p>No billing data available.</p>
+      </div>
 
 
 
@@ -55,11 +56,7 @@
       <!-- Filters -->
       <div class="filters">
         <div class="filter-row">
-          <input
-            v-model="filters.searchId"
-            type="text"
-            placeholder="Search by Ride ID"
-          />
+          <input v-model="filters.searchId" type="text" placeholder="Search by Ride ID" />
 
           <select v-model="filters.bikeType">
             <option value="">All bike types</option>
@@ -93,12 +90,8 @@
       </div>
 
       <ul v-else class="rides-list">
-        <li
-          v-for="ride in filteredRides"
-          :key="ride._id"
-          :class="{ selected: ride._id === selectedRide?._id }"
-          @click="selectRide(ride)"
-        >
+        <li v-for="ride in filteredRides" :key="ride._id" :class="{ selected: ride._id === selectedRide?._id }"
+          @click="selectRide(ride)">
           <div class="ride-line">
             <span class="ride-id">{{ ride.tripId }}</span>
             <span class="ride-date">{{ formatDate(ride.startTime) }}</span>
@@ -118,6 +111,7 @@
 </template>
 
 <script setup>
+import topbar from './topbar.vue'
 import { ref, computed, onMounted } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { tripApi } from "../services/api.js"; // updated api.js
@@ -389,7 +383,8 @@ onMounted(() => {
 .ride-details h1 {
   font-size: 1.4rem;
   font-weight: 700;
-  border-bottom: 2px solid #e2e8f0; /* soft gray divider */
+  border-bottom: 2px solid #e2e8f0;
+  /* soft gray divider */
   padding-bottom: 0.4rem;
   margin-bottom: 1rem;
   color: #2d3748;
@@ -431,5 +426,4 @@ onMounted(() => {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   border: 1px solid #edf2f7;
 }
-
 </style>

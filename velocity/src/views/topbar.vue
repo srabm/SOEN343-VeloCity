@@ -3,7 +3,7 @@
         <nav class="grid grid-cols-3 items-stretch h-14 px-4">
             <!-- logo -->
             <div class="flex items-center">
-                <img :src="logo" alt="VeloCity" class="h-10 w-auto select-none" />
+                <img :src="logo" alt="VeloCity" class="h-14 w-auto select-none" />
             </div>
 
             <!-- tabs -->
@@ -13,6 +13,15 @@
                 </router-link>
                 <router-link to="/VeloCity/pricing" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     Pricing
+                </router-link>
+                <router-link to="/VeloCity/rides" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
+                    Ride History
+                </router-link>
+                <router-link to="/VeloCity/billing" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
+                    Billing History
+                </router-link>
+                <router-link to="/VeloCity/about" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
+                    About Us
                 </router-link>
             </div>
 
