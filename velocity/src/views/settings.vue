@@ -183,7 +183,7 @@ onMounted(() => {
         console.error("Error loading profile:", err);
       }
     } else {
-      router.push("/login");
+      router.push("/velocity/login");
     }
   });
 });
@@ -261,7 +261,7 @@ async function savePaymentInfo() {
 async function logout() {
   try {
     await signOut(auth);
-    router.push("/login");
+    router.push("/velocity/login");
   } catch (err) {
     console.error("Error logging out:", err);
   }
