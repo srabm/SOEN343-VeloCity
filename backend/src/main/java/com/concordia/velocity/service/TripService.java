@@ -131,21 +131,7 @@ public class TripService {
         dock.setBikeId(null);
         dock.notifyObservers();
 
-        // Update station - decrement bike count
-        station.setNumDockedBikes(Math.max(0, station.getNumDockedBikes() - 1));
-        if (bike.getType().equals("electric")) {
-            station.setNumElectricBikes(Math.max(0, station.getNumElectricBikes() - 1));
-        } else {
-            station.setNumStandardBikes(Math.max(0, station.getNumStandardBikes() - 1));
-        }
-
-        station.removeBike(bikeId);
-
-        // Update station status based on new count
-        String newStationStatus = station.determineStatusFromCapacity();
-        if (!newStationStatus.equals(station.getStatus())) {
-            station.setStatus(newStationStatus);
-        }
+        station.removeBike(bike);
 
         // Create trip record
         Trip trip = createTripRecord(bikeId, bike.getType(), riderId, previousDockId, stationId, station.getStationName());
@@ -239,21 +225,7 @@ public class TripService {
         dock.setBikeId(null);
         dock.notifyObservers();
 
-        // Update station - decrement bike count
-        station.setNumDockedBikes(Math.max(0, station.getNumDockedBikes() - 1));
-        if (bike.getType().equals("electric")) {
-            station.setNumElectricBikes(Math.max(0, station.getNumElectricBikes() - 1));
-        } else {
-            station.setNumStandardBikes(Math.max(0, station.getNumStandardBikes() - 1));
-        }
-
-        station.removeBike(bikeId);
-
-        // Update station status based on new count
-        String newStationStatus = station.determineStatusFromCapacity();
-        if (!newStationStatus.equals(station.getStatus())) {
-            station.setStatus(newStationStatus);
-        }
+        station.removeBike(bike);
 
         // Create trip record
         Trip trip = createTripRecord(bikeId, bike.getType(), riderId, dockId, stationId, station.getStationName());
@@ -365,21 +337,7 @@ public class TripService {
         dock.setBikeId(bikeId);
         dock.notifyObservers();
 
-        // Update station - increment bike count
-        station.setNumDockedBikes(station.getNumDockedBikes() + 1);
-        if (bike.getType().equals("electric")) {
-            station.setNumElectricBikes(Math.max(0, station.getNumElectricBikes() + 1));
-        } else {
-            station.setNumStandardBikes(Math.max(0, station.getNumStandardBikes() + 1));
-        }
-
-        station.addBike(bikeId);
-
-        // Update station status based on new count
-        String newStationStatus = station.determineStatusFromCapacity();
-        if (!newStationStatus.equals(station.getStatus())) {
-            station.setStatus(newStationStatus);
-        }
+        station.addBike(bike);
 
         // Complete trip and calculate billing
         trip.completeTrip(stationId, station.getStationName(), dockId);

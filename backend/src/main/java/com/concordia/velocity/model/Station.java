@@ -1,6 +1,7 @@
 package com.concordia.velocity.model;
 
 import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
 import com.concordia.velocity.observer.Subject;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,6 +67,7 @@ public class Station implements Subject {
         this.bikeIds = bikeIds;
         this.numStandardBikes = numStandardBikes;
         this.numElectricBikes = numElectricBikes;
+        attach(new StatusObserver());
     }
 
     /**
@@ -212,16 +214,40 @@ public class Station implements Subject {
 
 
     // we could probably integrate the incrementing with this... so incrementing code does not repeat + maintained simultaneously
-    public void removeBike(String bikeID) {
-        this.bikeIds.remove(bikeID);
+    public void removeBike(Bike bike) {
+        String bikeId = bike.getBikeId();
+        this.bikeIds.remove(bike);
+        setNumDockedBikes(Math.max(0, getNumDockedBikes() - 1));
+
+        if (bike.getType().equals("electric")) {
+            setNumElectricBikes(Math.max(0, getNumElectricBikes() - 1));
+        } else {
+            setNumStandardBikes(Math.max(0, getNumStandardBikes() - 1));
+        }
+
+        String newStationStatus = determineStatusFromCapacity();
+        if (!newStationStatus.equals(getStatus())) {
+            setStatus(newStationStatus);
+        }
     }
 
-    public void addBike(String bikeID) {
-        this.bikeIds.add(bikeID);
+    public void addBike(Bike bike) {
+        String bikeId = bike.getBikeId();
+        this.bikeIds.add(bikeId);
+
+        setNumDockedBikes(Math.max(0, getNumDockedBikes() + 1));
+
+        if (bike.getType().equals("electric")) {
+            setNumElectricBikes(Math.max(0, getNumElectricBikes() + 1));
+        } else {
+            setNumStandardBikes(Math.max(0, getNumStandardBikes() + 1));
+        }
+
+        String newStationStatus = determineStatusFromCapacity();
+        if (!newStationStatus.equals(getStatus())) {
+            setStatus(newStationStatus);
+        }
     }
-
-
-
 
 
     @Override

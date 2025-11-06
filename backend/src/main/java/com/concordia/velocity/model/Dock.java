@@ -1,7 +1,9 @@
 package com.concordia.velocity.model;
 
 import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
 import com.concordia.velocity.observer.Subject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +35,7 @@ public class Dock implements Subject {
         this.status = status;
         this.bikeId = bikeId;
         this.stationId = stationId;
+        attach(new StatusObserver());
     }
 
     public Dock(String dockId, String status, String bikeId, String stationId, String dockCode) {

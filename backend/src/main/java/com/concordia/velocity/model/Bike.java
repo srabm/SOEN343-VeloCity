@@ -55,7 +55,7 @@ public class Bike implements Subject {
         this.dockId = dockId;
         this.stationId = stationId;
         this.reservationExpiry = null;
-        this.observers.add(new StatusObserver());
+        attach(new StatusObserver());
     }
 
     @Override

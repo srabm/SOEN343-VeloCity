@@ -167,38 +167,8 @@ public class TransferService {
         destinationDock.setBikeId(bikeId);
         destinationDock.notifyObservers();
 
-        // Update station bike counts
-        sourceStation.setNumDockedBikes(Math.max(0, sourceStation.getNumDockedBikes() - 1));
-        if (bike.getType().equals("electric")) {
-            sourceStation.setNumElectricBikes(Math.max(0, sourceStation.getNumElectricBikes() - 1));
-        } else {
-            sourceStation.setNumStandardBikes(Math.max(0, sourceStation.getNumStandardBikes() - 1));
-        }
-
-        sourceStation.removeBike(bikeId);
-
-
-        destinationStation.setNumDockedBikes(destinationStation.getNumDockedBikes() + 1);
-        if (bike.getType().equals("electric")) {
-            destinationStation.setNumElectricBikes(Math.max(0, destinationStation.getNumElectricBikes() + 1));
-        } else {
-            destinationStation.setNumStandardBikes(Math.max(0, destinationStation.getNumStandardBikes() + 1));
-        }
-
-        destinationStation.addBike(bikeId);
-
-        // Update station statuses based on new counts
-        String newSourceStatus = sourceStation.determineStatusFromCapacity();
-        if (!newSourceStatus.equals(sourceStation.getStatus()) &&
-                !Station.STATUS_OUT_OF_SERVICE.equalsIgnoreCase(sourceStation.getStatus())) {
-            sourceStation.setStatus(newSourceStatus);
-        }
-
-        String newDestinationStatus = destinationStation.determineStatusFromCapacity();
-        if (!newDestinationStatus.equals(destinationStation.getStatus()) &&
-                !Station.STATUS_OUT_OF_SERVICE.equalsIgnoreCase(destinationStation.getStatus())) {
-            destinationStation.setStatus(newDestinationStatus);
-        }
+        sourceStation.removeBike(bike);
+        destinationStation.addBike(bike);
 
         // ==================== Step 7: Persist using Firestore Batch ====================
         // Using batch writes ensures all updates succeed or all fail (atomicity)
