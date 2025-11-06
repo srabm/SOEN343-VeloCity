@@ -1,17 +1,17 @@
 <template>
-  <div class="login-container">
-    <h2>Login</h2>
-    <form @submit.prevent="handleLogin">
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input v-model="email" id="email" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input v-model="password" type="password" id="password" required />
-      </div>
-      <button type="submit">Login</button>
-    </form>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form @submit.prevent="handleLogin">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input v-model="email" id="email" required />
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input v-model="password" type="password" id="password" required />
+            </div>
+            <button type="submit">Login</button>
+        </form>
 
     <div class="forgot-password">
       <router-link to="/password-recovery">Forgot password?</router-link>

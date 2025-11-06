@@ -4,6 +4,8 @@ import PasswordRecovery from '../views/passwordRecovery.vue';
 import Register from '../views/register.vue';
 import Home from '../views/userHome.vue';
 import Settings from '../views/settings.vue';
+import pricing from '../views/pricing.vue';
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,6 +36,10 @@ const router = createRouter({
       path: '/settings',
       name: 'Settings',
       component: Settings
+    {
+      path: '/pricing',
+      name: 'Pricing',
+      component: pricing
     }
   ]
 });
