@@ -23,7 +23,7 @@
                 </template>
                 <template v-else>
                     <router-link
-                        to="/login"
+                        to="/velocity/login"
                         class="bg-yellow-300 text-black font-medium px-3 py-1 rounded hover:bg-yellow-400 duration-300"
                     >
                         Login
