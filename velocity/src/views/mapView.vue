@@ -346,26 +346,32 @@ export default {
 
       // Add markers for all stations
       for (const station of stations) {
-        // Count bikes by type dynamically
+        // Count bikes by type
         const { nbRegBikes, nbElectricBikes } = this.countBikesByType(station);
-        const totalAvailableBikes = nbRegBikes + nbElectricBikes;
-        
-        // icon color based on available bikes
-        let icon = this.icons.green; // default
+        const totalBikes = nbRegBikes + nbElectricBikes;
+        const capacity = station.capacity || 1; // avoid divide-by-zero
+        const fullness = (totalBikes / capacity) * 100;
+
+        // Determine icon based on DM-03 rules
+        let icon = this.icons.green;
+
         if (station.status === 'out_of_service') {
           icon = this.icons.black;
-        } else if (totalAvailableBikes === 0) {
+        } else if (fullness === 0 || fullness === 100) {
           icon = this.icons.red;
-        } else if (totalAvailableBikes < 5) {
+        } else if (fullness < 25 || fullness > 85) {
           icon = this.icons.yellow;
+        } else {
+          icon = this.icons.green;
         }
 
         const marker = L.marker([station.latitude, station.longitude], { icon })
           .addTo(this.map)
           .bindPopup(
             station.status === 'out_of_service'
-              ? `<b>Station ${station.stationName}</b><br><i>Temporarily Closed</i>`
-              : `<b>Station ${station.stationName}</b><br>` +
+              ? `<b>${station.stationName}</b><br><i>Temporarily Closed</i>`
+              : `<b>${station.stationName}</b><br>` +
+              `Maximum Capacity: ${capacity}<br>` +
               `Available Regular Bikes: ${nbRegBikes}<br>` +
               `Available Electric Bikes: ${nbElectricBikes}<br>` +
               `Available Docks: ${station.capacity - (station.bikeIds ? station.bikeIds.length : 0)}<br>` +              
