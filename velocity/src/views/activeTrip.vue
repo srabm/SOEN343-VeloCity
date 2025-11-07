@@ -1,108 +1,96 @@
 <template>
-  <div class="active-trip-page">
-    <div class="container">
-      <!-- Loading State -->
-      <div v-if="loading" class="loading">
-        <div class="spinner"></div>
-        <p>Loading trip details...</p>
-      </div>
-
-      <!-- Error State -->
-      <div v-else-if="error" class="error-container">
-        <div class="error-icon">⚠️</div>
-        <h2>Error</h2>
-        <p>{{ error }}</p>
-        <button @click="goToMap" class="btn btn-primary">Return to Map</button>
-      </div>
-
-      <!-- Active Trip -->
-      <div v-else class="trip-active">
-        <div class="header">
-          <h1>🚴 Trip in Progress</h1>
-          <div class="trip-duration">
-            <span class="label">Duration:</span>
-            <span class="duration">{{ formatDuration(tripDuration) }}</span>
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
+    <div class="min-h-screen bg-black/40">
+      <div class="active-trip-page">
+        <div class="container">
+          <!-- Loading State -->
+          <div v-if="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading trip details...</p>
           </div>
-        </div>
 
-        <div class="bike-info">
-          <h2>Bike Information</h2>
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">Bike ID</span>
-              <span class="info-value">{{ bikeId }}</span>
+          <!-- Error State -->
+          <div v-else-if="error" class="error-container">
+            <div class="error-icon">⚠️</div>
+            <h2>Error</h2>
+            <p>{{ error }}</p>
+            <button @click="goToMap" class="btn btn-primary">Return to Map</button>
+          </div>
+
+          <!-- Active Trip -->
+          <div v-else class="trip-active">
+            <div class="header">
+              <h1>🚴 Trip in Progress</h1>
+              <div class="trip-duration">
+                <span class="label">Duration:</span>
+                <span class="duration">{{ formatDuration(tripDuration) }}</span>
+              </div>
             </div>
-            <div class="info-item">
-              <span class="info-label">Bike Type</span>
-              <span class="info-value">{{ bikeType }}</span>
+
+            <div class="bike-info">
+              <h2>Bike Information</h2>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Bike ID</span>
+                  <span class="info-value">{{ bikeId }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Bike Type</span>
+                  <span class="info-value">{{ bikeType }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Estimated Cost</span>
+                  <span class="info-value">${{ estimatedCost.toFixed(2) }}</span>
+                </div>
+              </div>
             </div>
-            <div class="info-item">
-              <span class="info-label">Estimated Cost</span>
-              <span class="info-value">${{ estimatedCost.toFixed(2) }}</span>
+
+            <div class="cost-info">
+              <p class="cost-note">
+                <strong>Note:</strong>
+                {{ bikeType?.toLowerCase().includes('electric')
+                  ? 'Electric bikes cost $0.33/minute with a $1.11 unlock fee.'
+                  : 'Standard bikes cost $0.22/minute with a $1.11 unlock fee.' }}
+              </p>
+            </div>
+
+            <div class="end-trip-section">
+              <h2>End Your Trip</h2>
+              <p>Find an available dock at any station and enter the dock details below:</p>
+
+              <form @submit.prevent="endTrip">
+                <div class="form-group">
+                  <label for="dockId">Dock ID</label>
+                  <input id="dockId" v-model="endDockId" type="text" placeholder="Enter dock ID" :disabled="ending"
+                    required />
+                </div>
+
+                <div class="form-group">
+                  <label for="endDockCode">Dock Code</label>
+                  <input id="endDockCode" v-model="endDockCode" type="text" placeholder="Enter dock code to lock bike"
+                    :disabled="ending" required />
+                </div>
+
+                <div v-if="endError" class="error-message">
+                  {{ endError }}
+                </div>
+
+                <button type="submit" class="btn btn-success" :disabled="ending || !endDockId || !endDockCode">
+                  {{ ending ? 'Ending Trip...' : 'End Trip & Dock Bike' }}
+                </button>
+              </form>
+            </div>
+
+            <div class="help-section">
+              <h3>Need Help?</h3>
+              <ul>
+                <li>Look for a station with available docks (green or yellow markers on map)</li>
+                <li>The dock ID is displayed on each dock</li>
+                <li>Enter the dock code shown on the dock to lock your bike</li>
+                <li>You'll receive a receipt with your trip details after docking</li>
+              </ul>
             </div>
           </div>
-        </div>
-
-        <div class="cost-info">
-          <p class="cost-note">
-            <strong>Note:</strong> 
-            {{ bikeType?.toLowerCase().includes('electric') 
-              ? 'Electric bikes cost $0.33/minute with a $1.11 unlock fee.' 
-              : 'Standard bikes cost $0.22/minute with a $1.11 unlock fee.' }}
-          </p>
-        </div>
-
-        <div class="end-trip-section">
-          <h2>End Your Trip</h2>
-          <p>Find an available dock at any station and enter the dock details below:</p>
-          
-          <form @submit.prevent="endTrip">
-            <div class="form-group">
-              <label for="dockId">Dock ID</label>
-              <input
-                id="dockId"
-                v-model="endDockId"
-                type="text"
-                placeholder="Enter dock ID"
-                :disabled="ending"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="endDockCode">Dock Code</label>
-              <input
-                id="endDockCode"
-                v-model="endDockCode"
-                type="text"
-                placeholder="Enter dock code to lock bike"
-                :disabled="ending"
-                required
-              />
-            </div>
-
-            <div v-if="endError" class="error-message">
-              {{ endError }}
-            </div>
-
-            <button 
-              type="submit" 
-              class="btn btn-success" 
-              :disabled="ending || !endDockId || !endDockCode"
-            >
-              {{ ending ? 'Ending Trip...' : 'End Trip & Dock Bike' }}
-            </button>
-          </form>
-        </div>
-
-        <div class="help-section">
-          <h3>Need Help?</h3>
-          <ul>
-            <li>Look for a station with available docks (green or yellow markers on map)</li>
-            <li>The dock ID is displayed on each dock</li>
-            <li>Enter the dock code shown on the dock to lock your bike</li>
-            <li>You'll receive a receipt with your trip details after docking</li>
-          </ul>
         </div>
       </div>
     </div>
@@ -117,7 +105,7 @@ import { tripApi } from '../services/api';
 
 export default {
   name: 'ActiveTrip',
-  
+
   setup() {
     let prevBodyOverflowY = '';
     let prevHtmlOverflowY = '';
@@ -162,7 +150,7 @@ export default {
     const estimatedCost = computed(() => {
       const minutes = Math.ceil(tripDuration.value / 60);
       const isElectric = bikeType.value?.toLowerCase().includes('electric');
-      
+
       if (isElectric) {
         return 1.11 + (minutes * 0.33); // $1.11 unlock + $0.33/min
       } else {
@@ -175,7 +163,7 @@ export default {
       const hours = Math.floor(seconds / 3600);
       const mins = Math.floor((seconds % 3600) / 60);
       const secs = seconds % 60;
-      
+
       if (hours > 0) {
         return `${hours}h ${mins}m ${secs}s`;
       }
@@ -193,7 +181,7 @@ export default {
     const loadTrip = () => {
       bikeId.value = route.query.bikeId || '';
       bikeType.value = route.query.bikeType || 'Standard';
-      
+
       if (!bikeId.value) {
         error.value = 'No bike information found';
         return;
@@ -223,7 +211,7 @@ export default {
 
         // Show success message and navigate to trip summary/receipt
         alert(response.message);
-        
+
         // Navigate to ride history or home
         router.push({ name: 'RideHistory' });
 
@@ -273,7 +261,7 @@ export default {
 <style scoped>
 .active-trip-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  background: transparent;
   padding: 2rem;
 }
 
@@ -283,7 +271,8 @@ export default {
 }
 
 .loading {
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
   border-radius: 12px;
   padding: 3rem;
   text-align: center;
@@ -300,12 +289,18 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
   border-radius: 12px;
   padding: 3rem;
   text-align: center;
@@ -317,7 +312,8 @@ export default {
 }
 
 .trip-active {
-  background: white;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px);
   border-radius: 12px;
   padding: 2rem;
 }
@@ -354,7 +350,8 @@ export default {
 }
 
 .bike-info {
-  background: #f8f9fa;
+  background: rgba(248, 249, 250, 0.7);
+  backdrop-filter: blur(4px);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -393,7 +390,7 @@ export default {
 }
 
 .cost-info {
-  background: #fff3cd;
+  background: rgba(255, 243, 205, 0.85);
   border: 1px solid #ffc107;
   border-radius: 8px;
   padding: 1rem;
@@ -486,7 +483,8 @@ export default {
 }
 
 .help-section {
-  background: #f0f8ff;
+  background: rgba(240, 248, 255, 0.7);
+  backdrop-filter: blur(4px);
   border-radius: 8px;
   padding: 1.5rem;
 }

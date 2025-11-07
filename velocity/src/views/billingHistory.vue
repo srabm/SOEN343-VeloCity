@@ -1,102 +1,114 @@
 <template>
   <topbar />
-  <div class="billing-history">
-    <h1>Billing History</h1>
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
+    <div class="min-h-screen bg-black/40">
+      <header class="text-center py-8 text-white drop-shadow">
+        <h1 class="text-3xl font-semibold">Billing History</h1>
+      </header>
 
-    <!-- Filters -->
-    <div class="filters">
-      <label>
-        From:
-        <input v-model="filters.dateFrom" type="date" />
-      </label>
-      <label>
-        To:
-        <input v-model="filters.dateTo" type="date" />
-      </label>
-      <button @click="clearFilters" class="clear-btn">Clear</button>
-    </div>
-
-    <!-- Billing Table -->
-    <table class="billing-table">
-      <thead>
-        <tr>
-          <th>Ride ID</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Origin Station</th>
-          <th>Arrival Station</th>
-          <th>Bike Type</th>
-          <th>Total ($)</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr v-for="ride in filteredRides" :key="ride.rideId">
-          <td>{{ ride.rideId }}</td>
-          <td>{{ formatDateTime(ride.startTime) }}</td>
-          <td>{{ formatDateTime(ride.endTime) }}</td>
-          <td>{{ ride.originStationName }}</td>
-          <td>{{ ride.arrivalStationName }}</td>
-          <td>{{ ride.bikeType }}</td>
-          <td>{{ ride.bill?.total?.toFixed(2) || "—" }}</td>
-
-          <!-- Payment Status -->
-          <td>
-            <span
-              :class="{
-                paid: ride.bill?.paymentStatus === 'PAID',
-                unpaid: ride.bill?.paymentStatus === 'UNPAID',
-              }"
-            >
-              {{ ride.bill?.paymentStatus || "UNKNOWN" }}
-            </span>
-          </td>
-
-          <!-- Action -->
-          <td>
-            <button
-              v-if="ride.bill?.paymentStatus !== 'PAID'"
-              class="pay-btn"
-              @click="payForRide(ride)"
-            >
-              Pay Now
+      <section class="max-w-6xl mx-auto px-4 pb-4">
+        <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+          <!-- Filters -->
+          <div class="flex flex-wrap items-center gap-3 mb-4">
+            <label class="text-sm text-slate-700">From:
+              <input v-model="filters.dateFrom" type="date"
+                class="ml-1 px-2 py-1 rounded bg-white/90 border border-slate-300 text-sm" />
+            </label>
+            <label class="text-sm text-slate-700">To:
+              <input v-model="filters.dateTo" type="date"
+                class="ml-1 px-2 py-1 rounded bg-white/90 border border-slate-300 text-sm" />
+            </label>
+            <button @click="clearFilters"
+              class="ml-auto bg-slate-200 text-black px-3 py-1.5 rounded hover:bg-slate-300 duration-200 text-sm">
+              Clear
             </button>
-            <span v-else>—</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Payment Modal -->
-    <div v-if="showPaymentModal" class="modal-overlay">
-      <div class="modal">
-        <h2>External Payment Gateway</h2>
-        <p>Paying for ride: <strong>{{ selectedRide?.rideId }}</strong></p>
-
-        <form @submit.prevent="confirmPayment">
-          <label>Card Number</label>
-          <input v-model="mockPayment.cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" required />
-
-          <label>Expiry Date</label>
-          <input v-model="mockPayment.expiryDate" placeholder="MM/YY" required />
-
-          <label>CVC</label>
-          <input v-model="mockPayment.cvc" maxlength="4" placeholder="123" required />
-
-          <div class="modal-actions">
-            <button type="submit" class="pay-btn">Confirm Payment</button>
-            <button type="button" class="cancel-btn" @click="closeModal">Cancel</button>
           </div>
-        </form>
+
+          <!-- Billing Table -->
+          <div class="overflow-auto rounded-lg bg-white/80">
+            <table class="billing-table w-full">
+              <thead>
+                <tr>
+                  <th>Ride ID</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Origin Station</th>
+                  <th>Arrival Station</th>
+                  <th>Bike Type</th>
+                  <th>Total ($)</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr v-for="ride in filteredRides" :key="ride.rideId">
+                  <td>{{ ride.rideId }}</td>
+                  <td>{{ formatDateTime(ride.startTime) }}</td>
+                  <td>{{ formatDateTime(ride.endTime) }}</td>
+                  <td>{{ ride.originStationName }}</td>
+                  <td>{{ ride.arrivalStationName }}</td>
+                  <td>{{ ride.bikeType }}</td>
+                  <td>{{ ride.bill?.total?.toFixed(2) || "—" }}</td>
+
+                  <!-- Payment Status -->
+                  <td>
+                    <span
+                      :class="{
+                        paid: ride.bill?.paymentStatus === 'PAID',
+                        unpaid: ride.bill?.paymentStatus === 'UNPAID',
+                      }"
+                    >
+                      {{ ride.bill?.paymentStatus || "UNKNOWN" }}
+                    </span>
+                  </td>
+
+                  <!-- Action -->
+                  <td>
+                    <button
+                      v-if="ride.bill?.paymentStatus !== 'PAID'"
+                      class="pay-btn"
+                      @click="payForRide(ride)"
+                    >
+                      Pay Now
+                    </button>
+                    <span v-else>—</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="filteredRides.length === 0" class="no-results">
+            <p>No billing records found.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Payment Modal -->
+      <div v-if="showPaymentModal" class="modal-overlay">
+        <div class="modal">
+          <h2>External Payment Gateway</h2>
+          <p>Paying for ride: <strong>{{ selectedRide?.rideId }}</strong></p>
+
+          <form @submit.prevent="confirmPayment">
+            <label>Card Number</label>
+            <input v-model="mockPayment.cardNumber" maxlength="19" placeholder="1234 5678 9012 3456" required />
+
+            <label>Expiry Date</label>
+            <input v-model="mockPayment.expiryDate" placeholder="MM/YY" required />
+
+            <label>CVC</label>
+            <input v-model="mockPayment.cvc" maxlength="4" placeholder="123" required />
+
+            <div class="modal-actions">
+              <button type="submit" class="pay-btn">Confirm Payment</button>
+              <button type="button" class="cancel-btn" @click="closeModal">Cancel</button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-
-
-    <!-- Empty State -->
-    <div v-if="filteredRides.length === 0" class="no-results">
-      <p>No billing records found.</p>
     </div>
   </div>
 </template>
@@ -121,6 +133,7 @@ const db = getFirestore(app);
 const user = ref(null);
 const rides = ref([]);
 const filters = ref({ dateFrom: "", dateTo: "" });
+import topbar from './topbar.vue'
 
 onMounted(() => {
   onAuthStateChanged(auth, async (firebaseUser) => {

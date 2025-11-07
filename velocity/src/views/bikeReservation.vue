@@ -1,93 +1,91 @@
 <template>
-  <div class="reservation-page">
-    <div class="container">
-      <!-- Loading State -->
-      <div v-if="loading" class="loading">
-        <div class="spinner"></div>
-        <p>Loading reservation details...</p>
-      </div>
-
-      <!-- Error State -->
-      <div v-else-if="error" class="error-container">
-        <div class="error-icon">⚠️</div>
-        <h2>Reservation Error</h2>
-        <p>{{ error }}</p>
-        <button @click="goToMap" class="btn btn-primary">Return to Map</button>
-      </div>
-
-      <!-- Expired Reservation -->
-      <div v-else-if="reservationExpired" class="expired-container">
-        <div class="expired-icon">⏰</div>
-        <h2>Reservation Expired</h2>
-        <p>Your reservation has expired. Please return to the map to reserve another bike.</p>
-        <button @click="goToMap" class="btn btn-primary">Return to Map</button>
-      </div>
-
-      <!-- Active Reservation -->
-      <div v-else-if="bike" class="reservation-active">
-        <h1>Bike Reserved! ✅</h1>
-        
-        <div class="bike-details">
-          <h2>Reservation Details</h2>
-          <div class="detail-row">
-            <span class="label">Bike ID:</span>
-            <span class="value">{{ bike.bikeId }}</span>
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
+    <div class="min-h-screen bg-black/40">
+      <div class="reservation-page">
+        <div class="container">
+          <!-- Loading State -->
+          <div v-if="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading reservation details...</p>
           </div>
-          <div class="detail-row">
-            <span class="label">Bike Type:</span>
-            <span class="value">{{ bike.type }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Station:</span>
-            <span class="value">{{ stationName }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label">Dock ID:</span>
-            <span class="value">{{ bike.dockId }}</span>
-          </div>
-        </div>
 
-        <div class="expiry-section">
-          <h3>⏰ Reservation Expires At</h3>
-          <div class="expiry-time" :class="{ 'expiry-warning': isExpiringSoon }">
-            {{ formatExpiryTime(expiryDate) }}
+          <!-- Error State -->
+          <div v-else-if="error" class="error-container">
+            <div class="error-icon">⚠️</div>
+            <h2>Reservation Error</h2>
+            <p>{{ error }}</p>
+            <button @click="goToMap" class="btn btn-primary">Return to Map</button>
           </div>
-          <p class="expiry-subtext" :class="{ 'warning-text': isExpiringSoon }">
-            {{ isExpiringSoon ? '⚠️ Hurry! Your reservation is expiring soon!' : 'Head to the dock to unlock your bike' }}
-          </p>
-          <p class="expiry-detail">{{ formatTimeRemaining(expiryDate) }}</p>
-        </div>
 
-        <div class="unlock-section">
-          <h3>🔓 Unlock Your Bike</h3>
-          <p>Enter the dock code displayed on the dock to start your trip:</p>
-          
-          <form @submit.prevent="unlockBike">
-            <div class="form-group">
-              <label for="dockCode">Dock Code</label>
-              <input
-                id="dockCode"
-                v-model="dockCode"
-                type="text"
-                placeholder="Enter dock code (e.g., 1234)"
-                :disabled="unlocking"
-                required
-              />
+          <!-- Expired Reservation -->
+          <div v-else-if="reservationExpired" class="expired-container">
+            <div class="expired-icon">⏰</div>
+            <h2>Reservation Expired</h2>
+            <p>Your reservation has expired. Please return to the map to reserve another bike.</p>
+            <button @click="goToMap" class="btn btn-primary">Return to Map</button>
+          </div>
+
+          <!-- Active Reservation -->
+          <div v-else-if="bike" class="reservation-active">
+            <h1>Bike Reserved! ✅</h1>
+
+            <div class="bike-details">
+              <h2>Reservation Details</h2>
+              <div class="detail-row">
+                <span class="label">Bike ID:</span>
+                <span class="value">{{ bike.bikeId }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Bike Type:</span>
+                <span class="value">{{ bike.type }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Station:</span>
+                <span class="value">{{ stationName }}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Dock ID:</span>
+                <span class="value">{{ bike.dockId }}</span>
+              </div>
             </div>
 
-            <div v-if="unlockError" class="error-message">
-              {{ unlockError }}
+            <div class="expiry-section">
+              <h3>⏰ Reservation Expires At</h3>
+              <div class="expiry-time" :class="{ 'expiry-warning': isExpiringSoon }">
+                {{ formatExpiryTime(expiryDate) }}
+              </div>
+              <p class="expiry-subtext" :class="{ 'warning-text': isExpiringSoon }">
+                {{ isExpiringSoon ? '⚠️ Hurry! Your reservation is expiring soon!' : 'Head to the dock to unlock your bike' }}
+              </p>
+              <p class="expiry-detail">{{ formatTimeRemaining(expiryDate) }}</p>
             </div>
 
-            <button type="submit" class="btn btn-success" :disabled="unlocking || !dockCode">
-              {{ unlocking ? 'Unlocking...' : '🚴 Unlock & Start Trip' }}
+            <div class="unlock-section">
+              <h3>🔓 Unlock Your Bike</h3>
+              <p>Enter the dock code displayed on the dock to start your trip:</p>
+
+              <form @submit.prevent="unlockBike">
+                <div class="form-group">
+                  <label for="dockCode">Dock Code</label>
+                  <input id="dockCode" v-model="dockCode" type="text" placeholder="Enter dock code (e.g., 1234)"
+                    :disabled="unlocking" required />
+                </div>
+
+                <div v-if="unlockError" class="error-message">
+                  {{ unlockError }}
+                </div>
+
+                <button type="submit" class="btn btn-success" :disabled="unlocking || !dockCode">
+                  {{ unlocking ? 'Unlocking...' : '🚴 Unlock & Start Trip' }}
+                </button>
+              </form>
+            </div>
+
+            <button @click="cancelReservation" class="btn btn-secondary">
+              ❌ Cancel Reservation
             </button>
-          </form>
+          </div>
         </div>
-
-        <button @click="cancelReservation" class="btn btn-secondary">
-          ❌ Cancel Reservation
-        </button>
       </div>
     </div>
   </div>
@@ -101,7 +99,7 @@ import { bikeApi, tripApi } from '../services/api';
 
 export default {
   name: 'BikeReservation',
-  
+
   setup() {
     let prevBodyOverflowY = '';
     let prevHtmlOverflowY = '';
@@ -152,29 +150,29 @@ export default {
     // Parse Firestore Timestamp to JavaScript Date
     const parseFirestoreTimestamp = (timestamp) => {
       if (!timestamp) return null;
-      
+
       console.log('Parsing timestamp:', timestamp);
-      
+
       // Handle Firestore Timestamp object {_seconds, _nanoseconds}
       if (timestamp._seconds !== undefined) {
         return new Date(timestamp._seconds * 1000);
       }
-      
+
       // Handle plain object with seconds/nanoseconds
       if (timestamp.seconds !== undefined) {
         return new Date(timestamp.seconds * 1000);
       }
-      
+
       // Handle ISO string
       if (typeof timestamp === 'string') {
         return new Date(timestamp);
       }
-      
+
       // Handle Date object
       if (timestamp instanceof Date) {
         return timestamp;
       }
-      
+
       console.warn('Unknown timestamp format:', timestamp);
       return null;
     };
@@ -182,7 +180,7 @@ export default {
     // Format expiry time (e.g., "2:45 PM")
     const formatExpiryTime = (date) => {
       if (!date) return 'Unknown';
-      
+
       return date.toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
@@ -193,17 +191,17 @@ export default {
     // Format time remaining (e.g., "in 12 minutes")
     const formatTimeRemaining = (date) => {
       if (!date) return '';
-      
+
       const now = new Date();
       const diff = Math.floor((date - now) / 1000); // seconds
-      
+
       if (diff <= 0) {
         return 'Expired';
       }
-      
+
       const minutes = Math.floor(diff / 60);
       const seconds = diff % 60;
-      
+
       if (minutes > 0) {
         return `(${minutes} minute${minutes !== 1 ? 's' : ''} remaining)`;
       } else {
@@ -214,7 +212,7 @@ export default {
     // Check if reservation has expired
     const checkExpiry = async () => {
       if (!expiryDate.value) return;
-      
+
       const now = new Date();
       if (now >= expiryDate.value) {
         await bikeApi.updateBikeStatus(bike.value.bikeId, 'available');
@@ -241,7 +239,7 @@ export default {
 
         // Fetch bike details
         const response = await bikeApi.getBikeById(bikeId);
-        
+
         console.log('Bike API response:', response);
 
         if (!response.success) {
@@ -250,16 +248,16 @@ export default {
 
         bike.value = response.bike;
         stationName.value = route.query.stationName || 'Unknown Station';
-        
+
         // Parse reservation expiry
         const parsedExpiry = parseFirestoreTimestamp(bike.value.reservationExpiry);
-        
+
         if (!parsedExpiry) {
           throw new Error('Invalid reservation expiry time');
         }
-        
+
         expiryDate.value = parsedExpiry;
-        
+
         console.log('Expiry date:', expiryDate.value);
 
         // Verify bike is reserved by current user
@@ -269,7 +267,7 @@ export default {
 
         // Check if already expired
         checkExpiry();
-        
+
         // Check expiry every second
         checkExpiryInterval = setInterval(checkExpiry, 1000);
 
@@ -378,7 +376,7 @@ export default {
 <style scoped>
 .reservation-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: transparent;
   padding: 2rem;
 }
 
@@ -388,7 +386,8 @@ export default {
 }
 
 .loading {
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
   border-radius: 12px;
   padding: 3rem;
   text-align: center;
@@ -405,13 +404,19 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container,
 .expired-container {
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
   border-radius: 12px;
   padding: 3rem;
   text-align: center;
@@ -424,7 +429,8 @@ export default {
 }
 
 .reservation-active {
-  background: white;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(6px);
   border-radius: 12px;
   padding: 2rem;
 }
@@ -436,7 +442,8 @@ export default {
 }
 
 .bike-details {
-  background: #f8f9fa;
+  background: rgba(248, 249, 250, 0.7);
+  backdrop-filter: blur(4px);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -472,7 +479,8 @@ export default {
 .expiry-section {
   text-align: center;
   margin-bottom: 2rem;
-  background: #f0f8ff;
+  background: rgba(240, 248, 255, 0.7);
+  backdrop-filter: blur(4px);
   padding: 1.5rem;
   border-radius: 8px;
 }
@@ -495,8 +503,15 @@ export default {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .expiry-subtext {
@@ -517,7 +532,8 @@ export default {
 }
 
 .unlock-section {
-  background: #e8f5e9;
+  background: rgba(232, 245, 233, 0.85);
+  backdrop-filter: blur(2px);
   border-radius: 8px;
   padding: 1.5rem;
   margin-bottom: 2rem;
