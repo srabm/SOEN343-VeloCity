@@ -33,6 +33,15 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.named('bootRun') {
+	jvmArgs = [
+			'--add-opens', 'java.base/java.time=ALL-UNNAMED',
+			'--add-opens', 'java.base/java.time.chrono=ALL-UNNAMED',
+			'--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+			'--add-opens', 'java.base/java.util=ALL-UNNAMED'
+	]
+}
+
 application {
 	mainClass = 'com.concordia.velocity.BackendApplication'
 }

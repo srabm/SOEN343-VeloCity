@@ -1,16 +1,14 @@
 package com.concordia.velocity.service;
 
 import com.concordia.velocity.model.Bike;
-import com.concordia.velocity.model.BikeStatus;
 import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.NotificationObserver;
 import com.concordia.velocity.observer.Observer;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -20,6 +18,54 @@ public class BikeService {
 
     private final Firestore db = FirestoreClient.getFirestore();
 
+    /**
+     * Creates a reservation for a bike
+     * @param bikeId the bike to reserve
+     * @param userId the user making the reservation
+     * @param stationId the station where bike is located
+     * @return confirmation message with expiry time
+     */
+    public String reserveBike(String bikeId, String userId, String stationId)
+            throws ExecutionException, InterruptedException {
+
+        // Retrieve bike from Firestore
+        DocumentSnapshot doc = db.collection("bikes").document(bikeId).get().get();
+        Bike bike = doc.toObject(Bike.class);
+
+        if (bike == null) {
+            throw new IllegalArgumentException("Bike not found: " + bikeId);
+        }
+
+        // Validate bike is available
+        if (!Bike.STATUS_AVAILABLE.equalsIgnoreCase(bike.getStatus())) {
+            throw new IllegalStateException("Bike is not available for reservation. Current status: " + bike.getStatus());
+        }
+
+        // Get station to determine hold time
+        DocumentSnapshot stationDoc = db.collection("stations").document(stationId).get().get();
+        com.concordia.velocity.model.Station station = stationDoc.toObject(com.concordia.velocity.model.Station.class);
+
+        if (station == null) {
+            throw new IllegalArgumentException("Station not found: " + stationId);
+        }
+
+        // Attach observers
+        Observer dashboardObserver = new DashboardObserver();
+        bike.attach(dashboardObserver);
+
+        // Start reservation (sets status to RESERVED and schedules auto-expiry)
+        LocalDateTime expiryTime = bike.startReservationExpiry(station, userId);
+
+        // Persist to Firestore
+        db.collection("bikes").document(bikeId).set(bike).get();
+
+        return "Bike " + bikeId + " reserved successfully for user " + userId +
+                ". Reservation expires at " + expiryTime;
+    }
+
+    /**
+     * Updates bike status with validation and business rules
+     */
     public String updateBikeStatus(String bikeId, String newStatus)
             throws ExecutionException, InterruptedException {
 
@@ -31,42 +77,15 @@ public class BikeService {
             throw new IllegalArgumentException("Bike not found: " + bikeId);
         }
 
-        BikeStatus currentStatus = BikeStatus.valueOf(bike.getStatus().toUpperCase());
-        BikeStatus targetStatus;
-
-        try {
-            targetStatus = BikeStatus.valueOf(newStatus.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid status: " + newStatus +
-                    ". Valid options are: AVAILABLE, RESERVED, MAINTENANCE, ON_TRIP");
-        }
-
-        // Business rule: cannot modify if bike is ON_TRIP
-        if (currentStatus == BikeStatus.ON_TRIP) {
-            throw new IllegalStateException(
-                    "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
-        }
-
-        // If bike is reserved, terminate reservation before proceeding
-        if (currentStatus == BikeStatus.RESERVED) {
-            terminateReservation(bikeId);
-            bike.setStatus(BikeStatus.AVAILABLE.name());
-            System.out.println("Reservation terminated for bike " + bikeId);
-        }
-
-        // Perform update
-        bike.setStatus(targetStatus.name());
-        db.collection("bikes").document(bikeId).set(bike);
-
-        // Attach observers
+        // Attach observers before making changes
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
-
         bike.attach(dashboardObserver);
-        bike.attach(notificationObserver);
 
-        // Emit event
-        bike.notifyObservers();
+        // Perform status change (this will validate and notify observers)
+        bike.changeStatus(newStatus);
+
+        // Persist to Firestore
+        db.collection("bikes").document(bikeId).set(bike).get();
 
         return "Bike " + bikeId + " updated successfully to status: " + bike.getStatus();
     }
@@ -79,23 +98,11 @@ public class BikeService {
     public List<Bike> getAllBikes() throws ExecutionException, InterruptedException {
         List<Bike> bikes = new ArrayList<>();
         for (DocumentSnapshot doc : db.collection("bikes").get().get().getDocuments()) {
-            bikes.add(doc.toObject(Bike.class));
+            Bike bike = doc.toObject(Bike.class);
+            if (bike != null) {
+                bikes.add(bike);
+            }
         }
         return bikes;
-    }
-
-    private void terminateReservation(String bikeId) throws ExecutionException, InterruptedException {
-        // Example: find and delete any reservation document tied to this bike
-        var reservations = db.collection("reservations")
-                .whereEqualTo("bikeId", bikeId)
-                .get()
-                .get()
-                .getDocuments();
-
-        for (DocumentSnapshot res : reservations) {
-            db.collection("reservations").document(res.getId()).delete();
-        }
-
-        System.out.println("Reservation entries for bike " + bikeId + " cleaned up.");
     }
 }

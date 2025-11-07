@@ -3,15 +3,15 @@ package com.concordia.velocity.service;
 import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.model.Dock;
 import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.NotificationObserver;
 import com.concordia.velocity.observer.Observer;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
-import java.util.concurrent.ExecutionException;
-import java.util.List;
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class DockService {
@@ -56,9 +56,7 @@ public class DockService {
 
 
         Observer dashboardObserver = new DashboardObserver();
-        Observer notificationObserver = new NotificationObserver();
         dock.attach(dashboardObserver);
-        dock.attach(notificationObserver);
 
         dock.notifyObservers();
 

@@ -1,0 +1,16 @@
+[2025-11-06T23:09:07.138000000Z] TripID: Bike B076 changed status to available
+[2025-11-06T23:09:07.152000000Z] TripID: Dock D038 status changed to occupied
+[2025-11-06T23:35:10.160000000Z] TripID: Bike B029 changed status to available
+[2025-11-06T23:35:10.181000000Z] TripID: Dock D011 status changed to occupied
+[2025-11-06T23:35:10.181000000Z] TripID: Station S002 status changed to occupied
+[2025-11-07T01:12:40.569000000Z] TripID: Bike B078 changed status to available
+[2025-11-07T01:12:40.585000000Z] TripID: Dock D114 status changed to occupied
+[2025-11-07T01:16:48.776000000Z] TripID: Bike B029 changed status to available
+[2025-11-07T01:16:48.787000000Z] TripID: Dock D060 status changed to occupied
+[2025-11-07T01:32:35.998000000Z] TripID: Bike B077 changed status to available
+[2025-11-07T01:32:36.001000000Z] TripID: Dock D125 status changed to occupied
+[2025-11-07T01:33:44.330000000Z] TripID: Bike B042 changed status to available
+[2025-11-07T01:33:44.333000000Z] TripID: Dock D010 status changed to occupied
+[2025-11-07T01:33:44.333000000Z] TripID: Station S001 status changed to full
+[2025-11-07T02:28:02.206000000Z] TripID: Bike B078 changed status to available
+[2025-11-07T02:28:02.223000000Z] TripID: Dock D119 status changed to occupied
