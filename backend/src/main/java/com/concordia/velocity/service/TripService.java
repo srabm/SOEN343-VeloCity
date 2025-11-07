@@ -406,8 +406,8 @@ public class TripService {
         // Select payment strategy based on bike type
         PaymentStrategy paymentStrategy = selectPaymentStrategy(trip.getBikeType());
 
-        // Strategy creates the complete bill (cost + tax + total)
-        return paymentStrategy.createBill(trip.getTripId(), durationMinutes);
+        // Strategy creates the complete bill (cost + tax + total) and charge to rider
+        return paymentStrategy.createBillAndProcessPayment(trip, durationMinutes);
     }
 
     /**
