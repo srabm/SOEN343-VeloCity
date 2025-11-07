@@ -1,6 +1,6 @@
 package com.concordia.velocity.service;
 
-import com.concordia.velocity.model.User;
+import com.concordia.velocity.model.Rider;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.DocumentReference;    
@@ -18,14 +18,14 @@ public class UserService {
     private final Firestore db = FirestoreClient.getFirestore();
 
     //Fetch user info by ID (document ID or email) 
-    public User getUserById(String userId) throws ExecutionException, InterruptedException {
+    public Rider getUserById(String userId) throws ExecutionException, InterruptedException {
         DocumentSnapshot doc = db.collection("users").document(userId).get().get();
 
         if (!doc.exists()) return null;
 
-        User user = doc.toObject(User.class);
-        if (user != null) user.setId(doc.getId());
-        return user;
+        Rider rider = doc.toObject(Rider.class);
+        if (rider != null) rider.setId(doc.getId());
+        return rider;
     }
 
     //Check if an email already exists (for uniqueness) 
@@ -38,18 +38,18 @@ public class UserService {
         return !query.isEmpty();
     }
 
-    // Create a new user (only if email is unique) 
-    public Map<String, Object> createUser(User user) throws ExecutionException, InterruptedException {
+    // Create a new rider (only if email is unique)
+    public Map<String, Object> createUser(Rider rider) throws ExecutionException, InterruptedException {
         Map<String, Object> response = new HashMap<>();
 
-        if (emailExists(user.getEmail())) {
-            response.put("error", "Email already exists: " + user.getEmail());
+        if (emailExists(rider.getEmail())) {
+            response.put("error", "Email already exists: " + rider.getEmail());
             return response;
         }
 
-        db.collection("users").document(user.getEmail()).set(user).get();
-        response.put("message", "User created successfully");
-        response.put("email", user.getEmail());
+        db.collection("users").document(rider.getEmail()).set(rider).get();
+        response.put("message", "Rider created successfully");
+        response.put("email", rider.getEmail());
         return response;
     }
 
@@ -59,7 +59,7 @@ public class UserService {
         DocumentReference docRef = db.collection("users").document(userId);
         docRef.set(updates, SetOptions.merge()).get();
 
-        response.put("message", "User updated successfully");
+        response.put("message", "Rider updated successfully");
         response.put("userId", userId);
         return response;
     }
@@ -68,7 +68,7 @@ public class UserService {
         Map<String, Object> response = new HashMap<>();
 
         db.collection("users").document(userId).delete().get();
-        response.put("message", "User deleted successfully");
+        response.put("message", "Rider deleted successfully");
         response.put("userId", userId);
         return response;
     }

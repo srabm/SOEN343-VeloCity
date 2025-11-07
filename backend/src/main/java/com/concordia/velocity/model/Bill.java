@@ -6,6 +6,7 @@ public class Bill {
 
     private String billId;
     private String tripId;
+    private String riderId;
     private double cost;
     private double tax;
     private double total;
@@ -15,9 +16,10 @@ public class Bill {
 
     public Bill() {}
 
-    public Bill(String billId, String tripId, double cost, double tax, double total) {
+    public Bill(String billId, String tripId, String riderId, double cost, double tax, double total) {
         this.billId = billId;
         this.tripId = tripId;
+        this.riderId = riderId;
         this.cost = cost;
         this.tax = tax;
         this.total = total;
@@ -25,10 +27,11 @@ public class Bill {
         this.status = "pending";
     }
 
-    public Bill(String billId, String tripId, double cost, double tax, double total,
+    public Bill(String billId, String tripId, String riderId, double cost, double tax, double total,
                 String paymentMethodLastFour, String status) {
         this.billId = billId;
         this.tripId = tripId;
+        this.riderId = riderId;
         this.cost = cost;
         this.tax = tax;
         this.total = total;
@@ -80,11 +83,14 @@ public class Bill {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
+    public String getRiderId() { return this.riderId; }
+
     @Override
     public String toString() {
         return "Bill{" +
                 "billId='" + billId + '\'' +
                 ", tripId='" + tripId + '\'' +
+                ", riderId='" + riderId + '\'' +
                 ", cost=" + cost +
                 ", tax=" + tax +
                 ", total=" + total +

@@ -110,6 +110,11 @@
         </div>
       </div>
     </div>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="loading">
+      <p>Loading billing history...</p>
+    </div>
   </div>
 </template>
 
@@ -120,12 +125,11 @@ import {
   getFirestore,
   collection,
   query,
-  orderBy,
+  where,
   getDocs,
-  updateDoc,
-  doc,
 } from "firebase/firestore";
 import app from "../../firebase-config.js";
+import topbar from './topbar.vue'
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -134,105 +138,180 @@ const user = ref(null);
 const rides = ref([]);
 const filters = ref({ dateFrom: "", dateTo: "" });
 import topbar from './topbar.vue'
+const bills = ref([]);
+const loading = ref(false);
+const filters = ref({ 
+  dateFrom: "", 
+  dateTo: "",
+  billId: "",
+  station: ""
+});
+const sortBy = ref("date"); // default sort by date (newest first)
 
 onMounted(() => {
   onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
       user.value = firebaseUser;
-      await loadRides();
+      await loadBillingHistory();
     }
   });
 });
 
-async function loadRides() {
-  const ridesRef = collection(db, "riders", user.value.uid, "rides");
-  const q = query(ridesRef, orderBy("startTime", "desc"));
-  const snap = await getDocs(q);
-  rides.value = snap.docs.map((d) => ({ rideId: d.id, ...d.data() }));
-}
-
-function formatDateTime(ts) {
-  if (!ts) return "—";
-  const date = ts.toDate ? ts.toDate() : new Date(ts);
-  return date.toLocaleString();
-}
-
-function clearFilters() {
-  filters.value = { dateFrom: "", dateTo: "" };
-}
-
-// Modal state
-const showPaymentModal = ref(false);
-const selectedRide = ref(null);
-const mockPayment = ref({
-  cardNumber: "",
-  expiryDate: "",
-  cvc: ""
-});
-
-// Opens the modal for a specific ride
-function payForRide(ride) {
-  selectedRide.value = ride;
-  showPaymentModal.value = true;
-}
-
-// Closes modal
-function closeModal() {
-  showPaymentModal.value = false;
-  selectedRide.value = null;
-  mockPayment.value = { cardNumber: "", expiryDate: "", cvc: "" };
-}
-
-// Simulate external payment process
-async function confirmPayment() {
+async function loadBillingHistory() {
+  loading.value = true;
   try {
-    alert("Processing payment...");
-
-    // Simulate delay like a real API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // Update Firestore
-    const rideRef = doc(db, "riders", user.value.uid, "rides", selectedRide.value.rideId);
-    await updateDoc(rideRef, {
-      "bill.paymentStatus": "PAID",
-      "bill.transactionId": "TXN-" + Date.now(),
-    });
-
-    // Update local state
-    selectedRide.value.bill.paymentStatus = "PAID";
-
-    alert("Payment successful!");
-    closeModal();
-  } catch (err) {
-    console.error("Payment failed:", err);
-    alert("Payment failed. Try again.");
+    // Fetch trips from the top-level trips collection for the current user
+    // Bills are embedded within trips as a nested object
+    const tripsRef = collection(db, "trips");
+    const q = query(tripsRef, where("riderId", "==", user.value.uid));
+    const tripsSnap = await getDocs(q);
+    
+    // Extract bill data from trips
+    const extractedBills = [];
+    
+    for (const tripDoc of tripsSnap.docs) {
+      const tripData = tripDoc.data();
+      
+      // Check if trip has bill data embedded
+      if (tripData.bill && tripData.bill.billId) {
+        // Create enriched bill object combining bill and trip data
+        extractedBills.push({
+          // Bill data from embedded bill object
+          billId: tripData.bill.billId,
+          billingDate: tripData.bill.billingDate,
+          cost: tripData.bill.cost,
+          tax: tripData.bill.tax,
+          total: tripData.bill.total,
+          status: tripData.bill.status,
+          paymentMethodLastFour: tripData.bill.paymentMethodLastFour,
+          riderId: tripData.bill.riderId,
+          tripId: tripData.bill.tripId,
+          
+          // Trip data
+          bikeId: tripData.bikeId,
+          bikeType: tripData.bikeType,
+          startStationName: tripData.startStationName,
+          endStationName: tripData.endStationName,
+          startStationId: tripData.startStationId,
+          endStationId: tripData.endStationId,
+          startTime: tripData.startTime,
+          endTime: tripData.endTime,
+          durationMinutes: tripData.durationMinutes,
+        });
+      }
+    }
+    
+    bills.value = extractedBills;
+  } catch (error) {
+    console.error("Error loading billing history:", error);
+    alert("Failed to load billing history. Please try again.");
+  } finally {
+    loading.value = false;
   }
 }
 
-const filteredRides = computed(() => {
-  return rides.value.filter((ride) => {
-    const rideDate = ride.startTime ? new Date(ride.startTime) : null;
-    if (!rideDate) return true;
+function formatDateTime(timestamp) {
+  if (!timestamp) return "—";
+  const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
-    if (filters.value.dateFrom) {
-      const from = new Date(filters.value.dateFrom);
-      if (rideDate < from) return false;
+function clearFilters() {
+  filters.value = { 
+    dateFrom: "", 
+    dateTo: "",
+    billId: "",
+    station: ""
+  };
+  sortBy.value = "date";
+}
+
+// Computed property for filtered bills
+const filteredBills = computed(() => {
+  return bills.value.filter((bill) => {
+    // Date filter
+    if (filters.value.dateFrom || filters.value.dateTo) {
+      const billDate = bill.billingDate?.toDate ? bill.billingDate.toDate() : new Date(bill.billingDate);
+      
+      if (filters.value.dateFrom) {
+        const fromDate = new Date(filters.value.dateFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        if (billDate < fromDate) return false;
+      }
+      
+      if (filters.value.dateTo) {
+        const toDate = new Date(filters.value.dateTo);
+        toDate.setHours(23, 59, 59, 999);
+        if (billDate > toDate) return false;
+      }
     }
-
-    if (filters.value.dateTo) {
-      const to = new Date(filters.value.dateTo);
-      to.setHours(23, 59, 59, 999);
-      if (rideDate > to) return false;
+    
+    // Bill ID filter
+    if (filters.value.billId) {
+      const searchTerm = filters.value.billId.toLowerCase();
+      if (!bill.billId?.toLowerCase().includes(searchTerm)) {
+        return false;
+      }
     }
-
+    
+    // Station filter (checks both origin and arrival)
+    if (filters.value.station) {
+      const searchTerm = filters.value.station.toLowerCase();
+      const originMatch = bill.startStationName?.toLowerCase().includes(searchTerm);
+      const arrivalMatch = bill.endStationName?.toLowerCase().includes(searchTerm);
+      if (!originMatch && !arrivalMatch) {
+        return false;
+      }
+    }
+    
     return true;
   });
+});
+
+// Computed property for sorted and filtered bills
+const sortedAndFilteredBills = computed(() => {
+  const filtered = [...filteredBills.value];
+  
+  switch (sortBy.value) {
+    case "date":
+      // Newest first (descending)
+      return filtered.sort((a, b) => {
+        const dateA = a.billingDate?.toDate ? a.billingDate.toDate() : new Date(a.billingDate);
+        const dateB = b.billingDate?.toDate ? b.billingDate.toDate() : new Date(b.billingDate);
+        return dateB - dateA;
+      });
+    
+    case "dateOldest":
+      // Oldest first (ascending)
+      return filtered.sort((a, b) => {
+        const dateA = a.billingDate?.toDate ? a.billingDate.toDate() : new Date(a.billingDate);
+        const dateB = b.billingDate?.toDate ? b.billingDate.toDate() : new Date(b.billingDate);
+        return dateA - dateB;
+      });
+    
+    case "costHigh":
+      // Highest cost first
+      return filtered.sort((a, b) => (b.total || 0) - (a.total || 0));
+    
+    case "costLow":
+      // Lowest cost first
+      return filtered.sort((a, b) => (a.total || 0) - (b.total || 0));
+    
+    default:
+      return filtered;
+  }
 });
 </script>
 
 <style scoped>
 .billing-history {
-  max-width: 1000px;
+  max-width: 1400px;
   margin: 2rem auto;
   padding: 1.5rem;
   background: white;
@@ -241,120 +320,203 @@ const filteredRides = computed(() => {
 }
 
 .billing-history h1 {
-  font-size: 2rem;              
-  font-weight: 700;         
-  color: #1a202c;               
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a202c;
   margin-bottom: 1.5rem;
-  border-bottom: 2px solid #e2e8f0; 
+  border-bottom: 2px solid #e2e8f0;
   padding-bottom: 0.5rem;
   letter-spacing: 0.5px;
 }
+
 .filters {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  align-items: center;
-  margin-bottom: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f7fafc;
+  border-radius: 8px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 0.5rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  min-width: 180px;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.clear-btn {
+  background-color: #e2e8f0;
+  color: #2d3748;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+  height: fit-content;
+}
+
+.clear-btn:hover {
+  background-color: #cbd5e0;
+}
+
+.table-container {
+  overflow-x: auto;
 }
 
 .billing-table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 1rem;
 }
 
 .billing-table th,
 .billing-table td {
   border: 1px solid #e2e8f0;
-  padding: 0.5rem;
-  text-align: center;
+  padding: 0.75rem;
+  text-align: left;
 }
 
 .billing-table th {
   background-color: #f7fafc;
   font-weight: 600;
-}
-
-.paid {
-  color: #2f855a;
-  font-weight: 600;
-}
-
-.unpaid {
-  color: #c53030;
-  font-weight: 600;
-}
-
-.pay-btn {
-  background-color: #3182ce;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-}
-
-.pay-btn:hover {
-  background-color: #2b6cb0;
-}
-
-.no-results {
-  margin-top: 1rem;
+  color: #2d3748;
   text-align: center;
+}
+
+.billing-table td {
+  color: #4a5568;
+}
+
+.bill-id {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: #3182ce;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.charges-cell {
+  background-color: #f7fafc;
+}
+
+.charge-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.charge-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.charge-line span:first-child {
   color: #718096;
 }
 
-/* Modal overlay */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
+.charge-line span:last-child {
+  font-weight: 600;
+  color: #2d3748;
 }
 
-/* Modal box */
-.modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 400px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+.total-line {
+  border-top: 1px solid #cbd5e0;
+  padding-top: 0.25rem;
+  margin-top: 0.25rem;
 }
 
-.modal h2 {
-  margin-bottom: 1rem;
+.total-line span {
   font-weight: 700;
   color: #1a202c;
 }
 
-.modal input {
-  display: block;
-  width: 100%;
-  margin-bottom: 0.8rem;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
+.status-paid {
+  background-color: #c6f6d5;
+  color: #22543d;
 }
 
-.cancel-btn {
-  background-color: #e2e8f0;
-  color: #333;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
+.status-unpaid {
+  background-color: #fed7d7;
+  color: #742a2a;
 }
 
-.cancel-btn:hover {
-  background-color: #cbd5e0;
+.status-pending {
+  background-color: #feebc8;
+  color: #7c2d12;
 }
 
+.no-results {
+  margin-top: 2rem;
+  text-align: center;
+  color: #718096;
+  padding: 2rem;
+}
+
+.loading {
+  margin-top: 2rem;
+  text-align: center;
+  color: #4a5568;
+  padding: 2rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    min-width: 100%;
+  }
+
+  .billing-table {
+    font-size: 0.85rem;
+  }
+
+  .billing-table th,
+  .billing-table td {
+    padding: 0.5rem;
+  }
+}
 </style>

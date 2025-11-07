@@ -1,6 +1,8 @@
 package com.concordia.velocity.strategy;
 
 import com.concordia.velocity.model.Bill;
+import com.concordia.velocity.model.Trip;
+
 import java.util.UUID;
 
 /**
@@ -13,15 +15,14 @@ public class OneTimeElectricPayment implements PaymentStrategy {
     private static final double PRICE_PER_MINUTE = 0.33;
     private static final double TAX_RATE = 0.14975;  // 13% tax
 
-    @Override
-    public Bill createBill(String tripId, long durationMinutes) {
+    public Bill createBillAndProcessPayment(Trip trip, long durationMinutes) {
         // Calculate cost
         double cost = BASE_PRICE + (durationMinutes * PRICE_PER_MINUTE);
         cost = Math.round(cost * 100.0) / 100.0;
 
         // Create bill
         String billId = UUID.randomUUID().toString();
-        Bill bill = new Bill(billId, tripId, cost, 0, 0);
+        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), cost, 0, 0);
 
         // Calculate tax and total
         bill.calculateTax(TAX_RATE);
@@ -30,13 +31,12 @@ public class OneTimeElectricPayment implements PaymentStrategy {
         bill.setTotal(Math.round(bill.getTotal() * 100.0) / 100.0);
         bill.setTax(Math.round(bill.getTax() * 100.0) / 100.0);
 
+        // process bill payment here --> get user credit card and charge
+        bill.setStatus("paid");
+
         return bill;
     }
 
-    @Override
-    public String getStrategyName() {
-        return "One-Time Electric Payment";
-    }
 
     /**
      * Gets the base price for this strategy
