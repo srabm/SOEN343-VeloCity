@@ -61,7 +61,8 @@ const router = createRouter({
     {
       path: '/VeloCity/settings',
       name: 'Settings',
-      component: Settings
+      component: Settings,
+      meta: { requiresAuth: true }
     },
     {
       path: '/VeloCity/pricing',
@@ -71,12 +72,14 @@ const router = createRouter({
     {
       path: '/VeloCity/rides',
       name: 'RideHistory',
-      component: RideHistory
+      component: RideHistory,
+      meta: { requiresAuth: true }
     },
     {
       path: '/VeloCity/billing',
       name: 'BillingHistory',
-      component: BillingHistory
+      component: BillingHistory,
+      meta: { requiresAuth: true }
     },
     {
       path: '/VeloCity/about',

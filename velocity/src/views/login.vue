@@ -145,7 +145,7 @@ async function handleLogin() {
     await login(email.value, password.value)
     router.push({ name: 'Home' })
   } catch (e) {
-    error.value = 'Login failed'
+    error.value = e?.message
   }
 }
 
@@ -165,7 +165,7 @@ async function handleSignup() {
     })
     router.push({ name: 'Home' })
   } catch (e) {
-    error.value = 'Registration failed'
+    error.value = e?.message
   }
 }
 
@@ -176,7 +176,7 @@ async function handleReset() {
     await resetPassword(email.value)
     info.value = 'Password reset email sent. Check your inbox.'
   } catch (e) {
-    error.value = 'Failed to send reset email'
+    error.value = e?.message
   }
 }
 </script>
@@ -211,7 +211,7 @@ async function handleReset() {
 
 .flip-wrapper {
   width: 100%;
-  max-width: 880px;
+  max-width: 660px;
   height: 660px;
   perspective: 1400px;
 }
