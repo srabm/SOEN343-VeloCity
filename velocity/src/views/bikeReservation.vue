@@ -103,6 +103,25 @@ export default {
   name: 'BikeReservation',
   
   setup() {
+    let prevBodyOverflowY = '';
+    let prevHtmlOverflowY = '';
+    let prevBodyPaddingTop = '';
+
+    onMounted(() => {
+      prevBodyOverflowY = document.body.style.overflowY;
+      prevHtmlOverflowY = document.documentElement.style.overflowY;
+      prevBodyPaddingTop = document.body.style.paddingTop;
+      document.body.style.overflowY = 'auto';
+      document.documentElement.style.overflowY = 'auto';
+      document.body.style.paddingTop = '0px';
+    });
+
+    onUnmounted(() => {
+      document.body.style.overflowY = prevBodyOverflowY;
+      document.documentElement.style.overflowY = prevHtmlOverflowY;
+      document.body.style.paddingTop = prevBodyPaddingTop;
+    });
+
     const router = useRouter();
     const route = useRoute();
     const auth = getAuth();
