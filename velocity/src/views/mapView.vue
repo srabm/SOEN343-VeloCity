@@ -14,11 +14,27 @@
     </div>
   </div>
 
+  <!-- Missing Payment Info Modal -->
+<div id="paymentInfoModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close" id="paymentClose">&times;</span>
+      <h2>Payment Information Required</h2>
+    </div>
+    <div class="modal-body">
+      <p>You must add a valid credit card before reserving a bike.</p>
+      <button id="goToPayment" class="reserve-bike-button">Go to Settings</button>
+    </div>
+  </div>
+</div>
+
+
 </template>
 
 <script>
 import L from "leaflet";
-import { collection, firestore, doc, updateDoc, onSnapshot } from '../../firebaseAuth.js';
+import { collection, firestore, doc, updateDoc, onSnapshot} from '../../firebaseAuth.js';
+import { getDoc } from 'firebase/firestore'; // at the top if not already
 import { bikeApi } from '../services/api';
 import { getAuth } from 'firebase/auth';
 
@@ -184,6 +200,56 @@ export default {
                 alert('Please login or create an account to reserve a bike.');
                 return;
               }
+
+              
+              // After checking login:
+              const userRef = doc(firestore, "riders", currentUser.uid);
+              const userSnap = await getDoc(userRef);
+
+              if (!userSnap.exists()) {
+                alert("User not found in database.");
+                button.disabled = false;
+                button.textContent = "Reserve";
+                return;
+              }
+
+              const userData = userSnap.data();
+              console.log(userData);
+              const paymentInfo = userData.paymentInfo;
+              console.log(paymentInfo);
+
+              // Check if paymentInfo exists and has a valid credit card
+              if (
+                !paymentInfo ||
+                !paymentInfo.cardNumber ||
+                !paymentInfo.expiryDate ||
+                !paymentInfo.cvc
+              ) {
+                // Show payment info modal
+                const paymentModal = document.getElementById("paymentInfoModal");
+                paymentModal.style.display = "block";
+
+                // close button
+                const closeBtn = document.getElementById("paymentClose");
+                if (closeBtn) {
+                  closeBtn.onclick = () => (paymentModal.style.display = "none");
+                }
+
+                // go to payment page (assuming you have a route)
+                const goToPaymentBtn = document.getElementById("goToPayment");
+                if (goToPaymentBtn) {
+                  goToPaymentBtn.onclick = () => {
+                    paymentModal.style.display = "none";
+                    this.$router.push({ name: "Settings" });
+                  };
+                }
+
+                // stop reservation
+                button.disabled = false;
+                button.textContent = "Reserve";
+                return;
+              }
+              
               
               // Disable button and show loading state
               button.disabled = true;
