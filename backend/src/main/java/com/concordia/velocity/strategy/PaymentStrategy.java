@@ -16,11 +16,4 @@ public interface PaymentStrategy {
      * @return a complete Bill object with cost, tax, and total calculated
      */
     Bill createBillAndProcessPayment(Trip trip, long durationMinutes);
-
-
-    /**
-     * Gets the name of this payment strategy
-     * @return strategy name for logging/display
-     */
-    String getStrategyName();
 }

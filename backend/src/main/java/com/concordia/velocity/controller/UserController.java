@@ -1,6 +1,6 @@
 package com.concordia.velocity.controller;
 
-import com.concordia.velocity.model.User;
+import com.concordia.velocity.model.Rider;
 import com.concordia.velocity.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,23 +25,23 @@ public class UserController {
      */
     @GetMapping("/me")
     public Object getUserInfo() throws ExecutionException, InterruptedException {
-        String userId = "U001"; // TODO: Replace with authenticated user ID later
-        User user = userService.getUserById(userId);
+        String userId = "U001"; // TODO: Replace with authenticated rider ID later
+        Rider rider = userService.getUserById(userId);
 
-        if (user == null) {
-            return Map.of("error", "User not found: " + userId);
+        if (rider == null) {
+            return Map.of("error", "Rider not found: " + userId);
         }
 
-        return user;
+        return rider;
     }
 
     /**
      * POST /api/users
-     * Create a new user (email must be unique)
+     * Create a new rider (email must be unique)
      */
     @PostMapping
-    public Object createUser(@RequestBody User user) throws ExecutionException, InterruptedException {
-        return userService.createUser(user);
+    public Object createUser(@RequestBody Rider rider) throws ExecutionException, InterruptedException {
+        return userService.createUser(rider);
     }
 
     /**

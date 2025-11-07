@@ -38,11 +38,6 @@ public class OneTimeElectricPayment implements PaymentStrategy {
     }
 
 
-    @Override
-    public String getStrategyName() {
-        return "One-Time Electric Payment";
-    }
-
     /**
      * Gets the base price for this strategy
      */

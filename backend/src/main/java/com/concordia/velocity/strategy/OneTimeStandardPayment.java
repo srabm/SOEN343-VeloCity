@@ -39,10 +39,6 @@ public class OneTimeStandardPayment implements PaymentStrategy {
 
 
 
-    @Override
-    public String getStrategyName() {
-        return "One-Time Standard Payment";
-    }
 
     /**
      * Gets the base price for this strategy
