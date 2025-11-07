@@ -43,6 +43,7 @@ public class Bike implements Subject {
     private String dockId;
     private String stationId;
     private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+    private Rider reservationUser;
 
     private transient List<Observer> observers = new ArrayList<>();
 
@@ -54,6 +55,7 @@ public class Bike implements Subject {
         this.type = type;
         this.dockId = dockId;
         this.stationId = stationId;
+        this.reservationUser = null;
         this.reservationExpiry = null;
         attach(new StatusObserver());
     }
