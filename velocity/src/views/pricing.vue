@@ -1,13 +1,13 @@
 <template>
     <topbar />
     <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-        <div class="min-h-screen bg-black/30">
+        <div class="min-h-screen bg-black/40">
 
             <header class="text-center py-8 text-white drop-shadow">
                 <h1 class="text-3xl font-semibold">Pricing</h1>
             </header>
 
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto text-center px-4">
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto text-center px-4">
 
                 <!-- Regular Membership -->
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
@@ -18,7 +18,7 @@
                     <p class="text-slate-600">Unlimited access to regular velos.</p>
                     <button
                         class="mt-4 w-full bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-500 duration-300">
-                        Subscribe
+                        Coming soon...
                     </button>
                 </div>
 
@@ -31,7 +31,7 @@
                     <p class="text-slate-600">Unlimited access to both regular and electric velos.</p>
                     <button
                         class="mt-4 w-full bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-500 duration-300">
-                        Subscribe
+                        Coming soon...
                     </button>
                 </div>
 

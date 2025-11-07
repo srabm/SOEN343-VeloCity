@@ -1,5 +1,5 @@
 <template>
-    <header class="bg-white text-black">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-white text-black shadow">
         <nav class="grid grid-cols-3 items-stretch h-14 px-4">
             <!-- logo -->
             <div class="flex items-center">
@@ -14,10 +14,10 @@
                 <router-link to="/VeloCity/pricing" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     Pricing
                 </router-link>
-                <router-link to="/VeloCity/rides" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
+                <router-link v-if="isLoggedIn" to="/VeloCity/rides" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     Ride History
                 </router-link>
-                <router-link to="/VeloCity/billing" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
+                <router-link v-if="isLoggedIn" to="/VeloCity/billing" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     Billing History
                 </router-link>
                 <router-link to="/VeloCity/about" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">

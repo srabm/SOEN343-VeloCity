@@ -1,7 +1,7 @@
 <template>
     <topbar />
     <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-        <div class="min-h-screen bg-black/30">
+        <div class="min-h-screen bg-black/40">
             <header class="text-center py-8 text-white drop-shadow">
                 <h1 class="text-3xl font-semibold">About VeloCity</h1>
                 <p class="mt-2 px-4 max-w-3xl mx-auto text-slate-100/90">
@@ -9,7 +9,7 @@
                 </p>
             </header>
 
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto text-center px-4">
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto text-center px-4">
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">Our Mission</h2>
                     <p class="text-slate-600">

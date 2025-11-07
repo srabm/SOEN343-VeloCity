@@ -19,6 +19,8 @@
 
   body {
     font-family: 'Roboto', sans-serif;
+    overflow-y: hidden;
+    padding-top: 56px;
   }
 
 }
