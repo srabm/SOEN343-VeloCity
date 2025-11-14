@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import app from '../../firebase-config.js';
 import Login from '../views/login.vue';
 import PasswordRecovery from '../views/passwordRecovery.vue';
 import Register from '../views/register.vue';
@@ -13,8 +15,11 @@ import AboutUs from '../views/aboutUs.vue';
 import BikeReservation from '../views/bikeReservation.vue';
 import ActiveTrip from '../views/activeTrip.vue';
 
-// todo : make routing to new operator-only pages conditional on operator status?
-// au pire we can do it within the page maybe
+// Import operator-specific views (create these as needed)
+import MoveBike from '../views/moveBike.vue';
+// import AllRides from '../views/operator/allRides.vue';
+// import AllBilling from '../views/operator/allBilling.vue';
+// import Maintenance from '../views/operator/maintenance.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -87,12 +92,42 @@ const router = createRouter({
       path: '/VeloCity/about',
       name: 'AboutUs',
       component: AboutUs
-    }
+    },
+    
+    
+    {
+      path: '/VeloCity/move-bike',
+      name: 'MoveBike',
+      component: MoveBike,
+      meta: { requiresAuth: true, requiresOperator: true }
+    },
 
+    // Operator-only routes
+    // Uncomment and implement these routes as you create the corresponding components
+    /*
+    {
+      path: '/VeloCity/operator/all-rides',
+      name: 'AllRides',
+      component: AllRides,
+      meta: { requiresAuth: true, requiresOperator: true }
+    },
+    {
+      path: '/VeloCity/operator/all-billing',
+      name: 'AllBilling',
+      component: AllBilling,
+      meta: { requiresAuth: true, requiresOperator: true }
+    },
+    {
+      path: '/VeloCity/operator/maintenance',
+      name: 'Maintenance',
+      component: Maintenance,
+      meta: { requiresAuth: true, requiresOperator: true }
+    }
+    */
   ]
 });
 
-function getCurrentUser() {
+async function getCurrentUser() {
   return new Promise((resolve) => {
     const auth = getAuth();
     const removeListener = onAuthStateChanged(auth, (user) => {
@@ -102,18 +137,40 @@ function getCurrentUser() {
   });
 }
 
+async function getUserProfile(uid) {
+  const db = getFirestore(app);
+  const docRef = doc(db, 'riders', uid);
+  const docSnap = await getDoc(docRef);
+  
+  if (docSnap.exists()) {
+    return docSnap.data();
+  }
+  return null;
+}
+
 router.beforeEach(async (to) => {
   const user = await getCurrentUser();
 
   // Redirect authenticated users away from guest-only pages
   if (to.matched.some((r) => r.meta?.requiresGuest)) {
-    const user = await getCurrentUser();
     if (user) return { path: '/VeloCity/home' };
   }
 
   // Redirect unauthenticated users to login for protected pages
   if (to.matched.some((r) => r.meta?.requiresAuth)) {
     if (!user) return { path: '/VeloCity/login' };
+  }
+
+  // Check operator permissions for operator-only routes
+  if (to.matched.some((r) => r.meta?.requiresOperator)) {
+    if (!user) return { path: '/VeloCity/login' };
+    
+    const profile = await getUserProfile(user.uid);
+    
+    // Redirect non-operators or operators with operator view disabled
+    if (!profile?.isOperator || !profile?.isOperatorView) {
+      return { path: '/VeloCity/home' };
+    }
   }
 
   return true;

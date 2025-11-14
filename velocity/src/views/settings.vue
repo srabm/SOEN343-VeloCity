@@ -16,9 +16,35 @@
             <li><strong>Address:</strong> {{ profile?.address || 'Not set' }}</li>
             <li><strong>Phone Number:</strong> {{ profile?.phoneNumber || 'Not set' }}</li>
             <li><strong>Role:</strong> {{ profile?.isOperator ? 'Operator' : 'Rider' }}</li>
-            <!--todo: display toggle button somewhere here (only for operators)-->
-
           </ul>
+
+          <!-- Operator View Toggle (only visible for operators) -->
+          <div v-if="profile?.isOperator" class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-semibold text-blue-900">Operator View</h3>
+                <p class="text-xs text-blue-700 mt-1">Toggle between operator and user interface</p>
+              </div>
+              <button 
+                @click="toggleOperatorView"
+                :class="[
+                  'relative inline-flex h-8 w-14 items-center rounded-full transition-colors duration-300',
+                  profile?.isOperatorView ? 'bg-blue-600' : 'bg-gray-300'
+                ]"
+              >
+                <span 
+                  :class="[
+                    'inline-block h-6 w-6 transform rounded-full bg-white transition-transform duration-300',
+                    profile?.isOperatorView ? 'translate-x-7' : 'translate-x-1'
+                  ]"
+                ></span>
+              </button>
+            </div>
+            <p class="text-xs text-blue-600 mt-2">
+              Current mode: <strong>{{ profile?.isOperatorView ? 'Operator' : 'User' }}</strong>
+            </p>
+          </div>
+
           <div class="mt-4">
             <button @click="startProfileEdit"
               class="bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-400 duration-300">Edit Profile</button>
@@ -75,7 +101,7 @@
                       <label class="text-[10px] uppercase tracking-wide opacity-80">Exp</label>
                       <input :value="paymentForm.expiryDate" @input="handleExpiryInput" placeholder="MM/YY"
                         maxlength="5"
-                        class="w-full bg-white/95 text-black px-2 py-2 rounded mt-1 text-sm focus:outline-none placeholder:text-black/50 text-center" />
+                        class="w-full bg-white/95 text-black px-3 py-2 rounded mt-1 text-sm focus:outline-none placeholder:text-black/50 text-center" />
                     </div>
                   </div>
                 </div>
@@ -164,7 +190,7 @@ onMounted(() => {
       user.value = firebaseUser;
 
       try {
-        const docRef = doc(db, "riders", firebaseUser.uid); // riders/<uid>
+        const docRef = doc(db, "riders", firebaseUser.uid);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -180,6 +206,29 @@ onMounted(() => {
     }
   });
 });
+
+// ----- Operator View Toggle -----
+async function toggleOperatorView() {
+  if (!user.value || !profile.value?.isOperator) return;
+
+  try {
+    const newOperatorViewState = !profile.value.isOperatorView;
+    const docRef = doc(db, "riders", user.value.uid);
+    
+    await updateDoc(docRef, {
+      isOperatorView: newOperatorViewState
+    });
+
+    profile.value.isOperatorView = newOperatorViewState;
+    
+    console.log(`Operator view ${newOperatorViewState ? 'enabled' : 'disabled'}`);
+    
+    // Reload the page to update the topbar navigation
+    window.location.reload();
+  } catch (err) {
+    console.error("Error toggling operator view:", err);
+  }
+}
 
 // ----- Profile (address + phone) editing -----
 function startProfileEdit() {
