@@ -16,6 +16,8 @@
             <li><strong>Address:</strong> {{ profile?.address || 'Not set' }}</li>
             <li><strong>Phone Number:</strong> {{ profile?.phoneNumber || 'Not set' }}</li>
             <li><strong>Role:</strong> {{ profile?.isOperator ? 'Operator' : 'Rider' }}</li>
+            <!--todo: display toggle button somewhere here (only for operators)-->
+
           </ul>
           <div class="mt-4">
             <button @click="startProfileEdit"

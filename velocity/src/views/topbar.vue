@@ -23,6 +23,7 @@
                 <router-link to="/VeloCity/about" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     About Us
                 </router-link>
+                <!--todo : if isOperatorView => operator pages : moveBike, AllRideHistory, AllBillingHistory, a placeholder maintenance manager page, otherwise, not-->
             </div>
 
             <!-- Login/Logout -->

@@ -13,6 +13,8 @@ import AboutUs from '../views/aboutUs.vue';
 import BikeReservation from '../views/bikeReservation.vue';
 import ActiveTrip from '../views/activeTrip.vue';
 
+// todo : make routing to new operator-only pages conditional on operator status?
+// au pire we can do it within the page maybe
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
