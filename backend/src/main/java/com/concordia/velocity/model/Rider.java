@@ -1,4 +1,6 @@
 package com.concordia.velocity.model;
+import com.concordia.velocity.state.NoTierState;
+import com.concordia.velocity.state.TierState;
 
 public class Rider {
     private String id;
@@ -9,6 +11,13 @@ public class Rider {
     private String phoneNumber;
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
+    private int successfulClaims;
+
+    TierState tierState;
+    TierState noTierState;
+    TierState bronzeTierState;
+    TierState silverTierState;
+    TierState goldTierState;
 
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
     this.firstName = firstName;
@@ -16,8 +25,9 @@ public class Rider {
     this.address = address;
     this.email = email;
     this.phoneNumber = phoneNumber;
+    this.tierState = new NoTierState(); //initially the rider has no tier
 }
-
+    // Getters and Setters
     public String getId() {return id;}
     public void setId(String id) {this.id = id;}
 
@@ -75,5 +85,25 @@ public class Rider {
 
         public String getExpiryDate() { return expiryDate; }
         public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
+    }
+
+    public void evaluateTier() {
+        tierState.evaluateTier(this);
+    }
+
+    public void setTierState(TierState tierState) {
+        this.tierState = tierState;
+    }
+
+    public double applyDiscount(double price){
+        return tierState.applyDiscount(price);
+    }
+
+    public int getExtraHoldMinutes(){
+        return tierState.getExtraHoldMinutes();
+    }
+
+    public String getTierName(){
+        return tierState.getClass().getSimpleName().replace("TierState", "");
     }
 }

@@ -255,6 +255,7 @@ export default {
               button.disabled = true;
               button.textContent = 'Reserving...';
               
+              // this is the actual reservation API call 
               try {
                 // Call API to reserve the bike
                 const response = await bikeApi.reserveBike(bikeId, currentUser.uid, stationId);

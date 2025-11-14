@@ -198,6 +198,8 @@ export default {
           endDockCode.value
         );
 
+        //add evaluatetier()
+
         if (!response.success) {
           throw new Error(response.error || 'Failed to end trip');
         }
