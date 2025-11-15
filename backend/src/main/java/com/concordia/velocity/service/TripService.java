@@ -490,21 +490,23 @@ public class TripService {
     /**
      * Get all trips for a specific rider (userId)
      */
-    public List<Trip> getRiderTrips(String userId) throws ExecutionException, InterruptedException {
-        CollectionReference tripsRef = db.collection("trips");
-        ApiFuture<QuerySnapshot> future = tripsRef.whereArrayContains("riderId", userId).get();
-        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+    public List<Trip> getRiderTrips(String riderId) throws ExecutionException, InterruptedException {
+    var future = db.collection("trips")
+            .whereEqualTo("riderId", riderId)
+            .get();
 
-        List<Trip> trips = new ArrayList<>();
-        for (QueryDocumentSnapshot doc : documents) {
-            if (doc.exists()) {
-                Trip trip = doc.toObject(Trip.class);
-                if (trip != null) trips.add(trip);
-            }
+    List<QueryDocumentSnapshot> docs = future.get().getDocuments();
+    List<Trip> trips = new ArrayList<>();
+
+    for (QueryDocumentSnapshot doc : docs) {
+        if (doc.exists()) {
+            Trip trip = doc.toObject(Trip.class);
+            if (trip != null) trips.add(trip);
         }
-
-        return trips;
     }
+    return trips;
+}
+
 
 
     // ==================== Validation Helper Methods ====================

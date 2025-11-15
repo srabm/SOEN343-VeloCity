@@ -11,6 +11,9 @@ public class Trip {
     public static final String STATUS_ACTIVE = "active";
     public static final String STATUS_COMPLETED = "completed";
     public static final String STATUS_CANCELLED = "cancelled";
+    public static final String STATUS_MISSED = "missed"; // added these 2 lines to handle missed reservations and expired reservations to use in LoyaltyStatsService
+    public static final String STATUS_EXPIRED = "expired";
+
 
     private String tripId;
     private String riderId;
