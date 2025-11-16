@@ -20,7 +20,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -28,6 +30,14 @@ import java.util.concurrent.ExecutionException;
 public class TripService {
 
     private final Firestore db = FirestoreClient.getFirestore();
+    private final UserService userService;
+    private final LoyaltyStatsService loyaltyStatsService; 
+
+    // constructor injection
+    public TripService(UserService userService, LoyaltyStatsService loyaltyStatsService) {
+    this.userService = userService;
+    this.loyaltyStatsService = loyaltyStatsService;
+}
 
     /**
      * Wrapper method for docking bike and ending trip
@@ -339,8 +349,22 @@ public class TripService {
 
         station.addBike(bike);
 
-        // Complete trip and calculate billing
+        // Complete trip 
         trip.completeTrip(stationId, station.getStationName(), dockId);
+
+        //compute new loyalty tier
+        Rider rider = userService.getUserById(riderId);
+        if (rider != null) {
+            RiderStats stats = loyaltyStatsService.computeStats(riderId);
+            rider.evaluateTier(stats);
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("User updated. Tier: ", rider.getTierState());
+            userService.updateUser(riderId, updates); //to persist the new tier state
+        }
+
+        //calculate billing
+        //*remove: still have to add the applyDiscount, but might have to do it in our payment strategy classes
         Bill bill = calculateAndCreateBill(trip);
         trip.setBill(bill);
 

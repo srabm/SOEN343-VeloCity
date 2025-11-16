@@ -11,13 +11,14 @@ public class Rider {
     private String phoneNumber;
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
-    private int successfulClaims;
 
-    TierState tierState;
-    TierState noTierState;
-    TierState bronzeTierState;
-    TierState silverTierState;
-    TierState goldTierState;
+    //*remove: made these fields private, not sure if we had to or not
+    private TierState tierState;
+    //*remove: never used, not sure if we need them 
+    private TierState noTierState;
+    private TierState bronzeTierState;
+    private TierState silverTierState;
+    private TierState goldTierState;
 
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
     this.firstName = firstName;
@@ -51,6 +52,8 @@ public class Rider {
 
     public PaymentInfo getPaymentInfo() { return paymentInfo; }
     public void setPaymentInfo(PaymentInfo paymentInfo) { this.paymentInfo = paymentInfo; }
+
+    public TierState getTierState() { return tierState; }
 
     public String getFullName() {
         String fn = firstName != null ? firstName : ""; 
@@ -87,8 +90,8 @@ public class Rider {
         public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
     }
 
-    public void evaluateTier() {
-        tierState.evaluateTier(this);
+    public void evaluateTier(RiderStats riderStats){ 
+        tierState.evaluateTier(this, riderStats); //*remove: now passing riderStats to evaluateTier, not 100% sure if this is correct
     }
 
     public void setTierState(TierState tierState) {

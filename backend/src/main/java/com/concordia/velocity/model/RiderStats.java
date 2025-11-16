@@ -56,7 +56,7 @@ public class RiderStats {
         return true;
     }
 
-    public boolean hasTripsLastYear(int threshold) { // checks whether the rider meets a minimum number of trips in the last year, for Bronze >=10
+    public boolean hasTripsLastYear(int threshold) { // checks whether the rider meets a minimum number of trips in the last year, for Bronze > 10 (surpasses 10 trips so 11 and more in the last year)
         return tripsLastYear >= threshold;
     }
 
