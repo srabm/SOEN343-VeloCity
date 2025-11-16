@@ -375,7 +375,7 @@ export default {
               `Maximum Capacity: ${capacity}<br>` +
               `Available Regular Bikes: ${nbRegBikes}<br>` +
               `Available Electric Bikes: ${nbElectricBikes}<br>` +
-              `Available Docks: ${station.capacity - (station.bikeIds ? station.bikeIds.length : 0)}<br>` +              
+              `Available Docks: ${station.capacity - totalBikes}<br>` +
               (nbRegBikes > 0
                 ? `<button onclick="window.dispatchEvent(new CustomEvent('reserveBike', 
                         {detail: {stationId: '${station.id}', stationName: '${station.stationName}', bikeType: 'standard'}}))">

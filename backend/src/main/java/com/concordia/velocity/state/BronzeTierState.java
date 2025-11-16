@@ -16,6 +16,11 @@ public class BronzeTierState implements TierState {
      @Override
     public void evaluateTier(Rider rider, RiderStats riderStats) {
         boolean bronzeCriteriaMet = riderStats.hasNoMissedReservations() && riderStats.returnedAllBikes() && riderStats.hasTripsLastYear(11);
+        System.out.println("Evaluating Bronze Tier for rider " + rider.getId() + ": " +
+                           "No missed reservations: " + riderStats.hasNoMissedReservations() +
+                           ", Returned all bikes: " + riderStats.returnedAllBikes() +
+                           ", Trips last year >= 11: " + riderStats.hasTripsLastYear(11) +
+                           " => Bronze criteria met: " + bronzeCriteriaMet);
 
         //first check if bronze criteria is still met
         if (!bronzeCriteriaMet) {

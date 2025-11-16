@@ -135,4 +135,15 @@ public class RiderStats {
         }
         return true;
     }
+
+    public String toString() {
+        return "RiderStats{" +
+                "tripsLastYear=" + tripsLastYear +
+                ", missedReservations=" + missedReservations +
+                ", successfulClaims=" + successfulClaims +
+                ", tripsPerMonth=" + tripsPerMonth +
+                ", tripsPerWeek=" + tripsPerWeek +
+                ", returnedAllBikes=" + returnedAllBikes +
+                '}';
+    }
 }

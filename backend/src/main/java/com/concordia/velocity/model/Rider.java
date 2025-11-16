@@ -1,6 +1,10 @@
 package com.concordia.velocity.model;
+
 import com.concordia.velocity.state.NoTierState;
 import com.concordia.velocity.state.TierState;
+
+import org.checkerframework.checker.units.qual.g;
+
 import com.concordia.velocity.state.BronzeTierState;
 import com.concordia.velocity.state.SilverTierState;
 import com.concordia.velocity.state.GoldTierState;
@@ -14,65 +18,117 @@ public class Rider {
     private String phoneNumber;
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
+    private int missedReservationsCount = 0;
 
-    //*remove: made these fields private, not sure if we had to or not
+    // *remove: made these fields private, not sure if we had to or not
     private TierState tierState;
     private String tier; // For Firestore persistence to store "NoTier", "Bronze", "Silver", "Gold"
-    //*remove: never used, not sure if we need them 
-    // private TierState noTierState;
-    // private TierState bronzeTierState;
-    // private TierState silverTierState;
-    // private TierState goldTierState;
 
     public Rider() { // default constructor for Firestore
-        this.tierState = new NoTierState(); //initially the rider has no tier
+        this.tierState = new NoTierState(); // initially the rider has no tier
         this.tier = "NoTier";
     }
 
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.address = address;
-    this.email = email;
-    this.phoneNumber = phoneNumber;
-    this.tierState = new NoTierState(); //initially the rider has no tier
-    this.tier = "NoTier";
-}
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.tierState = new NoTierState(); // initially the rider has no tier
+        this.tier = "NoTier";
+    }
+
     // Getters and Setters
-    public String getId() {return id;}
-    public void setId(String id) {this.id = id;}
+    public String getId() {
+        return id;
+    }
 
-    public String getFirstName() {return firstName;}
-    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getLastName() { return lastName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getFirstName() {
+        return firstName;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getLastName() {
+        return lastName;
+    }
 
-    public String getPhoneNumber() { return phoneNumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
-    public Boolean getIsOperator() { return isOperator; }
-    public void setIsOperator(Boolean isOperator) { this.isOperator = isOperator; }
+    public String getEmail() {
+        return email;
+    }
 
-    public PaymentInfo getPaymentInfo() { return paymentInfo; }
-    public void setPaymentInfo(PaymentInfo paymentInfo) { this.paymentInfo = paymentInfo; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public TierState getTierState() { return tierState; }
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Boolean getIsOperator() {
+        return isOperator;
+    }
+
+    public void setIsOperator(Boolean isOperator) {
+        this.isOperator = isOperator;
+    }
+
+    public PaymentInfo getPaymentInfo() {
+        return paymentInfo;
+    }
+
+    public void setPaymentInfo(PaymentInfo paymentInfo) {
+        this.paymentInfo = paymentInfo;
+    }
+
+    public TierState getTierState() {
+        return tierState;
+    }
 
     public String getFullName() {
-        String fn = firstName != null ? firstName : ""; 
+        String fn = firstName != null ? firstName : "";
         String ln = lastName != null ? lastName : "";
         return (fn + " " + ln).trim();
     }
 
     public String getRole() {
         return isOperator != null && isOperator ? "OPERATOR" : "RIDER";
+    }
+
+    public int getMissedReservationsCount() {
+        return missedReservationsCount;
+    }
+
+    public void setMissedReservationsCount(int count) {
+        this.missedReservationsCount = count;
+    }
+
+    //increment missed reservations count by 1
+    public void incrementMissedReservations() {
+        this.missedReservationsCount++;
     }
 
     public static class PaymentInfo {
@@ -82,24 +138,49 @@ public class Rider {
         private String cardholderName;
         private String expiryDate;
 
-        public PaymentInfo() {}
+        public PaymentInfo() {
+        }
 
-        public Boolean getHasPaymentMethod() { return hasPaymentMethod; }
-        public void setHasPaymentMethod(Boolean hasPaymentMethod) { this.hasPaymentMethod = hasPaymentMethod; }
+        public Boolean getHasPaymentMethod() {
+            return hasPaymentMethod;
+        }
 
-        public String getCardNumber() { return cardNumber; }
-        public void setCardNumber(String cardNumber) { this.cardNumber = cardNumber; }
+        public void setHasPaymentMethod(Boolean hasPaymentMethod) {
+            this.hasPaymentMethod = hasPaymentMethod;
+        }
 
-        public String getCvc() { return cvc; }
-        public void setCvc(String cvc) { this.cvc = cvc; }
+        public String getCardNumber() {
+            return cardNumber;
+        }
 
-        public String getCardholderName() { return cardholderName; }
-        public void setCardholderName(String cardholderName) { this.cardholderName = cardholderName; }
+        public void setCardNumber(String cardNumber) {
+            this.cardNumber = cardNumber;
+        }
 
-        public String getExpiryDate() { return expiryDate; }
-        public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
+        public String getCvc() {
+            return cvc;
+        }
+
+        public void setCvc(String cvc) {
+            this.cvc = cvc;
+        }
+
+        public String getCardholderName() {
+            return cardholderName;
+        }
+
+        public void setCardholderName(String cardholderName) {
+            this.cardholderName = cardholderName;
+        }
+
+        public String getExpiryDate() {
+            return expiryDate;
+        }
+
+        public void setExpiryDate(String expiryDate) {
+            this.expiryDate = expiryDate;
+        }
     }
-
 
     // ==== TIER MANAGEMENT ====
 
@@ -107,27 +188,27 @@ public class Rider {
      * Gets the tier tier string for Firestore persistence
      */
     public String getTier() {
-        return tier;    
+        return tier;
     }
 
     /**
      * Sets tier from Firestore and reconstructs the TierState object
      */
-    public void setTier(String tier) { 
+    public void setTier(String tier) {
         this.tier = tier;
         // Reconstruct tierState from string when loading from Firestore
-        switch(tier) {
-            case "Bronze": 
-                this.tierState = new BronzeTierState(); 
+        switch (tier) {
+            case "Bronze":
+                this.tierState = new BronzeTierState();
                 break;
-            case "Silver": 
-                this.tierState = new SilverTierState(); 
+            case "Silver":
+                this.tierState = new SilverTierState();
                 break;
-            case "Gold": 
-                this.tierState = new GoldTierState(); 
+            case "Gold":
+                this.tierState = new GoldTierState();
                 break;
-            default: 
-                this.tierState = new NoTierState(); 
+            default:
+                this.tierState = new NoTierState();
                 break;
         }
     }
@@ -135,19 +216,21 @@ public class Rider {
     /**
      * Evaluates tier based on rider stats and tracks changes
      */
-    public void evaluateTier(RiderStats riderStats){ 
+    public void evaluateTier(RiderStats riderStats) {
         String oldTier = this.tier;
-        
+
         // Let the current state evaluate and potentially change the tier
         tierState.evaluateTier(this, riderStats);
-        
+
         // Update tier string after evaluation
         this.tier = getTierName();
-        
+
         // Log tier change for notification
         if (!oldTier.equals(this.tier)) {
-            System.out.println("TIER CHANGE for " + getFullName() + ": " + oldTier + " → " + this.tier);
+            System.out.println("TIER CHANGE for " + getFullName() + ": " + oldTier + " → " + this.tier + "\n");
         }
+
+        System.out.println("\n" + getFullName() + " is in tier: " + this.tier);
     }
 
     /**
@@ -158,15 +241,15 @@ public class Rider {
         this.tier = getTierName();
     }
 
-    public double applyDiscount(double price){
+    public double applyDiscount(double price) {
         return tierState.applyDiscount(price);
     }
 
-    public int getExtraHoldMinutes(){
+    public int getExtraHoldMinutes() {
         return tierState.getExtraHoldMinutes();
     }
 
-    public String getTierName(){
+    public String getTierName() {
         return tierState.getClass().getSimpleName().replace("TierState", "");
     }
 }

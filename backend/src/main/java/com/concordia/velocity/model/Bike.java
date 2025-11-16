@@ -57,18 +57,21 @@ public class Bike implements Subject {
         this.stationId = stationId;
         this.reservationUser = null;
         this.reservationExpiry = null;
-        attach(new StatusObserver());
+        attach(new StatusObserver()); //*remove: apparently we don't want to auto attach observers on bike creation 
+                                     //since it does it in bike service
     }
 
     @Override
     public void attach(Observer observer) {
-        if (observers == null) observers = new ArrayList<>();
+        if (observers == null)
+            observers = new ArrayList<>();
         observers.add(observer);
     }
 
     @Override
     public void detach(Observer observer) {
-        if (observers == null) observers = new ArrayList<>();
+        if (observers == null)
+            observers = new ArrayList<>();
         observers.remove(observer);
     }
 
@@ -81,8 +84,18 @@ public class Bike implements Subject {
         }
     }
 
+    // notifyObservers with a custom message so we can detect the event in StatusObserver 
+    public void notifyObservers(String message) {
+        if (observers != null) {
+            for (Observer o : observers) {
+                o.update(message);
+            }
+        }
+    }
+
     public static boolean isValidStatus(String status) {
-        if (status == null) return false;
+        if (status == null)
+            return false;
         return VALID_STATUSES.contains(status);
     }
 
@@ -97,9 +110,9 @@ public class Bike implements Subject {
 
         if (STATUS_ON_TRIP.equalsIgnoreCase(this.status)
                 && !STATUS_AVAILABLE.equalsIgnoreCase(newStatus)) {
-            throw new IllegalStateException("Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
+            throw new IllegalStateException(
+                    "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
         }
-
 
         if (normalizedCurrentStatus.equals(normalizedNewStatus)) {
             return false;
@@ -111,8 +124,10 @@ public class Bike implements Subject {
     }
 
     public boolean isReservedActive() {
-        if (!STATUS_RESERVED.equalsIgnoreCase(this.status)) return false;
-        if (reservationExpiry == null) return false;
+        if (!STATUS_RESERVED.equalsIgnoreCase(this.status))
+            return false;
+        if (reservationExpiry == null)
+            return false;
 
         LocalDateTime expiryTime = timestampToLocalDateTime(reservationExpiry);
         return expiryTime != null && expiryTime.isAfter(LocalDateTime.now());
@@ -131,8 +146,8 @@ public class Bike implements Subject {
 
                 setStatus(STATUS_AVAILABLE);
                 setReservationExpiry(null);
+                notifyObservers("RESERVATION_EXPIRED userId=" + reservedByUserId);
                 setReservedByUserId(null);
-                notifyObservers();
                 System.out.println("Reservation expired, bike " + getBikeId() + " has been set to available.");
             }
         }, station.getReservationHoldTime(), TimeUnit.MINUTES);
@@ -151,7 +166,8 @@ public class Bike implements Subject {
      * Convert LocalDateTime to Timestamp
      */
     private Timestamp localDateTimeToTimestamp(LocalDateTime localDateTime) {
-        if (localDateTime == null) return null;
+        if (localDateTime == null)
+            return null;
         Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
         return Timestamp.ofTimeSecondsAndNanos(instant.getEpochSecond(), instant.getNano());
     }
@@ -160,29 +176,50 @@ public class Bike implements Subject {
      * Convert Timestamp to LocalDateTime
      */
     private LocalDateTime timestampToLocalDateTime(Timestamp timestamp) {
-        if (timestamp == null) return null;
+        if (timestamp == null)
+            return null;
         return LocalDateTime.ofInstant(
                 Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()),
-                ZoneId.systemDefault()
-        );
+                ZoneId.systemDefault());
     }
 
     // ============ Getters and Setters ============
 
-    public String getBikeId() { return bikeId; }
-    public void setBikeId(String bikeId) { this.bikeId = bikeId; }
+    public String getBikeId() {
+        return bikeId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setBikeId(String bikeId) {
+        this.bikeId = bikeId;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     // Firestore uses this
-    public Timestamp getReservationExpiry() { return reservationExpiry; }
-    public void setReservationExpiry(Timestamp reservationExpiry) { this.reservationExpiry = reservationExpiry; }
+    public Timestamp getReservationExpiry() {
+        return reservationExpiry;
+    }
 
-    // Convenience methods for LocalDateTime (marked with @Exclude so Firestore ignores them)
+    public void setReservationExpiry(Timestamp reservationExpiry) {
+        this.reservationExpiry = reservationExpiry;
+    }
+
+    // Convenience methods for LocalDateTime (marked with @Exclude so Firestore
+    // ignores them)
     @Exclude
     public LocalDateTime getReservationExpiryAsLocalDateTime() {
         return timestampToLocalDateTime(reservationExpiry);
@@ -193,14 +230,29 @@ public class Bike implements Subject {
         this.reservationExpiry = localDateTimeToTimestamp(localDateTime);
     }
 
-    public String getReservedByUserId() { return reservedByUserId; }
-    public void setReservedByUserId(String reservedByUserId) { this.reservedByUserId = reservedByUserId; }
+    public String getReservedByUserId() {
+        return reservedByUserId;
+    }
 
-    public String getDockId() { return dockId; }
-    public void setDockId(String dockId) { this.dockId = dockId; }
+    public void setReservedByUserId(String reservedByUserId) {
+        this.reservedByUserId = reservedByUserId;
+    }
 
-    public String getStationId() { return stationId; }
-    public void setStationId(String stationId) { this.stationId = stationId; }
+    public String getDockId() {
+        return dockId;
+    }
+
+    public void setDockId(String dockId) {
+        this.dockId = dockId;
+    }
+
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
+    }
 
     @Override
     public String toString() {

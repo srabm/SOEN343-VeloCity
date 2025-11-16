@@ -1,5 +1,6 @@
 package com.concordia.velocity.service;
 
+import com.concordia.velocity.model.Rider;
 import com.concordia.velocity.model.RiderStats;
 import com.concordia.velocity.model.Trip;
 import org.springframework.stereotype.Service;
@@ -42,17 +43,25 @@ public class LoyaltyStatsService {
     public RiderStats computeStats(String riderId) throws ExecutionException, InterruptedException {
         List<Trip> trips = loadRiderTrips(riderId);
 
-        RiderStats stats = new RiderStats();
+        // Get rider to access missedReservationsCount
+        Rider rider = loadRider(riderId);
 
+        RiderStats stats = new RiderStats();
         stats.setTripsLastYear(countTripsLastYear(trips));
-        stats.setMissedReservations(countMissedReservations(trips));
+        stats.setMissedReservations(rider != null ? rider.getMissedReservationsCount() : 0);
+        System.out.println("Rider " + riderId + " has missed reservations: " + stats.getMissedReservations());
         stats.setSuccessfulClaims(countSuccessfulClaims(trips));
         stats.setReturnedAllBikes(hasReturnedAllBikes(trips));
-
         stats.setTripsPerMonth(computeTripsPerMonth(trips));
         stats.setTripsPerWeek(computeTripsPerWeek(trips));
-
+        System.out.println("Computed stats for rider " + rider.getFirstName() + ": " + stats);
         return stats;
+    }
+
+    // load rider directly from Firestore to use in computeStats
+    private Rider loadRider(String riderId) throws ExecutionException, InterruptedException {
+        var doc = db.collection("riders").document(riderId).get().get();
+        return doc.exists() ? doc.toObject(Rider.class) : null;
     }
 
     private boolean hasReturnedAllBikes(List<Trip> trips) {
@@ -117,21 +126,21 @@ public class LoyaltyStatsService {
         return count;
     }
 
-    private int countMissedReservations(List<Trip> trips) {
-        int count = 0;
-        LocalDate oneYearAgo = LocalDate.now().minusYears(1);
+    // private int countMissedReservations(List<Trip> trips) {
+    //     int count = 0;
+    //     LocalDate oneYearAgo = LocalDate.now().minusYears(1);
 
-        for (Trip trip : trips) {
-            String s = trip.getStatus();
-            if ("missed".equalsIgnoreCase(s) || "expired".equalsIgnoreCase(s)) {
-                LocalDate date = getDate(trip.getStartTime());
-                if (date != null && date.isAfter(oneYearAgo)) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
+    //     for (Trip trip : trips) {
+    //         String s = trip.getStatus();
+    //         if ("missed".equalsIgnoreCase(s) || "expired".equalsIgnoreCase(s)) {
+    //             LocalDate date = getDate(trip.getStartTime());
+    //             if (date != null && date.isAfter(oneYearAgo)) {
+    //                 count++;
+    //             }
+    //         }
+    //     }
+    //     return count;
+    // }
 
     private int countSuccessfulClaims(List<Trip> trips) {
         int count = 0;
