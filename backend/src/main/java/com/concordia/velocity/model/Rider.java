@@ -2,12 +2,14 @@ package com.concordia.velocity.model;
 
 import com.concordia.velocity.state.NoTierState;
 import com.concordia.velocity.state.TierState;
-
+import java.util.ArrayList;
 import org.checkerframework.checker.units.qual.g;
-
 import com.concordia.velocity.state.BronzeTierState;
 import com.concordia.velocity.state.SilverTierState;
 import com.concordia.velocity.state.GoldTierState;
+import com.google.cloud.Timestamp;
+import java.util.List;
+import java.time.LocalDate;
 
 public class Rider {
     private String id;
@@ -18,7 +20,7 @@ public class Rider {
     private String phoneNumber;
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
-    private int missedReservationsCount = 0;
+    private List<Timestamp> missedReservationTimestamps = new ArrayList<>();
 
     // *remove: made these fields private, not sure if we had to or not
     private TierState tierState;
@@ -118,17 +120,37 @@ public class Rider {
         return isOperator != null && isOperator ? "OPERATOR" : "RIDER";
     }
 
-    public int getMissedReservationsCount() {
-        return missedReservationsCount;
+    public List<Timestamp> getMissedReservationTimestamps() {
+        return missedReservationTimestamps;
     }
 
-    public void setMissedReservationsCount(int count) {
-        this.missedReservationsCount = count;
+    public void setMissedReservationTimestamps(List<Timestamp> timestamps) {
+        this.missedReservationTimestamps = timestamps;
     }
 
-    //increment missed reservations count by 1
-    public void incrementMissedReservations() {
-        this.missedReservationsCount++;
+    // add a missed reservation timestamp
+    public void addMissedReservation() {
+        if (missedReservationTimestamps == null) {
+            missedReservationTimestamps = new ArrayList<>();
+        }
+        missedReservationTimestamps.add(Timestamp.now());
+    }
+
+    // Helper to count only last year
+    public int getMissedReservationsLastYear() {
+        if (missedReservationTimestamps == null)
+            return 0;
+
+        LocalDate oneYearAgo = LocalDate.now().minusYears(1);
+        int count = 0;
+
+        for (Timestamp ts : missedReservationTimestamps) {
+            LocalDate missedDate = ts.toSqlTimestamp().toLocalDateTime().toLocalDate();
+            if (missedDate.isAfter(oneYearAgo)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static class PaymentInfo {

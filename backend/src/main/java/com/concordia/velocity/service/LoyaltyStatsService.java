@@ -48,7 +48,7 @@ public class LoyaltyStatsService {
 
         RiderStats stats = new RiderStats();
         stats.setTripsLastYear(countTripsLastYear(trips));
-        stats.setMissedReservations(rider != null ? rider.getMissedReservationsCount() : 0);
+        stats.setMissedReservations(rider != null ? rider.getMissedReservationsLastYear() : 0);
         System.out.println("Rider " + riderId + " has missed reservations: " + stats.getMissedReservations());
         stats.setSuccessfulClaims(countSuccessfulClaims(trips));
         stats.setReturnedAllBikes(hasReturnedAllBikes(trips));
