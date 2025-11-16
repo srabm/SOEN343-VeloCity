@@ -78,17 +78,20 @@
             <p class="text-slate-500">Try clearing filters or searching a different Ride ID.</p>
           </div>
 
-          <ul v-else class="divide-y divide-slate-200">
-            <li v-for="ride in filteredRides" :key="ride._id"
-              :class="['py-2 cursor-pointer', ride._id === selectedRide?._id ? 'bg-blue-50' : '']"
-              @click="selectRide(ride)">
-              <div class="flex justify-between text-sm">
-                <span class="font-semibold">{{ ride.tripId }}</span>
-                <span>{{ formatDate(ride.startTime) }}</span>
-                <span class="font-semibold">${{ ride.bill?.total?.toFixed(2) || '—' }}</span>
-              </div>
-            </li>
-          </ul>
+          <div class="ride-list-scroll">
+            <ul class="divide-y divide-slate-200">
+              <li v-for="ride in filteredRides" :key="ride._id"
+                  :class="['py-2 cursor-pointer', ride._id === selectedRide?._id ? 'bg-blue-50' : '']"
+                  @click="selectRide(ride)">
+                <div class="flex justify-between text-sm">
+                  <span class="font-semibold">{{ ride.tripId }}</span>
+                  <span>{{ formatDate(ride.startTime) }}</span>
+                  <span class="font-semibold">${{ ride.bill?.total?.toFixed(2) || '—' }}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+
 
           
         </div>
@@ -128,7 +131,6 @@ async function loadInitialRides() {
       tripsCol,
       where("riderId", "==", user.value.uid),
       orderBy("startTime", "desc"),
-      limit(20)
     );
 
     const tripsSnap = await getDocs(tripsQuery);
@@ -229,4 +231,24 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.ride-list-scroll {
+  max-height: 60vh;      /* Keeps it on one screen */
+  overflow-y: auto;      /* Enables vertical scrolling */
+  padding-right: 6px;    /* For scrollbar spacing */
+}
+
+.ride-list-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ride-list-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;   /* Slate-300 */
+  border-radius: 4px;
+}
+
+.ride-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;   /* Slate-400 */
+}
+
+</style>
