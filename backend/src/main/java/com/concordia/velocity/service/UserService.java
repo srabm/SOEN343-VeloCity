@@ -19,7 +19,7 @@ public class UserService {
 
     //Fetch user info by ID (document ID or email) 
     public Rider getUserById(String userId) throws ExecutionException, InterruptedException {
-        DocumentSnapshot doc = db.collection("users").document(userId).get().get();
+        DocumentSnapshot doc = db.collection("riders").document(userId).get().get();
 
         if (!doc.exists()) return null;
 
@@ -30,7 +30,7 @@ public class UserService {
 
     //Check if an email already exists (for uniqueness) 
     public boolean emailExists(String email) throws ExecutionException, InterruptedException {
-        var query = db.collection("users")
+        var query = db.collection("riders")
                 .whereEqualTo("email", email)
                 .limit(1)
                 .get()
@@ -47,7 +47,7 @@ public class UserService {
             return response;
         }
 
-        db.collection("users").document(rider.getEmail()).set(rider).get();
+        db.collection("riders").document(rider.getEmail()).set(rider).get();
         response.put("message", "Rider created successfully");
         response.put("email", rider.getEmail());
         return response;
@@ -56,7 +56,7 @@ public class UserService {
     public Map<String, Object> updateUser(String userId, Map<String, Object> updates) throws ExecutionException, InterruptedException {
         Map<String, Object> response = new HashMap<>();
 
-        DocumentReference docRef = db.collection("users").document(userId);
+        DocumentReference docRef = db.collection("riders").document(userId);
         docRef.set(updates, SetOptions.merge()).get();
 
         response.put("message", "Rider updated successfully");
@@ -67,7 +67,7 @@ public class UserService {
     public Map<String, Object> deleteUser(String userId) throws ExecutionException, InterruptedException {
         Map<String, Object> response = new HashMap<>();
 
-        db.collection("users").document(userId).delete().get();
+        db.collection("riders").document(userId).delete().get();
         response.put("message", "Rider deleted successfully");
         response.put("userId", userId);
         return response;

@@ -1,6 +1,9 @@
 package com.concordia.velocity.model;
 import com.concordia.velocity.state.NoTierState;
 import com.concordia.velocity.state.TierState;
+import com.concordia.velocity.state.BronzeTierState;
+import com.concordia.velocity.state.SilverTierState;
+import com.concordia.velocity.state.GoldTierState;
 
 public class Rider {
     private String id;
@@ -14,11 +17,17 @@ public class Rider {
 
     //*remove: made these fields private, not sure if we had to or not
     private TierState tierState;
+    private String tier; // For Firestore persistence to store "NoTier", "Bronze", "Silver", "Gold"
     //*remove: never used, not sure if we need them 
-    private TierState noTierState;
-    private TierState bronzeTierState;
-    private TierState silverTierState;
-    private TierState goldTierState;
+    // private TierState noTierState;
+    // private TierState bronzeTierState;
+    // private TierState silverTierState;
+    // private TierState goldTierState;
+
+    public Rider() { // default constructor for Firestore
+        this.tierState = new NoTierState(); //initially the rider has no tier
+        this.tier = "NoTier";
+    }
 
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
     this.firstName = firstName;
@@ -27,6 +36,7 @@ public class Rider {
     this.email = email;
     this.phoneNumber = phoneNumber;
     this.tierState = new NoTierState(); //initially the rider has no tier
+    this.tier = "NoTier";
 }
     // Getters and Setters
     public String getId() {return id;}
@@ -90,12 +100,62 @@ public class Rider {
         public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
     }
 
-    public void evaluateTier(RiderStats riderStats){ 
-        tierState.evaluateTier(this, riderStats); //*remove: now passing riderStats to evaluateTier, not 100% sure if this is correct
+
+    // ==== TIER MANAGEMENT ====
+
+    /**
+     * Gets the tier tier string for Firestore persistence
+     */
+    public String getTier() {
+        return tier;    
     }
 
+    /**
+     * Sets tier from Firestore and reconstructs the TierState object
+     */
+    public void setTier(String tier) { 
+        this.tier = tier;
+        // Reconstruct tierState from string when loading from Firestore
+        switch(tier) {
+            case "Bronze": 
+                this.tierState = new BronzeTierState(); 
+                break;
+            case "Silver": 
+                this.tierState = new SilverTierState(); 
+                break;
+            case "Gold": 
+                this.tierState = new GoldTierState(); 
+                break;
+            default: 
+                this.tierState = new NoTierState(); 
+                break;
+        }
+    }
+
+    /**
+     * Evaluates tier based on rider stats and tracks changes
+     */
+    public void evaluateTier(RiderStats riderStats){ 
+        String oldTier = this.tier;
+        
+        // Let the current state evaluate and potentially change the tier
+        tierState.evaluateTier(this, riderStats);
+        
+        // Update tier string after evaluation
+        this.tier = getTierName();
+        
+        // Log tier change for notification
+        if (!oldTier.equals(this.tier)) {
+            System.out.println("TIER CHANGE for " + getFullName() + ": " + oldTier + " → " + this.tier);
+        }
+    }
+
+    /**
+     * Sets the tier state (called by TierState implementations)
+     */
     public void setTierState(TierState tierState) {
         this.tierState = tierState;
+        this.tier = getTierName();
     }
 
     public double applyDiscount(double price){

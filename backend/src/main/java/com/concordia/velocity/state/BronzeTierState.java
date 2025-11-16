@@ -11,7 +11,7 @@ import com.concordia.velocity.model.RiderStats;
 public class BronzeTierState implements TierState {
     private final double discount = 0.05;
     private final int hold = 0;
-    private RiderStats riderStats; //*remove: how do i pass this? should i add it as a parameter in evaluateTier?
+    // private RiderStats riderStats; //*remove: how do i pass this? should i add it as a parameter in evaluateTier?
 
      @Override
     public void evaluateTier(Rider rider, RiderStats riderStats) {

@@ -14,7 +14,7 @@ import com.concordia.velocity.model.RiderStats;
 public class SilverTierState implements TierState {
     private final double discount = 0.10;
     private final int hold = 2;
-    private RiderStats riderStats;
+
 
     @Override
     public void evaluateTier(Rider rider, RiderStats riderStats) {

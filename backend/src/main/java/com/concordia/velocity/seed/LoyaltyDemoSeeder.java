@@ -133,7 +133,7 @@
 //     }
 
 //     /**
-//      * Bronze rider: around 10 trips in the last year.
+//      * Bronze rider: over 10 trips in the last year.
 //      * We spread 10 trips over the past 10 months.
 //      */
 //     private void seedBronzeRiderTrips() throws Exception {
@@ -141,7 +141,7 @@
 
 //         LocalDateTime now = LocalDateTime.now();
 
-//         for (int i = 1; i <= 10; i++) {
+//         for (int i = 1; i <= 11; i++) {
 //             LocalDateTime start = now.minusMonths(i).withDayOfMonth(12).withHour(8).withMinute(30);
 
 //             // Alternate routes between a few stations
