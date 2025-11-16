@@ -4,6 +4,10 @@ import com.concordia.velocity.model.RiderStats;
 import com.concordia.velocity.model.Trip;
 import org.springframework.stereotype.Service;
 import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.firebase.cloud.FirestoreClient;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
@@ -29,15 +33,13 @@ import java.lang.InterruptedException;
 @Service
 public class LoyaltyStatsService {
 
-    private final TripService tripService;
+    private final Firestore db = FirestoreClient.getFirestore();
 
-    public LoyaltyStatsService(TripService tripService) {
-        this.tripService = tripService;
-    }
+    public LoyaltyStatsService() {}
 
     public RiderStats computeStats(String riderId) throws ExecutionException, InterruptedException {
 
-        List<Trip> trips = tripService.getRiderTrips(riderId); // loads all trips from Firestore for this rider
+        List<Trip> trips = loadRiderTrips(riderId);
 
         RiderStats stats = new RiderStats();
 
@@ -49,6 +51,22 @@ public class LoyaltyStatsService {
         stats.setTripsPerWeek(computeTripsPerWeek(trips));
 
         return stats;
+    }
+
+    // load trips directly from Firestore
+    private List<Trip> loadRiderTrips(String riderId) throws ExecutionException, InterruptedException {
+        var docs = db.collection("trips")
+                .whereEqualTo("riderId", riderId)
+                .get()
+                .get()
+                .getDocuments();
+
+        List<Trip> trips = new ArrayList<>();
+        for (QueryDocumentSnapshot doc : docs) {
+            Trip t = doc.toObject(Trip.class);
+            if (t != null) trips.add(t);
+        }
+        return trips;
     }
 
     // ---------------------------------------------------------------------

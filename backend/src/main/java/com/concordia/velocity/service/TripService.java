@@ -353,13 +353,16 @@ public class TripService {
         trip.completeTrip(stationId, station.getStationName(), dockId);
 
         //compute new loyalty tier
+        System.out.println("Looking up rider in Firestore: " + riderId);
         Rider rider = userService.getUserById(riderId);
+        System.out.println("Rider object = " + rider);
         if (rider != null) {
             RiderStats stats = loyaltyStatsService.computeStats(riderId);
             rider.evaluateTier(stats);
 
             Map<String, Object> updates = new HashMap<>();
-            updates.put("User updated. Tier: ", rider.getTierState());
+            updates.put("tier", rider.getTierName());
+            System.out.println("New tier for rider " + rider.getId() + ": " + rider.getTierState());
             userService.updateUser(riderId, updates); //to persist the new tier state
         }
 
