@@ -1,5 +1,9 @@
 package com.concordia.velocity.observer;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import com.concordia.velocity.model.Rider;
 import com.concordia.velocity.model.RiderStats;
 import com.concordia.velocity.service.LoyaltyStatsService;
@@ -9,10 +13,7 @@ import com.google.cloud.firestore.FieldValue;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
+//handles reservation expiry events and updates rider stats and tier accordingly
 public class ReservationObserver implements Observer {
     private final UserService userService;
     private final LoyaltyStatsService loyaltyStatsService;
@@ -31,26 +32,28 @@ public class ReservationObserver implements Observer {
                 try {
                     // atomic array union to add timestamp (thread-safe)
                     Map<String, Object> updates = new HashMap<>();
-                    updates.put("missedReservationTimestamps", 
-                               FieldValue.arrayUnion(Timestamp.now()));
-                    
+                    updates.put("missedReservationTimestamps",
+                            FieldValue.arrayUnion(Timestamp.now()));
+
+                    // adds missed reservation timestamp to rider document on firebase
                     db.collection("riders").document(userId)
-                      .update(updates).get();
-                    
+                            .update(updates).get();
+
                     System.out.println("Added missed reservation timestamp for rider " + userId);
-                    
-                    // reload and evaluate
                     Rider rider = userService.getUserById(userId);
                     if (rider != null) {
+                        // compute updated stats
                         RiderStats stats = loyaltyStatsService.computeStats(userId);
                         System.out.println("Computed stats: " + stats);
-                        
+
+                        // evaluate tier based on updated stats
                         rider.evaluateTier(stats);
-                        
+
+                        // update rider tier in Firestore
                         Map<String, Object> tierUpdates = new HashMap<>();
                         tierUpdates.put("tier", rider.getTier());
                         userService.updateUser(rider.getId(), tierUpdates);
-                        
+
                         System.out.println("Evaluated rider " + userId + ". New tier: " + rider.getTier());
                     }
                 } catch (ExecutionException | InterruptedException e) {
