@@ -85,8 +85,14 @@ public class LoyaltyStatsService {
         List<Trip> trips = new ArrayList<>();
         for (QueryDocumentSnapshot doc : docs) {
             Trip t = doc.toObject(Trip.class);
-            if (t != null)
+            if (t != null){
                 trips.add(t);
+                System.out.println(
+                "[DEBUG] Trip loaded → ID=" + t.getTripId()
+                + ", Status=" + t.getStatus()
+                + ", Start=" + t.getStartTime()
+            );
+            }
         }
         return trips;
     }
@@ -117,14 +123,20 @@ public class LoyaltyStatsService {
 
         for (Trip trip : trips) {
             LocalDate date = getDate(trip.getStartTime());
-            // Only count completed trips
-            if (date != null && date.isAfter(oneYearAgo)
-                    && "completed".equalsIgnoreCase(trip.getStatus())) {
+            String status = trip.getStatus();
+
+            // A trip counts if it was STARTED in the last year
+            boolean claimed = 
+                    "completed".equalsIgnoreCase(status) ||
+                    "active".equalsIgnoreCase(status);
+
+            if (date != null && !date.isBefore(oneYearAgo) && claimed) {
                 count++;
             }
         }
         return count;
     }
+
 
     // private int countMissedReservations(List<Trip> trips) {
     //     int count = 0;
@@ -150,16 +162,18 @@ public class LoyaltyStatsService {
             LocalDate date = getDate(trip.getStartTime());
             String status = trip.getStatus();
 
-            // Count trips that were started (claimed) within last year
-            // Exclude missed/expired reservations
-            if (date != null && date.isAfter(oneYearAgo)
-                    && !"missed".equalsIgnoreCase(status)
-                    && !"expired".equalsIgnoreCase(status)) {
+            // Successful claims = rider actually took the bike (active OR completed)
+            boolean claimed = 
+                    "completed".equalsIgnoreCase(status) ||
+                    "active".equalsIgnoreCase(status);
+
+            if (date != null && !date.isBefore(oneYearAgo) && claimed) {
                 count++;
             }
         }
         return count;
     }
+
 
     // ---------------------------------------------------------------------
     // MONTHLY TRIP DISTRIBUTION (12 LAST MONTHS)

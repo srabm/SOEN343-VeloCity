@@ -4,6 +4,7 @@ import com.concordia.velocity.model.*;
 import com.concordia.velocity.observer.DashboardObserver;
 import com.concordia.velocity.observer.StatusObserver;
 import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.reservation.ReservationManager;
 import com.concordia.velocity.strategy.OneTimeElectricPayment;
 import com.concordia.velocity.strategy.OneTimeStandardPayment;
 import com.concordia.velocity.strategy.PaymentStrategy;
@@ -89,6 +90,10 @@ public class TripService {
         if (!riderId.equals(bike.getReservedByUserId())) {
             throw new IllegalArgumentException("Rider " + riderId + " did not reserve this bike");
         }
+
+        // Stops the reservation timer
+        ReservationManager.cancel(bike.getBikeId());
+        bike.clearReservation();
 
         // Get dock and station info before removing bike
         String previousDockId = bike.getDockId();
@@ -334,6 +339,10 @@ public class TripService {
         dock.attach(notificationObserver);
         station.attach(dashboardObserver);
         station.attach(notificationObserver);
+
+        // Extra safety: ensure reservation timer is cancelled when ending trip
+        ReservationManager.cancel(bike.getBikeId());
+        bike.clearReservation();
 
         // End trip - change bike status to AVAILABLE
         bike.changeStatus(Bike.STATUS_AVAILABLE);

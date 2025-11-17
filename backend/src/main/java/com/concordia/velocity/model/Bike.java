@@ -3,6 +3,7 @@ package com.concordia.velocity.model;
 import com.concordia.velocity.observer.Observer;
 import com.concordia.velocity.observer.StatusObserver;
 import com.concordia.velocity.observer.Subject;
+import com.concordia.velocity.reservation.ReservationManager;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.Exclude;
 
@@ -38,14 +39,14 @@ public class Bike implements Subject {
 
     // Store as Timestamp for Firestore compatibility
     private Timestamp reservationExpiry;
-
     private String reservedByUserId;
     private String dockId;
     private String stationId;
-    private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+    // private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
     private Rider reservationUser;
 
     private transient List<Observer> observers = new ArrayList<>();
+    // private transient java.util.concurrent.ScheduledFuture<?> reservationTask;
 
     public Bike() {}
 
@@ -139,18 +140,25 @@ public class Bike implements Subject {
         setReservedByUserId(userId);
         setStatus(STATUS_RESERVED);
 
-        RESERVATION_SCHEDULER.schedule(() -> {
-            if (STATUS_RESERVED.equalsIgnoreCase(getStatus()) &&
-                    getReservationExpiry() != null &&
-                    !LocalDateTime.now().isBefore(getReservationExpiryAsLocalDateTime())) {
+        ReservationManager.schedule(
+            bikeId,
+            () -> {
+                LocalDateTime expiry = getReservationExpiryAsLocalDateTime();
 
-                setStatus(STATUS_AVAILABLE);
-                setReservationExpiry(null);
-                notifyObservers("RESERVATION_EXPIRED userId=" + reservedByUserId);
-                setReservedByUserId(null);
-                System.out.println("Reservation expired, bike " + getBikeId() + " has been set to available.");
-            }
-        }, station.getReservationHoldTime(), TimeUnit.MINUTES);
+                if (STATUS_RESERVED.equalsIgnoreCase(getStatus())
+                    && expiry != null
+                    && !LocalDateTime.now().isBefore(expiry)) {
+
+                    setStatus(STATUS_AVAILABLE);
+                    setReservationExpiry(null);
+                    notifyObservers("RESERVATION_EXPIRED userId=" + reservedByUserId);
+                    setReservedByUserId(null);
+
+                    System.out.println("Reservation expired, bike " + getBikeId() + " has been set to available.");
+                }
+            },
+            station.getReservationHoldTime()
+        );
 
         return expiryTime;
     }
@@ -158,6 +166,7 @@ public class Bike implements Subject {
     public void clearReservation() {
         this.reservationExpiry = null;
         this.reservedByUserId = null;
+        ReservationManager.cancel(this.bikeId);
     }
 
     // ============ Conversion Helpers ============
@@ -238,6 +247,21 @@ public class Bike implements Subject {
         this.reservedByUserId = reservedByUserId;
     }
 
+    // public void setReservationTask(java.util.concurrent.ScheduledFuture<?> task) {
+    //     this.reservationTask = task;
+    // }
+
+    // public void cancelReservationTimer() {
+    //     if (reservationExpiry == null) return;
+
+    //     if (reservationTask != null && !reservationTask.isDone()) {
+    //         reservationTask.cancel(true);
+    //         System.out.println("[DEBUG] Cancelled reservation timer for bike " + bikeId);
+    //     }
+
+    //     reservationTask = null; // important
+    // }
+    
     public String getDockId() {
         return dockId;
     }
