@@ -368,7 +368,7 @@ public class TripService {
 
         //calculate billing
         //*remove: still have to add the applyDiscount, but might have to do it in our payment strategy classes
-        Bill bill = calculateAndCreateBill(trip);
+        Bill bill = calculateAndCreateBill(trip, rider);
         trip.setBill(bill);
 
         // Persist all changes to Firestore
@@ -423,7 +423,7 @@ public class TripService {
      * Calculates billing for a completed trip and creates a bill
      * Uses Strategy pattern - delegates bill creation to the payment strategy
      */
-    private Bill calculateAndCreateBill(Trip trip) {
+    private Bill calculateAndCreateBill(Trip trip, Rider rider) {
         if (trip.getDurationMinutes() == null) {
             trip.calculateDuration();
         }
@@ -434,7 +434,7 @@ public class TripService {
         PaymentStrategy paymentStrategy = selectPaymentStrategy(trip.getBikeType());
 
         // Strategy creates the complete bill (cost + tax + total) and charge to rider
-        return paymentStrategy.createBillAndProcessPayment(trip, durationMinutes);
+        return paymentStrategy.createBillAndProcessPayment(trip, durationMinutes, rider);
     }
 
     /**

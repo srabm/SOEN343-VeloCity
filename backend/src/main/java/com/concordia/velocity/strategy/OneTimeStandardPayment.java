@@ -2,6 +2,7 @@ package com.concordia.velocity.strategy;
 
 import com.concordia.velocity.model.Bill;
 import com.concordia.velocity.model.Trip;
+import com.concordia.velocity.model.Rider;
 
 import java.util.UUID;
 
@@ -15,14 +16,26 @@ public class OneTimeStandardPayment implements PaymentStrategy {
     private static final double PRICE_PER_MINUTE = 0.22;
     private static final double TAX_RATE = 0.14975;  // 13% tax
 
-    public Bill createBillAndProcessPayment(Trip trip, long durationMinutes) {
-        // Calculate cost
+    public Bill createBillAndProcessPayment(Trip trip, long durationMinutes, Rider rider) {
+        // Calculate base cost
         double cost = BASE_PRICE + (durationMinutes * PRICE_PER_MINUTE);
         cost = Math.round(cost * 100.0) / 100.0;
 
+        // apply tier discount
+        double discount = 0.0;
+        if (rider != null) {
+            double discountedCost = rider.applyDiscount(cost);
+            discount = cost - discountedCost;
+            cost = discountedCost;
+        }
+
+        // round cost and discount
+        cost = Math.round(cost * 100.0) / 100.0;
+        discount = Math.round(discount * 100.0) / 100.0;
+
         // Create bill
         String billId = UUID.randomUUID().toString();
-        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), cost, 0, 0);
+        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), cost, discount, 0);
 
         // Calculate tax and total
         bill.calculateTax(TAX_RATE);
@@ -33,6 +46,9 @@ public class OneTimeStandardPayment implements PaymentStrategy {
 
         // process bill payment here --> get user credit card and charge
         bill.setStatus("paid");
+
+         System.out.println(String.format("Applied %s tier discount: $%.2f off", 
+                                        rider != null ? rider.getTier() : "NoTier", discount));
 
         return bill;
     }

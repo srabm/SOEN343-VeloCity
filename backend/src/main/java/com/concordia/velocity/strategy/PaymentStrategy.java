@@ -1,6 +1,7 @@
 package com.concordia.velocity.strategy;
 
 import com.concordia.velocity.model.Bill;
+import com.concordia.velocity.model.Rider;
 import com.concordia.velocity.model.Trip;
 
 /**
@@ -15,5 +16,5 @@ public interface PaymentStrategy {
      * @param durationMinutes the trip duration in minutes
      * @return a complete Bill object with cost, tax, and total calculated
      */
-    Bill createBillAndProcessPayment(Trip trip, long durationMinutes);
+    Bill createBillAndProcessPayment(Trip trip, long durationMinutes, Rider rider);
 }
