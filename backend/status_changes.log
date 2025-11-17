@@ -81,3 +81,29 @@
 [2025-11-17T21:44:30.861000000Z] TripID: Dock D008 status changed to occupied
 [2025-11-17T21:46:00.792000000Z] TripID: RESERVATION_EXPIRED userId=JVhF5jUT1KgLB3ediOXZiJgcbLv2
 [2025-11-17T21:46:01.010000000Z] TripID: Bike B077 changed status to available
+[2025-11-17T21:52:38.758000000Z] TripID: Bike B039 changed status to available
+[2025-11-17T21:52:38.760000000Z] TripID: Dock D061 status changed to occupied
+[2025-11-17T21:53:45.722000000Z] TripID: Bike B040 changed status to available
+[2025-11-17T21:53:45.731000000Z] TripID: Dock D124 status changed to occupied
+[2025-11-17T21:54:23.785000000Z] TripID: Bike B039 changed status to available
+[2025-11-17T21:54:23.786000000Z] TripID: Dock D117 status changed to occupied
+[2025-11-17T21:55:12.094000000Z] TripID: Bike B028 changed status to available
+[2025-11-17T21:55:12.096000000Z] TripID: Dock D059 status changed to occupied
+[2025-11-17T21:55:48.193000000Z] TripID: Bike B040 changed status to available
+[2025-11-17T21:55:48.196000000Z] TripID: Dock D087 status changed to occupied
+[2025-11-17T21:56:34.455000000Z] TripID: Bike B053 changed status to available
+[2025-11-17T21:56:34.457000000Z] TripID: Dock D095 status changed to occupied
+[2025-11-17T21:57:18.686000000Z] TripID: Bike B038 changed status to available
+[2025-11-17T21:57:18.688000000Z] TripID: Dock D106 status changed to occupied
+[2025-11-17T21:57:58.573000000Z] TripID: Bike B038 changed status to available
+[2025-11-17T21:57:58.574000000Z] TripID: Dock D001 status changed to occupied
+[2025-11-17T21:57:58.576000000Z] TripID: Station S001 status changed to full
+[2025-11-17T21:58:43.452000000Z] TripID: Bike B008 changed status to available
+[2025-11-17T21:58:43.456000000Z] TripID: Dock D082 status changed to occupied
+[2025-11-17T21:59:20.295000000Z] TripID: Bike B008 changed status to available
+[2025-11-17T21:59:20.296000000Z] TripID: Dock D111 status changed to occupied
+[2025-11-17T22:00:10.827000000Z] TripID: Bike B017 changed status to available
+[2025-11-17T22:00:10.828000000Z] TripID: Dock D019 status changed to occupied
+[2025-11-17T22:01:47.333000000Z] TripID: RESERVATION_EXPIRED userId=NdCBIzXE5tY9XWzsGpLpd0uybK32
+[2025-11-17T22:01:47.877000000Z] TripID: Bike B039 changed status to available
+[2025-11-17T22:15:00.907000000Z] TripID: RESERVATION_EXPIRED userId=NdCBIzXE5tY9XWzsGpLpd0uybK32
