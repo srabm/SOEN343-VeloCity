@@ -1,11 +1,12 @@
 package com.concordia.velocity.model;
 
-import com.concordia.velocity.observer.Observer;
-import com.concordia.velocity.observer.StatusObserver;
-import com.concordia.velocity.observer.Subject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
+import com.concordia.velocity.observer.Subject;
 
 public class Station implements Subject {
 
@@ -216,7 +217,7 @@ public class Station implements Subject {
     // we could probably integrate the incrementing with this... so incrementing code does not repeat + maintained simultaneously
     public void removeBike(Bike bike) {
         String bikeId = bike.getBikeId();
-        this.bikeIds.remove(bike);
+        this.bikeIds.remove(bikeId);
         setNumDockedBikes(Math.max(0, getNumDockedBikes() - 1));
 
         if (bike.getType().equals("electric")) {
