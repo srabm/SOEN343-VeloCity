@@ -235,10 +235,10 @@ public class Rider {
         }
     }
 
-    /**
-     * Evaluates tier based on rider stats and tracks changes
+    *  Evaluates tier based on rider stats and tracks changes
+     * @return TierChange object containing old and new tier, or null if no change
      */
-    public void evaluateTier(RiderStats riderStats) {
+    public TierChange evaluateTier(RiderStats riderStats)  {
         String oldTier = this.tier;
 
         // Let the current state evaluate and potentially change the tier
@@ -250,9 +250,11 @@ public class Rider {
         // Log tier change for notification
         if (!oldTier.equals(this.tier)) {
             System.out.println("TIER CHANGE for " + getFullName() + ": " + oldTier + " → " + this.tier + "\n");
+            return new TierChange(oldTier, this.tier);
         }
 
         System.out.println("\n" + getFullName() + " is in tier: " + this.tier);
+        return null;
     }
 
     /**
@@ -274,4 +276,24 @@ public class Rider {
     public String getTierName() {
         return tierState.getClass().getSimpleName().replace("TierState", "");
     }
+
+    /**
+     * Inner class to represent tier change information
+     */
+    public static class TierChange {
+        private final String oldTier;
+        private final String newTier;
+
+        public TierChange(String oldTier, String newTier) {
+            this.oldTier = oldTier;
+            this.newTier = newTier;
+        }
+
+        public String getOldTier() {
+            return oldTier;
+        }
+
+        public String getNewTier() {
+            return newTier;
+        }
 }

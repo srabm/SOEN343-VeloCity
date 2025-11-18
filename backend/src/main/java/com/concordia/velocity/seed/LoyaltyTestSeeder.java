@@ -299,9 +299,9 @@
 
 
 
-//=================================================
+// =================================================
 // SEEDER FOR 16 RIDERS (4 OF EACH TIER)
-//=================================================
+// =================================================
 // package com.concordia.velocity.seed;
 
 // import com.concordia.velocity.model.Trip;
@@ -517,14 +517,14 @@
 //         }
 //     }
 
+
 //     /**
 //      * Bronze riders:
-//      * - 5 trips/month for last 2 months
-//      * - 3 trips in current month
-//      * → total = 13 trips (covers Bronze, below Silver's 6 trips/month requirement).
+//      * - 6 trips/month for last 2 months
+//      * - 4 trips in current month
 //      */
 //     private void seedBronzeRiders() throws Exception {
-//         System.out.println("[LoyaltyTestSeeder] Seeding Bronze riders (5,5,3 monthly pattern)");
+//         System.out.println("[LoyaltyTestSeeder] Seeding Bronze riders (6,6,4 monthly pattern)");
 
 //         LocalDateTime now = LocalDateTime.now();
 
@@ -535,9 +535,10 @@
 //     }
 
 //     private void seedBronzePattern(String riderId, LocalDateTime now, String bikeId) throws Exception {
-//         // This month → 3 trips
-//         for (int i = 0; i < 3; i++) {
-//             LocalDateTime start = now.minusDays(i * 3)
+
+//         // Current month → 4 trips
+//         for (int i = 0; i < 4; i++) {
+//             LocalDateTime start = now.minusDays(i * 4)
 //                     .withHour(9 + (i % 2))
 //                     .withMinute(15 + i * 4);
 
@@ -552,9 +553,9 @@
 //             save(t);
 //         }
 
-//         // Last month → 5 trips
-//         for (int i = 0; i < 5; i++) {
-//             LocalDateTime start = now.minusMonths(1).minusDays(i * 3)
+//         // Previous month → 6 trips
+//         for (int i = 0; i < 6; i++) {
+//             LocalDateTime start = now.minusMonths(1).minusDays(i * 4)
 //                     .withHour(10 + (i % 2))
 //                     .withMinute(5 + i * 3);
 
@@ -569,9 +570,9 @@
 //             save(t);
 //         }
 
-//         // Two months ago → 5 trips
-//         for (int i = 0; i < 5; i++) {
-//             LocalDateTime start = now.minusMonths(2).minusDays(i * 3)
+//         // 2 months ago → 6 trips
+//         for (int i = 0; i < 6; i++) {
+//             LocalDateTime start = now.minusMonths(2).minusDays(i * 4)
 //                     .withHour(11 + (i % 2))
 //                     .withMinute(10 + i * 2);
 
@@ -587,13 +588,14 @@
 //         }
 //     }
 
+
 //     /**
 //      * Silver riders:
-//      * - 6 trips/month for last 3 months (including current month)
-//      * → satisfies Silver's 6 trips every month for last 3 months.
+//      * - 6 trips/week for last 11 weeks
+//      * - 4 trips in current week
 //      */
 //     private void seedSilverRiders() throws Exception {
-//         System.out.println("[LoyaltyTestSeeder] Seeding Silver riders (6 trips/month × 3 months)");
+//         System.out.println("[LoyaltyTestSeeder] Seeding Silver riders (6 trips/week × 11 weeks + 4 this week)");
 
 //         LocalDateTime now = LocalDateTime.now();
 
@@ -604,26 +606,35 @@
 //     }
 
 //     private void seedSilverPattern(String riderId, LocalDateTime now, String bikeId) throws Exception {
-//         for (int month = 0; month < 3; month++) {
+
+//         // Current week → 4 trips
+//         for (int i = 0; i < 4; i++) {
+//             LocalDateTime start = now.minusDays(i)
+//                     .withHour(9 + (i % 2))
+//                     .withMinute(10 + i * 3);
+
+//             Trip t = trip(
+//                     riderId,
+//                     start,
+//                     10 + random.nextInt(10),
+//                     bikeId,
+//                     "S007", "Quartier des Spectacles Station", "D063",
+//                     "S008", "Complexe Desjardins Station", "D078"
+//             );
+//             save(t);
+//         }
+
+//         // Weeks 1–11 → 6 trips/week
+//         for (int week = 1; week <= 11; week++) {
 //             for (int i = 0; i < 6; i++) {
-//                 LocalDateTime start = now.minusMonths(month)
-//                         .minusDays(i * 2)
+//                 LocalDateTime start = now.minusWeeks(week)
 //                         .withHour(8 + (i % 3))
-//                         .withMinute(10 + i * 3);
+//                         .withMinute(15 + i * 4);
 
 //                 Trip t;
+
 //                 switch (i % 3) {
 //                     case 0:
-//                         t = trip(
-//                                 riderId,
-//                                 start,
-//                                 10 + random.nextInt(10),
-//                                 bikeId,
-//                                 "S007", "Quartier des Spectacles Station", "D063",
-//                                 "S008", "Complexe Desjardins Station", "D078"
-//                         );
-//                         break;
-//                     case 1:
 //                         t = trip(
 //                                 riderId,
 //                                 start,
@@ -633,21 +644,33 @@
 //                                 "S009", "Place Ville Marie Station", "D090"
 //                         );
 //                         break;
+//                     case 1:
+//                         t = trip(
+//                                 riderId,
+//                                 start,
+//                                 10 + random.nextInt(10),
+//                                 bikeId,
+//                                 "S009", "Place Ville Marie Station", "D095",
+//                                 "S010", "Square Victoria Station", "D105"
+//                         );
+//                         break;
 //                     default:
 //                         t = trip(
 //                                 riderId,
 //                                 start,
 //                                 10 + random.nextInt(10),
 //                                 bikeId,
-//                                 "S010", "Square Victoria Station", "D105",
-//                                 "S011", "Chinatown Station", "D115"
+//                                 "S011", "Chinatown Station", "D115",
+//                                 "S007", "Quartier des Spectacles Station", "D063"
 //                         );
 //                         break;
 //                 }
+
 //                 save(t);
 //             }
 //         }
 //     }
+
 
 //     /**
 //      * Gold riders:

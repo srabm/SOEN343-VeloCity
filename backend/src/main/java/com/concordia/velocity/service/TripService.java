@@ -50,7 +50,7 @@ public class TripService {
      * @param dockCode the code to lock the dock
      * @return trip completion message
      */
-    public String dockBikeAndEndTrip(String bikeId, String riderId, String dockId, String dockCode)
+    public TripEndResponse dockBikeAndEndTrip(String bikeId, String riderId, String dockId, String dockCode)
             throws ExecutionException, InterruptedException {
         // Call the existing endTrip method with parameters in the correct order
         return endTrip(bikeId, dockId, dockCode, riderId);
@@ -256,6 +256,27 @@ public class TripService {
                 " at station " + station.getStationName();
     }
 
+     /**
+     * Response class for trip end operation
+     */
+    public static class TripEndResponse {
+        private final String message;
+        private final Rider.TierChange tierChange;
+
+        public TripEndResponse(String message, Rider.TierChange tierChange) {
+            this.message = message;
+            this.tierChange = tierChange;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public Rider.TierChange getTierChange() {
+            return tierChange;
+        }
+    }
+
     /**
      * Ends a trip by docking the bike
      *
@@ -263,9 +284,9 @@ public class TripService {
      * @param dockId   the dock to return to
      * @param dockCode the code to lock the dock
      * @param riderId  the rider ending the trip
-     * @return trip completion message
+     * @return TripEndResponse containing completion message and tier change info
      */
-    public String endTrip(String bikeId, String dockId, String dockCode, String riderId)
+    public TripEndResponse endTrip(String bikeId, String dockId, String dockCode, String riderId)
             throws ExecutionException, InterruptedException {
 
         // Retrieve bike from Firestore
@@ -365,9 +386,10 @@ public class TripService {
         System.out.println("Looking up rider in Firestore: " + riderId);
         Rider rider = userService.getUserById(riderId);
         System.out.println("Rider object = " + rider);
+        Rider.TierChange tierChange = null;
         if (rider != null) {
             RiderStats stats = loyaltyStatsService.computeStats(riderId);
-            rider.evaluateTier(stats);
+            tierChange = rider.evaluateTier(stats);
 
             Map<String, Object> updates = new HashMap<>();
             updates.put("tier", rider.getTierName());
@@ -387,7 +409,7 @@ public class TripService {
         db.collection("trips").document(trip.getTripId()).set(trip).get();
         db.collection("bills").document(bill.getBillId()).set(bill).get();
 
-        return String.format(
+        String message = String.format(
                 "Trip ended successfully. Bike %s docked at dock %s at station %s (%s). " +
                         "Trip duration: %d minutes. Total cost: $%.2f (including tax).",
                 bikeId, dockId, stationId, station.getStationName(),

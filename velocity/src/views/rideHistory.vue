@@ -1,5 +1,11 @@
 <template>
   <topbar />
+  <TierNotification
+    v-if="tierChange.oldTier && tierChange.newTier"
+    :oldTier="tierChange.oldTier"
+    :newTier="tierChange.newTier"
+    @close="dismissTierNotification"
+  />
   <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
     <div class="min-h-screen bg-black/40">
       <header class="text-center py-8 text-white drop-shadow">
@@ -102,6 +108,7 @@
 
 <script setup>
 import topbar from './topbar.vue'
+import TierNotification from '../components/TierNotification.vue'
 import { ref, computed, onMounted } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { tripApi } from "../services/api.js"; // updated api.js
@@ -114,6 +121,7 @@ const user = ref(null);
 const allRides = ref([]);
 const selectedRide = ref(null);
 const canLoadMore = ref(false);
+const tierChange = ref({ oldTier: null, newTier: null });
 
 const filters = ref({
   searchId: "",
@@ -218,11 +226,38 @@ function formatDate(date) {
   return date.toLocaleDateString();
 }
 
+function checkForTierChange(userId) {
+  // Check for pending tier change notification
+  const tierChangeKey = `pending_tier_change_${userId}`;
+  const pendingTierChange = localStorage.getItem(tierChangeKey);
+  
+  if (pendingTierChange) {
+    try {
+      const tierData = JSON.parse(pendingTierChange);
+      tierChange.value = {
+        oldTier: tierData.oldTier,
+        newTier: tierData.newTier
+      };
+      // Clear the pending notification so it doesn't show again
+      localStorage.removeItem(tierChangeKey);
+    } catch (e) {
+      console.error('Error parsing tier change data:', e);
+      localStorage.removeItem(tierChangeKey);
+    }
+  }
+}
+
+function dismissTierNotification() {
+  tierChange.value = { oldTier: null, newTier: null };
+}
+
 onMounted(() => {
   const auth = getAuth();
   onAuthStateChanged(auth, async (firebaseUser) => {
     if (firebaseUser) {
       user.value = firebaseUser;
+      // Check for tier change notification first
+      checkForTierChange(firebaseUser.uid);
       await loadInitialRides();
     } else {
       console.warn("No user logged in");

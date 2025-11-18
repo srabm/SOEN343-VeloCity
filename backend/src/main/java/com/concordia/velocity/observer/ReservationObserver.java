@@ -47,14 +47,18 @@ public class ReservationObserver implements Observer {
                         System.out.println("Computed stats: " + stats);
 
                         // evaluate tier based on updated stats
-                        rider.evaluateTier(stats);
+                        Rider.TierChange tierChange = rider.evaluateTier(stats);
 
                         // update rider tier in Firestore
                         Map<String, Object> tierUpdates = new HashMap<>();
                         tierUpdates.put("tier", rider.getTier());
                         userService.updateUser(rider.getId(), tierUpdates);
 
-                        System.out.println("Evaluated rider " + userId + ". New tier: " + rider.getTier());
+                        if (tierChange != null) {
+                            System.out.println("Tier changed for rider " + userId + ": " + tierChange.getOldTier() + " → " + tierChange.getNewTier());
+                        } else {
+                            System.out.println("Evaluated rider " + userId + ". New tier: " + rider.getTier());
+                        }
                     }
                 } catch (ExecutionException | InterruptedException e) {
                     System.err.println("Error: " + e.getMessage());
