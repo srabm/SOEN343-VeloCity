@@ -3,233 +3,256 @@ package com.concordia.velocity.service;
 import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.model.Dock;
 import com.concordia.velocity.model.Station;
-import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.Observer;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.WriteBatch;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-// todo full review of this class / the move bike method
-
+/**
+ * Service for handling bike transfers between docks and stations
+ */
 @Service
 public class TransferService {
 
-    private final Firestore db = FirestoreClient.getFirestore();
+    private static final String BIKES_COLLECTION = "bikes";
+    private static final String DOCKS_COLLECTION = "docks";
+    private static final String STATIONS_COLLECTION = "stations";
 
     /**
-     * Moves a bike from one station to another
-     *
-     * This operation:
-     * 1. Validates all entities exist
-     * 2. Validates bike can be moved (not reserved or on trip)
-     * 3. Validates destination station has capacity
-     * 4. Validates destination dock is empty
-     * 5. Updates bike location
-     * 6. Updates source dock (set to empty)
-     * 7. Updates destination dock (set to occupied)
-     * 8. Updates station bike counts
-     * 9. Uses Firestore batch to ensure atomicity
-     *
-     * @param bikeId the bike to move
-     * @param sourceStationId the station where bike currently is
-     * @param destinationStationId the station to move bike to
-     * @param destinationDockId the specific dock to place bike in
-     * @return confirmation message
+     * Get all stations from Firestore
      */
-    public String moveBike(String bikeId, String sourceStationId, String destinationStationId, String destinationDockId)
+    public List<Station> getAllStations() throws ExecutionException, InterruptedException {
+        Firestore db = FirestoreClient.getFirestore();
+
+        ApiFuture<QuerySnapshot> future = db.collection(STATIONS_COLLECTION).get();
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+
+        List<Station> stations = new ArrayList<>();
+        for (QueryDocumentSnapshot document : documents) {
+            Station station = document.toObject(Station.class);
+            stations.add(station);
+        }
+
+        return stations;
+    }
+
+    /**
+     * Get all available bikes at a specific station
+     */
+    public List<Bike> getAvailableBikesAtStation(String stationId)
             throws ExecutionException, InterruptedException {
 
-        // ==================== Step 1: Fetch all entities ====================
-        DocumentSnapshot bikeDoc = db.collection("bikes").document(bikeId).get().get();
-        Bike bike = bikeDoc.toObject(Bike.class);
-
-        DocumentSnapshot sourceStationDoc = db.collection("stations").document(sourceStationId).get().get();
-        Station sourceStation = sourceStationDoc.toObject(Station.class);
-
-        DocumentSnapshot destinationStationDoc = db.collection("stations").document(destinationStationId).get().get();
-        Station destinationStation = destinationStationDoc.toObject(Station.class);
-
-        DocumentSnapshot destinationDockDoc = db.collection("docks").document(destinationDockId).get().get();
-        Dock destinationDock = destinationDockDoc.toObject(Dock.class);
-
-        // Validate all entities exist
-        if (bike == null) {
-            throw new IllegalArgumentException("Bike not found: " + bikeId);
-        }
-        if (sourceStation == null) {
-            throw new IllegalArgumentException("Source station not found: " + sourceStationId);
-        }
-        if (destinationStation == null) {
-            throw new IllegalArgumentException("Destination station not found: " + destinationStationId);
-        }
-        if (destinationDock == null) {
-            throw new IllegalArgumentException("Destination dock not found: " + destinationDockId);
+        if (stationId == null || stationId.isEmpty()) {
+            throw new IllegalArgumentException("Station ID cannot be null or empty");
         }
 
-        // ==================== Step 2: Validate bike state ====================
-        String currentBikeStatus = bike.getStatus();
+        Firestore db = FirestoreClient.getFirestore();
 
-        if (Bike.STATUS_RESERVED.equalsIgnoreCase(currentBikeStatus)) {
-            throw new IllegalStateException(
-                    "Cannot move bike " + bikeId + " - it is currently reserved by user " +
-                            bike.getReservedByUserId()
-            );
+        ApiFuture<QuerySnapshot> future = db.collection(BIKES_COLLECTION)
+                .whereEqualTo("stationId", stationId)
+                .whereEqualTo("status", Bike.STATUS_AVAILABLE)
+                .get();
+
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+        List<Bike> bikes = new ArrayList<>();
+
+        for (QueryDocumentSnapshot document : documents) {
+            Bike bike = document.toObject(Bike.class);
+            bikes.add(bike);
         }
 
-        if (Bike.STATUS_ON_TRIP.equalsIgnoreCase(currentBikeStatus)) {
-            throw new IllegalStateException(
-                    "Cannot move bike " + bikeId + " - it is currently on a trip"
-            );
-        }
-
-        // ==================== Step 3: Validate bike is at source station ====================
-        String currentStationId = bike.getStationId();
-        if (currentStationId == null || !currentStationId.equals(sourceStationId)) {
-            throw new IllegalStateException(
-                    "Bike " + bikeId + " is not at source station " + sourceStationId +
-                            ". Current station: " + (currentStationId != null ? currentStationId : "none")
-            );
-        }
-
-        String currentDockId = bike.getDockId();
-        if (currentDockId == null) {
-            throw new IllegalStateException(
-                    "Bike " + bikeId + " has no dock assignment. Cannot determine source dock."
-            );
-        }
-
-        // Fetch source dock
-        DocumentSnapshot sourceDockDoc = db.collection("docks").document(currentDockId).get().get();
-        Dock sourceDock = sourceDockDoc.toObject(Dock.class);
-
-        if (sourceDock == null) {
-            throw new IllegalArgumentException("Source dock not found: " + currentDockId);
-        }
-
-        // Validate source dock belongs to source station
-        validateDockAtStation(sourceDock, sourceStationId);
-
-        // ==================== Step 4: Validate destination station ====================
-        if (Station.STATUS_OUT_OF_SERVICE.equalsIgnoreCase(destinationStation.getStatus())) {
-            throw new IllegalStateException(
-                    "Destination station " + destinationStationId + " (" +
-                            destinationStation.getStationName() + ") is out of service"
-            );
-        }
-
-        if (destinationStation.getNumDockedBikes() >= destinationStation.getCapacity()) {
-            throw new IllegalStateException(
-                    "Destination station " + destinationStationId + " (" +
-                            destinationStation.getStationName() + ") is full. " +
-                            "Capacity: " + destinationStation.getCapacity() +
-                            ", Current bikes: " + destinationStation.getNumDockedBikes()
-            );
-        }
-
-        // ==================== Step 5: Validate destination dock ====================
-        // Validate destination dock belongs to destination station
-        validateDockAtStation(destinationDock, destinationStationId);
-
-        if (!Dock.STATUS_EMPTY.equalsIgnoreCase(destinationDock.getStatus())) {
-            throw new IllegalStateException(
-                    "Destination dock " + destinationDockId + " is not empty. " +
-                            "Current status: " + destinationDock.getStatus() +
-                            (destinationDock.getBikeId() != null ?
-                                    ", occupied by bike: " + destinationDock.getBikeId() : "")
-            );
-        }
-
-        // ==================== Step 6: Perform the move ====================
-        // Attach observers
-        Observer dashboardObserver = new DashboardObserver();
-
-        bike.attach(dashboardObserver);
-        sourceDock.attach(dashboardObserver);
-        destinationDock.attach(dashboardObserver);
-        sourceStation.attach(dashboardObserver);
-        destinationStation.attach(dashboardObserver);
-
-        // Update bike location
-        bike.setStationId(destinationStationId);
-        bike.setDockId(destinationDockId);
-
-        // Update source dock (set to empty)
-        sourceDock.setStatus(Dock.STATUS_EMPTY);
-        sourceDock.setBikeId(null);
-        sourceDock.notifyObservers();
-
-        // Update destination dock (set to occupied)
-        destinationDock.setStatus(Dock.STATUS_OCCUPIED);
-        destinationDock.setBikeId(bikeId);
-        destinationDock.notifyObservers();
-
-        sourceStation.removeBike(bike);
-        destinationStation.addBike(bike);
-
-        // ==================== Step 7: Persist using Firestore Batch ====================
-        // Using batch writes ensures all updates succeed or all fail (atomicity)
-        WriteBatch batch = db.batch();
-
-        batch.set(db.collection("bikes").document(bikeId), bike);
-        batch.set(db.collection("docks").document(currentDockId), sourceDock);
-        batch.set(db.collection("docks").document(destinationDockId), destinationDock);
-        batch.set(db.collection("stations").document(sourceStationId), sourceStation);
-        batch.set(db.collection("stations").document(destinationStationId), destinationStation);
-
-        // Commit all changes atomically
-        batch.commit().get();
-
-        // Notify observers
-        dashboardObserver.update("Bike " + bikeId + " moved from " + sourceStation.getStationName() +
-                " to " + destinationStation.getStationName());
-
-        return "Bike " + bikeId + " (" + bike.getType() + ") successfully moved from " +
-                sourceStation.getStationName() + " (dock " + currentDockId + ") to " +
-                destinationStation.getStationName() + " (dock " + destinationDockId + "). " +
-                "Source station now has " + sourceStation.getNumDockedBikes() + "/" + sourceStation.getCapacity() + " bikes. " +
-                "Destination station now has " + destinationStation.getNumDockedBikes() + "/" +
-                destinationStation.getCapacity() + " bikes.";
-    }
-
-    // ==================== Validation Helper Methods ====================
-
-    /**
-     * Validates that a bike is assigned to the specified station
-     */
-    private void validateBikeAtStation(Bike bike, String expectedStationId) {
-        if (!expectedStationId.equals(bike.getStationId())) {
-            throw new IllegalStateException(
-                    "Bike " + bike.getBikeId() + " is not at station " + expectedStationId +
-                            ". Current station: " + bike.getStationId()
-            );
-        }
+        return bikes;
     }
 
     /**
-     * Validates that a dock belongs to the specified station
+     * Get all available (empty) docks at a specific station
      */
-    private void validateDockAtStation(Dock dock, String expectedStationId) {
-        if (!expectedStationId.equals(dock.getStationId())) {
-            throw new IllegalStateException(
-                    "Dock " + dock.getDockId() + " does not belong to station " + expectedStationId +
-                            ". Current station: " + dock.getStationId()
-            );
+    public List<Dock> getAvailableDocksAtStation(String stationId)
+            throws ExecutionException, InterruptedException {
+
+        if (stationId == null || stationId.isEmpty()) {
+            throw new IllegalArgumentException("Station ID cannot be null or empty");
         }
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        ApiFuture<QuerySnapshot> future = db.collection(DOCKS_COLLECTION)
+                .whereEqualTo("stationId", stationId)
+                .whereEqualTo("status", Dock.STATUS_EMPTY)
+                .get();
+
+        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+        List<Dock> docks = new ArrayList<>();
+
+        for (QueryDocumentSnapshot document : documents) {
+            Dock dock = document.toObject(Dock.class);
+            docks.add(dock);
+        }
+
+        return docks;
     }
 
     /**
-     * Validates that a bike is at a specific dock
+     * Transfer a bike from one dock to another
      */
-    private void validateBikeAtDock(Bike bike, String expectedDockId) {
-        if (!expectedDockId.equals(bike.getDockId())) {
-            throw new IllegalStateException(
-                    "Bike " + bike.getBikeId() + " is not at dock " + expectedDockId +
-                            ". Current dock: " + bike.getDockId()
-            );
-        }
+    public Map<String, Object> transferBike(
+            String bikeId,
+            String sourceDockId,
+            String destinationDockId,
+            String sourceStationId,
+            String destinationStationId
+    ) throws ExecutionException, InterruptedException {
+
+        Firestore db = FirestoreClient.getFirestore();
+
+        // Start a transaction to ensure atomicity
+        ApiFuture<Map<String, Object>> transaction = db.runTransaction(txn -> {
+
+            // 1. Fetch the bike
+            DocumentReference bikeRef = db.collection(BIKES_COLLECTION).document(bikeId);
+            DocumentSnapshot bikeDoc = txn.get(bikeRef).get();
+
+            if (!bikeDoc.exists()) {
+                throw new IllegalArgumentException("Bike not found: " + bikeId);
+            }
+
+            Bike bike = bikeDoc.toObject(Bike.class);
+
+            // Validate bike status
+            if (!Bike.STATUS_AVAILABLE.equalsIgnoreCase(bike.getStatus())) {
+                throw new IllegalStateException(
+                        "Bike is not available for transfer. Current status: " + bike.getStatus()
+                );
+            }
+
+            // Validate bike is at the source dock
+            if (!sourceDockId.equals(bike.getDockId())) {
+                throw new IllegalArgumentException(
+                        "Bike is not at the specified source dock. Expected: " +
+                                sourceDockId + ", Actual: " + bike.getDockId()
+                );
+            }
+
+            // 2. Fetch source dock
+            DocumentReference sourceDockRef = db.collection(DOCKS_COLLECTION).document(sourceDockId);
+            DocumentSnapshot sourceDockDoc = txn.get(sourceDockRef).get();
+
+            if (!sourceDockDoc.exists()) {
+                throw new IllegalArgumentException("Source dock not found: " + sourceDockId);
+            }
+
+            Dock sourceDock = sourceDockDoc.toObject(Dock.class);
+
+            if (!Dock.STATUS_OCCUPIED.equalsIgnoreCase(sourceDock.getStatus())) {
+                throw new IllegalStateException(
+                        "Source dock is not occupied. Status: " + sourceDock.getStatus()
+                );
+            }
+
+            if (!bikeId.equals(sourceDock.getBikeId())) {
+                throw new IllegalArgumentException(
+                        "Source dock does not contain the specified bike"
+                );
+            }
+
+            // 3. Fetch destination dock
+            DocumentReference destDockRef = db.collection(DOCKS_COLLECTION).document(destinationDockId);
+            DocumentSnapshot destDockDoc = txn.get(destDockRef).get();
+
+            if (!destDockDoc.exists()) {
+                throw new IllegalArgumentException(
+                        "Destination dock not found: " + destinationDockId
+                );
+            }
+
+            Dock destDock = destDockDoc.toObject(Dock.class);
+
+            if (!Dock.STATUS_EMPTY.equalsIgnoreCase(destDock.getStatus())) {
+                throw new IllegalStateException(
+                        "Destination dock is not empty. Status: " + destDock.getStatus()
+                );
+            }
+
+            // 4. Fetch source station
+            DocumentReference sourceStationRef = db.collection(STATIONS_COLLECTION).document(sourceStationId);
+            DocumentSnapshot sourceStationDoc = txn.get(sourceStationRef).get();
+
+            if (!sourceStationDoc.exists()) {
+                throw new IllegalArgumentException(
+                        "Source station not found: " + sourceStationId
+                );
+            }
+
+            Station sourceStation = sourceStationDoc.toObject(Station.class);
+
+            // 5. Fetch destination station
+            DocumentReference destStationRef = db.collection(STATIONS_COLLECTION).document(destinationStationId);
+            DocumentSnapshot destStationDoc = txn.get(destStationRef).get();
+
+            if (!destStationDoc.exists()) {
+                throw new IllegalArgumentException(
+                        "Destination station not found: " + destinationStationId
+                );
+            }
+
+            Station destStation = destStationDoc.toObject(Station.class);
+
+            if (!destStation.hasAvailableSpace()) {
+                throw new IllegalStateException(
+                        "Destination station has no available space or is out of service"
+                );
+            }
+
+            // 6. Perform the transfer
+            boolean isInterStationTransfer = !sourceStationId.equals(destinationStationId);
+
+            // Update bike
+            bike.setDockId(destinationDockId);
+            bike.setStationId(destinationStationId);
+            txn.set(bikeRef, bike);
+
+            // Update source dock - make it empty
+            sourceDock.changeStatus(Dock.STATUS_EMPTY);
+            sourceDock.setBikeId(null);
+            txn.set(sourceDockRef, sourceDock);
+
+            // Update destination dock - make it occupied
+            destDock.changeStatus(Dock.STATUS_OCCUPIED);
+            destDock.setBikeId(bikeId);
+            txn.set(destDockRef, destDock);
+
+            // Update stations if inter-station transfer
+            if (isInterStationTransfer) {
+                sourceStation.removeBike(bike);
+                txn.set(sourceStationRef, sourceStation);
+
+                destStation.addBike(bike);
+                txn.set(destStationRef, destStation);
+            }
+
+            // 7. Create response map
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Bike successfully transferred");
+            response.put("bikeId", bike.getBikeId());
+            response.put("sourceDockId", sourceDockId);
+            response.put("destinationDockId", destinationDockId);
+            response.put("sourceStationId", sourceStationId);
+            response.put("sourceStationName", sourceStation.getStationName());
+            response.put("destinationStationId", destinationStationId);
+            response.put("destinationStationName", destStation.getStationName());
+            response.put("interStationTransfer", isInterStationTransfer);
+            response.put("timestamp", java.time.Instant.now().toString());
+
+            return response;
+        });
+
+        return transaction.get();
     }
 }

@@ -7,6 +7,7 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.concurrent.ExecutionException;
  * To run: Uncomment @Component annotation above
  * Or manually call seedFirestoreData() bean
  */
-// @Component  // Uncomment to run on startup -> ./gradlew bootRun --args='--seed'
+@Component  // Uncomment to run on startup -> ./gradlew bootRun --args='--seed'
 public class FirestoreDataSeeder {
 
     private final Random random = new Random();
@@ -62,10 +63,10 @@ public class FirestoreDataSeeder {
      * Preserves: riders, users (if you have them)
      */
     private void clearDatabase(Firestore db) throws ExecutionException, InterruptedException {
-        System.out.println("🗑️  Clearing existing data (preserving riders)...");
+        System.out.println("🗑️  Clearing existing data (preserving riders, trips, bills)...");
 
         // Only clear these collections - riders will be preserved
-        String[] collections = {"stations", "docks", "bikes", "trips", "bills"};
+        String[] collections = {"stations", "docks", "bikes"};
 
         for (String collection : collections) {
             var docs = db.collection(collection).listDocuments();
@@ -77,7 +78,7 @@ public class FirestoreDataSeeder {
             System.out.println("   Cleared " + count + " documents from: " + collection);
         }
 
-        System.out.println("   ✓ Riders collection preserved");
+        System.out.println("   ✓ Riders, trips, bills collections preserved");
     }
 
     /**
@@ -463,7 +464,7 @@ public class FirestoreDataSeeder {
                 // Station 1: Downtown Ste-Catherine (8 bikes)
                 new Bike("B001", "available", "standard", "D001", "S001"),
                 new Bike("B002", "available", "standard", "D002", "S001"),
-                new Bike("B003", "reserved", "electric", "D003", "S001"),
+                new Bike("B003", "available", "electric", "D003", "S001"),
                 new Bike("B004", "maintenance", "standard", "D004", "S001"),
                 new Bike("B005", "available", "standard", "D005", "S001"),
                 new Bike("B006", "available", "electric", "D006", "S001"),
