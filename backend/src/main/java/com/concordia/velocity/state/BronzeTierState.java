@@ -30,7 +30,7 @@ public class BronzeTierState implements TierState {
 
         //if the bronze criteria is still met, check for silver criteria 
         //*remove: i dont think i needed to check if the boolean bronzeCriteriaMet is true again, since if it was false it would have already returned, but better safe than sorry
-        if (bronzeCriteriaMet && riderStats.hasSuccessfulClaims(5) && riderStats.hasTripsEveryMonth(5, 3)){
+        if (bronzeCriteriaMet && riderStats.hasSuccessfulClaims(5) && riderStats.hasTripsEveryMonth(6, 3)){
             rider.setTierState(new SilverTierState());
         }
     }

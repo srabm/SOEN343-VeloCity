@@ -14,8 +14,8 @@ public class GoldTierState implements TierState {
   @Override
     public void evaluateTier(Rider rider, RiderStats riderStats) {
         boolean bronzeCriteriaMet = riderStats.hasNoMissedReservations() && riderStats.returnedAllBikes() && riderStats.hasTripsLastYear(11);
-        boolean silverCriteriaMet = bronzeCriteriaMet && riderStats.hasSuccessfulClaims(5) && riderStats.hasTripsEveryMonth(5, 3);
-        boolean goldCriteriaMet = silverCriteriaMet && riderStats.hasTripsEveryWeek(5, 12);
+        boolean silverCriteriaMet = bronzeCriteriaMet && riderStats.hasSuccessfulClaims(5) && riderStats.hasTripsEveryMonth(6, 3);
+        boolean goldCriteriaMet = silverCriteriaMet && riderStats.hasTripsEveryWeek(6, 12);
 
         if (!bronzeCriteriaMet) {
             rider.setTierState(new NoTierState());

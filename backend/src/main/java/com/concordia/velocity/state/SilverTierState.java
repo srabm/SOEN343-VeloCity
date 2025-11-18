@@ -19,7 +19,7 @@ public class SilverTierState implements TierState {
     @Override
     public void evaluateTier(Rider rider, RiderStats riderStats) {
         boolean bronzeCriteriaMet = riderStats.hasNoMissedReservations() && riderStats.returnedAllBikes() && riderStats.hasTripsLastYear(11);
-        boolean silverCriteriaMet = bronzeCriteriaMet && riderStats.hasSuccessfulClaims(5) && riderStats.hasTripsEveryMonth(5, 3);
+        boolean silverCriteriaMet = bronzeCriteriaMet && riderStats.hasSuccessfulClaims(5) && riderStats.hasTripsEveryMonth(6, 3);
 
         //off the bat, check if bronzeCriteria is still met, if not, downgrade to no tier
         if (!bronzeCriteriaMet) {
@@ -34,7 +34,7 @@ public class SilverTierState implements TierState {
         }
 
         //since we know both bronze and silver criterias are met, we can test for gold criteria and either upgrade or stay
-        if (silverCriteriaMet && riderStats.hasTripsEveryWeek(5, 12)){
+        if (silverCriteriaMet && riderStats.hasTripsEveryWeek(6, 12)){
             rider.setTierState(new GoldTierState());
         }
 

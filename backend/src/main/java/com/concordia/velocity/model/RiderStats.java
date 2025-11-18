@@ -113,7 +113,7 @@ public class RiderStats {
          * Silver requirement:
          * tripsPerMonth >= minTrips for the last 'months' months.
          * Example:
-         * hasTripsEveryMonth(5, 3) → last 3 months have 5 or more trips
+         * hasTripsEveryMonth(6, 3) → last 3 months have 6 or more trips
          */
         for (int i = 0; i < months; i++) {
             if (tripsPerMonth.get(i) < minTrips)
@@ -127,7 +127,7 @@ public class RiderStats {
          * Gold requirement:
          * tripsPerWeek >= minTrips for the last 'weeks' weeks.
          * Example:
-         * hasTripsEveryWeek(5, 12) → last 12 weeks have 5 or more trips each
+         * hasTripsEveryWeek(6, 12) → last 12 weeks have 6 or more trips each
          */
         for (int i = 0; i < weeks; i++) {
             if (tripsPerWeek.get(i) < minTrips)
