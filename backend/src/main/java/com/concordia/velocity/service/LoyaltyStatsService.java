@@ -196,10 +196,11 @@ public class LoyaltyStatsService {
         LocalDate today = LocalDate.now();
 
         for (Trip trip : trips) {
-            // Only count completed trips
-            if (!"completed".equalsIgnoreCase(trip.getStatus()))
+            String status = trip.getStatus();
+            if (!"completed".equalsIgnoreCase(status) &&
+                !"active".equalsIgnoreCase(status)) {
                 continue;
-
+            }
             LocalDate date = getDate(trip.getStartTime());
             if (date == null)
                 continue;
@@ -234,10 +235,11 @@ public class LoyaltyStatsService {
         int currentYear = today.getYear();
 
         for (Trip trip : trips) {
-            // Only count completed trips
-            if (!"completed".equalsIgnoreCase(trip.getStatus()))
+            String status = trip.getStatus();
+            if (!"completed".equalsIgnoreCase(status) &&
+                !"active".equalsIgnoreCase(status)) {
                 continue;
-
+            }
             LocalDate date = getDate(trip.getStartTime());
             if (date == null)
                 continue;
