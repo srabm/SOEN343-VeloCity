@@ -1,10 +1,10 @@
 package com.concordia.velocity.strategy;
 
-import com.concordia.velocity.model.Bill;
-import com.concordia.velocity.model.Trip;
-import com.concordia.velocity.model.Rider;
-
 import java.util.UUID;
+
+import com.concordia.velocity.model.Bill;
+import com.concordia.velocity.model.Rider;
+import com.concordia.velocity.model.Trip;
 
 /**
  * Payment strategy for standard (non-electric) bikes
@@ -14,28 +14,30 @@ public class OneTimeStandardPayment implements PaymentStrategy {
 
     private static final double BASE_PRICE = 1.11;
     private static final double PRICE_PER_MINUTE = 0.22;
-    private static final double TAX_RATE = 0.14975;  // 13% tax
+    private static final double TAX_RATE = 0.14975; // 13% tax
 
     public Bill createBillAndProcessPayment(Trip trip, long durationMinutes, Rider rider) {
-        // Calculate base cost
-        double cost = BASE_PRICE + (durationMinutes * PRICE_PER_MINUTE);
-        cost = Math.round(cost * 100.0) / 100.0;
+        // Calculate base cost BEFORE discount
+        double baseCost = BASE_PRICE + (durationMinutes * PRICE_PER_MINUTE);
+        baseCost = Math.round(baseCost * 100.0) / 100.0;
 
-        // apply tier discount
+        // Apply tier discount
         double discount = 0.0;
+        double finalCost = baseCost;
+
         if (rider != null) {
-            double discountedCost = rider.applyDiscount(cost);
-            discount = cost - discountedCost;
-            cost = discountedCost;
+            double discountedCost = rider.applyDiscount(baseCost);
+            discount = baseCost - discountedCost;
+            finalCost = discountedCost;
         }
 
-        // round cost and discount
-        cost = Math.round(cost * 100.0) / 100.0;
+        // Round final cost and discount
+        finalCost = Math.round(finalCost * 100.0) / 100.0;
         discount = Math.round(discount * 100.0) / 100.0;
 
         // Create bill
         String billId = UUID.randomUUID().toString();
-        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), cost, discount, 0);
+        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), finalCost, discount, 0, 0);
 
         // Calculate tax and total
         bill.calculateTax(TAX_RATE);
@@ -47,14 +49,11 @@ public class OneTimeStandardPayment implements PaymentStrategy {
         // process bill payment here --> get user credit card and charge
         bill.setStatus("paid");
 
-         System.out.println(String.format("Applied %s tier discount: $%.2f off", 
-                                        rider != null ? rider.getTier() : "NoTier", discount));
+        System.out.println(String.format("Applied %s tier discount: $%.2f off",
+                rider != null ? rider.getTier() : "NoTier", discount));
 
         return bill;
     }
-
-
-
 
     /**
      * Gets the base price for this strategy
