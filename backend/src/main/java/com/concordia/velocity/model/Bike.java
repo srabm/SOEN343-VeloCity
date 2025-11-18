@@ -134,34 +134,51 @@ public class Bike implements Subject {
         return expiryTime != null && expiryTime.isAfter(LocalDateTime.now());
     }
 
-    public LocalDateTime startReservationExpiry(Station station, String userId) {
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(station.getReservationHoldTime());
+    public LocalDateTime startReservationExpiry(Station station, Rider rider) {
+        int baseHold = station.getReservationHoldTime();
+        int extraHold = (rider != null ? rider.getExtraHoldMinutes() : 0);
+        int totalHold = baseHold + extraHold;
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(totalHold);
+
+        // Store expiry + reserver
         setReservationExpiryFromLocalDateTime(expiryTime);
-        setReservedByUserId(userId);
+        setReservedByUserId(rider != null ? rider.getId() : null);
         setStatus(STATUS_RESERVED);
 
+         System.out.println(
+            "[RESERVATION] Bike " + bikeId +
+            " reserved by user " + reservedByUserId +
+            " | Base hold time = " + baseHold +
+            " | Tier bonus = " + extraHold + 
+            " | TOTAL hold = " + totalHold + " minutes" +
+            " → Expires at: " + expiryTime
+        );
+
+        // Schedule expiration using ReservationManager
         ReservationManager.schedule(
             bikeId,
             () -> {
-                LocalDateTime expiry = getReservationExpiryAsLocalDateTime();
+                LocalDateTime exp = getReservationExpiryAsLocalDateTime();
 
                 if (STATUS_RESERVED.equalsIgnoreCase(getStatus())
-                    && expiry != null
-                    && !LocalDateTime.now().isBefore(expiry)) {
+                    && exp != null
+                    && !LocalDateTime.now().isBefore(exp)) {
 
                     setStatus(STATUS_AVAILABLE);
                     setReservationExpiry(null);
                     notifyObservers("RESERVATION_EXPIRED userId=" + reservedByUserId);
                     setReservedByUserId(null);
 
-                    System.out.println("Reservation expired, bike " + getBikeId() + " has been set to available.");
+                    System.out.println("Reservation expired for bike " + bikeId +
+                        " (hold time: " + totalHold + " mins)");
                 }
             },
-            station.getReservationHoldTime()
+            totalHold // IMPORTANT: schedule actual corrected hold time
         );
 
         return expiryTime;
     }
+
 
     public void clearReservation() {
         this.reservationExpiry = null;

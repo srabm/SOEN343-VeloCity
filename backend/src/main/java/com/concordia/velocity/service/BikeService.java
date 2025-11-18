@@ -1,6 +1,8 @@
 package com.concordia.velocity.service;
 
 import com.concordia.velocity.model.Bike;
+import com.concordia.velocity.model.Rider;
+import com.concordia.velocity.model.Station;
 import com.concordia.velocity.observer.DashboardObserver;
 import com.concordia.velocity.observer.Observer;
 import com.concordia.velocity.observer.ReservationObserver;
@@ -74,12 +76,13 @@ public class BikeService {
         attachObservers(bike);
 
         // Start reservation (sets status to RESERVED and schedules auto-expiry)
-        LocalDateTime expiryTime = bike.startReservationExpiry(station, userId);
+        Rider rider = userService.getUserById(userId);
+        LocalDateTime expiryTime = bike.startReservationExpiry(station, rider);
 
         // Persist to Firestore
         db.collection("bikes").document(bikeId).set(bike).get();
 
-        return "Bike " + bikeId + " reserved successfully for user " + userId +
+        return "Bike " + bikeId + " reserved successfully for user " + rider.getFullName() +
                 ". Reservation expires at " + expiryTime;
     }
 
