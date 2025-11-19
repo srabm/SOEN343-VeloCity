@@ -3,7 +3,7 @@
   <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
     <div class="min-h-screen bg-black/40">
       <header class="text-center py-8 text-white drop-shadow">
-        <h1 class="text-3xl font-semibold">Ride History</h1>
+        <h1 class="text-3xl font-semibold">All Ride History (All Users)</h1>
       </header>
 
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto px-4 items-start">
@@ -14,7 +14,7 @@
           <template v-if="selectedRide">
             <div class="space-y-2 text-sm text-slate-800">
               <p><strong>Ride ID:</strong> {{ selectedRide.tripId }}</p>
-              <p><strong>Rider Email:</strong> {{ user?.email }}</p>
+              <p><strong>Rider Email:</strong> {{ selectedRide.riderEmail || "—" }}</p>
               <p><strong>Time:</strong> {{ formatDateTime(selectedRide.startTime) }} → {{ formatDateTime(selectedRide.endTime) }}</p>
               <p><strong>Route:</strong> {{ selectedRide.startStationName }} → {{ selectedRide.endStationName }}</p>
               <p><strong>Bike ID:</strong> {{ selectedRide.bikeId }}</p>
@@ -49,11 +49,18 @@
             <div class="flex gap-2">
               <input v-model="filters.searchId" type="text" placeholder="Search by Ride ID"
                 class="flex-1 px-3 py-2 rounded bg-white/90 border border-slate-300 text-sm" />
-              <select v-model="filters.bikeType" class="px-3 py-2 rounded bg-white/90 border border-slate-300 text-sm">
+              <input v-model="filters.riderEmail" type="text" placeholder="Search by Rider Email"
+                class="flex-1 px-3 py-2 rounded bg-white/90 border border-slate-300 text-sm" />
+            </div>
+            
+            <div class="flex gap-2">
+              <select v-model="filters.bikeType" class="flex-1 px-3 py-2 rounded bg-white/90 border border-slate-300 text-sm">
                 <option value="">All bike types</option>
                 <option value="standard">standard</option>
                 <option value="electric">electric</option>
               </select>
+              <input v-model="filters.station" type="text" placeholder="Search by Station"
+                class="flex-1 px-3 py-2 rounded bg-white/90 border border-slate-300 text-sm" />
             </div>
 
             <div class="flex gap-2 items-center">
@@ -84,6 +91,7 @@
               @click="selectRide(ride)">
               <div class="flex justify-between text-sm">
                 <span class="font-semibold">{{ ride.tripId }}</span>
+                <span class="text-purple-600">{{ ride.riderEmail || "—" }}</span>
                 <span>{{ formatDate(ride.startTime) }}</span>
                 <span class="font-semibold">${{ ride.bill?.total?.toFixed(2) || '—' }}</span>
               </div>
@@ -102,7 +110,7 @@ import topbar from './topbar.vue'
 import { ref, computed, onMounted } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { tripApi } from "../services/api.js"; // updated api.js
-import { getFirestore, collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
+import { getFirestore, collection, query, where, orderBy, limit, getDocs, doc, getDoc } from "firebase/firestore";
 import app from "../../firebase-config.js";
 
 const db = getFirestore(app);
@@ -114,34 +122,59 @@ const canLoadMore = ref(false);
 
 const filters = ref({
   searchId: "",
+  riderEmail: "",
   bikeType: "",
+  station: "",
   dateFrom: "",
   dateTo: "",
 });
 
 async function loadInitialRides() {
-  if (!user.value?.uid) return;
-
   try {
     const tripsCol = collection(db, "trips");
+    // Remove the user filter to get all trips
     const tripsQuery = query(
       tripsCol,
-      where("riderId", "==", user.value.uid),
       orderBy("startTime", "desc"),
-      limit(20)
+      limit(100) // Increased limit for operator view
     );
 
     const tripsSnap = await getDocs(tripsQuery);
 
-    allRides.value = tripsSnap.docs.map(doc => ({
-      _id: doc.id,
-      ...doc.data(),
-      startTime: doc.data().startTime?.toDate ? doc.data().startTime.toDate() : new Date(doc.data().startTime),
-      endTime: doc.data().endTime?.toDate ? doc.data().endTime.toDate() : new Date(doc.data().endTime),
-      riderName: doc.data().riderName || "Unknown Rider",
-      bikeType: doc.data().bikeType || "BIKE",
-      bill: doc.data().bill || null,
-    }));
+    // Fetch rider emails for all trips
+    const ridesWithEmails = await Promise.all(
+      tripsSnap.docs.map(async (tripDoc) => {
+        const tripData = tripDoc.data();
+        let riderEmail = "—";
+        
+        // Fetch rider email
+        if (tripData.riderId) {
+          try {
+            const riderRef = doc(db, "riders", tripData.riderId);
+            const riderSnap = await getDoc(riderRef);
+            if (riderSnap.exists()) {
+              riderEmail = riderSnap.data().email || tripData.riderId;
+            }
+          } catch (error) {
+            console.error("Error fetching rider:", error);
+            riderEmail = tripData.riderId;
+          }
+        }
+
+        return {
+          _id: tripDoc.id,
+          ...tripData,
+          riderEmail: riderEmail,
+          startTime: tripData.startTime?.toDate ? tripData.startTime.toDate() : new Date(tripData.startTime),
+          endTime: tripData.endTime?.toDate ? tripData.endTime.toDate() : new Date(tripData.endTime),
+          riderName: tripData.riderName || "Unknown Rider",
+          bikeType: tripData.bikeType || "BIKE",
+          bill: tripData.bill || null,
+        };
+      })
+    );
+
+    allRides.value = ridesWithEmails;
 
     if (allRides.value.length > 0) selectedRide.value = allRides.value[0];
     canLoadMore.value = false;
@@ -159,7 +192,9 @@ function selectRide(ride) {
 function clearFilters() {
   filters.value = {
     searchId: "",
+    riderEmail: "",
     bikeType: "",
+    station: "",
     dateFrom: "",
     dateTo: "",
   };
@@ -179,10 +214,24 @@ function reportProblem(ride) {
 
 const filteredRides = computed(() => {
   return allRides.value.filter((ride) => {
+    // Ride ID filter
     if (filters.value.searchId && !ride.tripId.toLowerCase().includes(filters.value.searchId.toLowerCase())) return false;
 
+    // Rider Email filter
+    if (filters.value.riderEmail && !ride.riderEmail?.toLowerCase().includes(filters.value.riderEmail.toLowerCase())) return false;
+
+    // Bike Type filter
     if (filters.value.bikeType && ride.bikeType !== filters.value.bikeType) return false;
 
+    // Station filter (checks both start and end station)
+    if (filters.value.station) {
+      const searchTerm = filters.value.station.toLowerCase();
+      const startMatch = ride.startStationName?.toLowerCase().includes(searchTerm);
+      const endMatch = ride.endStationName?.toLowerCase().includes(searchTerm);
+      if (!startMatch && !endMatch) return false;
+    }
+
+    // Date filters
     if (ride.startTime) {
       const rideDate = new Date(ride.startTime);
       const rideLocalDate = new Date(rideDate.getFullYear(), rideDate.getMonth(), rideDate.getDate());

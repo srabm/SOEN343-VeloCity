@@ -15,11 +15,11 @@ import AboutUs from '../views/aboutUs.vue';
 import BikeReservation from '../views/bikeReservation.vue';
 import ActiveTrip from '../views/activeTrip.vue';
 
-// Import operator-specific views (create these as needed)
+// Import operator-specific views
 import MoveBike from '../views/moveBike.vue';
-// import AllRides from '../views/operator/allRides.vue';
-// import AllBilling from '../views/operator/allBilling.vue';
-// import Maintenance from '../views/operator/maintenance.vue';
+import AllRides from '../views/allRideHistory.vue';
+import AllBilling from '../views/allBillingHistory.vue';
+import Maintenance from '../views/maintenance.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -101,29 +101,24 @@ const router = createRouter({
       component: MoveBike,
       meta: { requiresAuth: true, requiresOperator: true }
     },
-
-    // Operator-only routes
-    // Uncomment and implement these routes as you create the corresponding components
-    /*
     {
-      path: '/VeloCity/operator/all-rides',
-      name: 'AllRides',
-      component: AllRides,
-      meta: { requiresAuth: true, requiresOperator: true }
-    },
-    {
-      path: '/VeloCity/operator/all-billing',
+      path: '/VeloCity/all-billing',
       name: 'AllBilling',
       component: AllBilling,
       meta: { requiresAuth: true, requiresOperator: true }
     },
     {
-      path: '/VeloCity/operator/maintenance',
+      path: '/VeloCity/all-rides',
+      name: 'AllRides',
+      component: AllRides,
+      meta: { requiresAuth: true, requiresOperator: true }
+    },
+    {
+      path: '/VeloCity/maintenance',
       name: 'Maintenance',
       component: Maintenance,
       meta: { requiresAuth: true, requiresOperator: true }
     }
-    */
   ]
 });
 
