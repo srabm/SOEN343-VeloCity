@@ -1,15 +1,15 @@
 package com.concordia.velocity.model;
 
-import com.concordia.velocity.state.NoTierState;
-import com.concordia.velocity.state.TierState;
-import java.util.ArrayList;
-import org.checkerframework.checker.units.qual.g;
-import com.concordia.velocity.state.BronzeTierState;
-import com.concordia.velocity.state.SilverTierState;
-import com.concordia.velocity.state.GoldTierState;
-import com.google.cloud.Timestamp;
-import java.util.List;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.concordia.velocity.state.BronzeTierState;
+import com.concordia.velocity.state.GoldTierState;
+import com.concordia.velocity.state.NoTierState;
+import com.concordia.velocity.state.SilverTierState;
+import com.concordia.velocity.state.TierState;
+import com.google.cloud.Timestamp;
 
 public class Rider {
     private String id;
@@ -235,7 +235,7 @@ public class Rider {
         }
     }
 
-    *  Evaluates tier based on rider stats and tracks changes
+    /*  Evaluates tier based on rider stats and tracks changes
      * @return TierChange object containing old and new tier, or null if no change
      */
     public TierChange evaluateTier(RiderStats riderStats)  {
@@ -296,4 +296,5 @@ public class Rider {
         public String getNewTier() {
             return newTier;
         }
+    }
 }

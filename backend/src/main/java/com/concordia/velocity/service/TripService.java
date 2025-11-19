@@ -1,19 +1,5 @@
 package com.concordia.velocity.service;
 
-import com.concordia.velocity.model.*;
-import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.StatusObserver;
-import com.concordia.velocity.observer.Observer;
-import com.concordia.velocity.reservation.ReservationManager;
-import com.concordia.velocity.strategy.OneTimeElectricPayment;
-import com.concordia.velocity.strategy.OneTimeStandardPayment;
-import com.concordia.velocity.strategy.PaymentStrategy;
-import com.google.api.core.ApiFuture;
-import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -26,6 +12,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+
+import org.springframework.stereotype.Service;
+
+import com.concordia.velocity.model.Bike;
+import com.concordia.velocity.model.Bill;
+import com.concordia.velocity.model.Dock;
+import com.concordia.velocity.model.Rider;
+import com.concordia.velocity.model.RiderStats;
+import com.concordia.velocity.model.Station;
+import com.concordia.velocity.model.Trip;
+import com.concordia.velocity.observer.DashboardObserver;
+import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
+import com.concordia.velocity.reservation.ReservationManager;
+import com.concordia.velocity.strategy.OneTimeElectricPayment;
+import com.concordia.velocity.strategy.OneTimeStandardPayment;
+import com.concordia.velocity.strategy.PaymentStrategy;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
+import com.google.firebase.cloud.FirestoreClient;
 
 @Service
 public class TripService {
@@ -415,6 +427,8 @@ public class TripService {
                 bikeId, dockId, stationId, station.getStationName(),
                 trip.getDurationMinutes(), bill.getTotal()
         );
+
+        return new TripEndResponse(message, tierChange);
     }
 
     // ==================== Trip Management Helper Methods ====================
