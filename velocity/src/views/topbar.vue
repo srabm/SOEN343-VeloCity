@@ -48,6 +48,12 @@
             <!-- Login/Logout -->
             <div class="justify-self-end h-full flex items-center">
                 <template v-if="isLoggedIn">
+                    <div class="mr-3 flex items-center text-sm text-slate-700 bg-gray-200 px-2 py-1 rounded">
+                        <span class="mr-2">Flex:</span>
+                        <div class="text-yellow-500 font-medium">
+                            {{ flexDollars }}
+                        </div>
+                    </div>
                     <Logout />
                 </template>
                 <template v-else>
@@ -73,6 +79,7 @@ import logo from '../assets/banner.png'
 
 const isLoggedIn = ref(false)
 const isOperatorView = ref(false)
+const flexDollars = ref(null)
 
 const auth = getAuth(app)
 const db = getFirestore(app)
@@ -80,7 +87,7 @@ const db = getFirestore(app)
 onMounted(() => {
     onAuthStateChanged(auth, async (user) => {
         isLoggedIn.value = !!user
-        
+
         if (user) {
             try {
                 const docRef = doc(db, "riders", user.uid)
@@ -90,12 +97,17 @@ onMounted(() => {
                     const userData = docSnap.data()
                     // Only show operator view if user is an operator AND has operator view enabled
                     isOperatorView.value = userData.isOperator && userData.isOperatorView
+                    flexDollars.value = userData?.flexDollars ?? 0
+                } else {
+                    flexDollars.value = 0
                 }
             } catch (err) {
                 console.error("Error loading user profile in topbar:", err)
+                flexDollars.value = 0
             }
         } else {
             isOperatorView.value = false
+            flexDollars.value = null
         }
     })
 })
