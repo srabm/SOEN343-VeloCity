@@ -11,13 +11,15 @@ public class Rider {
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
 
+    public Rider() {}
+
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.address = address;
-    this.email = email;
-    this.phoneNumber = phoneNumber;
-}
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
 
     public String getId() {return id;}
     public void setId(String id) {this.id = id;}
@@ -45,6 +47,14 @@ public class Rider {
 
     public PaymentInfo getPaymentInfo() { return paymentInfo; }
     public void setPaymentInfo(PaymentInfo paymentInfo) { this.paymentInfo = paymentInfo; }
+
+    public boolean redeemFlexDollar() {
+        if (this.flexDollars > 0) {
+            this.flexDollars = this.flexDollars - 1;
+            return true;
+        }
+        return false;
+    }
 
     public String getFullName() {
         String fn = firstName != null ? firstName : ""; 

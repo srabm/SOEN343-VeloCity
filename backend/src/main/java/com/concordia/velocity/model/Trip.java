@@ -27,6 +27,8 @@ public class Trip {
     private String status;              // active, completed, cancelled
     private Long durationMinutes;       // Trip duration in minutes
     private Bill bill;
+    private Boolean flexRedeemed;
+    private Double flexRedeemedAmount;
 
     public Trip() {}
 
@@ -159,6 +161,12 @@ public class Trip {
 
     public Bill getBill() { return bill; }
     public void setBill(Bill bill) { this.bill = bill; }
+
+    public Boolean getFlexRedeemed() { return flexRedeemed; }
+    public void setFlexRedeemed(Boolean flexRedeemed) { this.flexRedeemed = flexRedeemed; }
+
+    public Double getFlexRedeemedAmount() { return flexRedeemedAmount; }
+    public void setFlexRedeemedAmount(Double flexRedeemedAmount) { this.flexRedeemedAmount = flexRedeemedAmount; }
 
     @Override
     public String toString() {

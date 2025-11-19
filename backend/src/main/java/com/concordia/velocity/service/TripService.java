@@ -339,11 +339,6 @@ public class TripService {
 
         station.addBike(bike);
 
-        // Verify if station is below 25% capacity for Flex Dollars reward
-        if (station.getNumDockedBikes() < (0.25 * station.getCapacity())) {
-            db.collection("riders").document(riderId).update("flexDollars", FieldValue.increment(5)).get();
-        }
-
         // Complete trip and calculate billing
         trip.completeTrip(stationId, station.getStationName(), dockId);
         Bill bill = calculateAndCreateBill(trip);
@@ -353,8 +348,36 @@ public class TripService {
         db.collection("bikes").document(bikeId).set(bike).get();
         db.collection("docks").document(dockId).set(dock).get();
         db.collection("stations").document(stationId).set(station).get();
+
+        // Redeem flex dollar if available
+        DocumentReference riderRef = db.collection("riders").document(riderId);
+        boolean redeemed = false;
+        double redeemedAmount = 0.0;
+        DocumentSnapshot riderSnap = riderRef.get().get();
+        if (riderSnap.exists()) {
+            Long flex = riderSnap.getLong("flexDollars");
+            if (flex != null && flex > 0) {
+                db.collection("riders").document(riderId).update("flexDollars", FieldValue.increment(-1)).get();
+                redeemed = true;
+                redeemedAmount = 0.5;
+                double oldTotal = bill.getTotal();
+                double newTotal = Math.max(0.0, Math.round((oldTotal - redeemedAmount) * 100.0) / 100.0);
+                bill.setTotal(newTotal);
+            }
+        }
+
+        trip.setBill(bill);
+        trip.setFlexRedeemed(redeemed);
+        trip.setFlexRedeemedAmount(redeemedAmount);
+
         db.collection("trips").document(trip.getTripId()).set(trip).get();
         db.collection("bills").document(bill.getBillId()).set(bill).get();
+
+        // If station is low capacity, award flex
+        if (station.getNumDockedBikes() < (0.25 * station.getCapacity())) {
+            db.collection("riders").document(riderId).update("flexDollars", FieldValue.increment(2)).get();
+            db.collection("trips").document(trip.getTripId()).update("flexAwarded", true, "flexAwardAmount", 2).get();
+        }
 
         return String.format(
                 "Trip ended successfully. Bike %s docked at dock %s at station %s (%s). " +
