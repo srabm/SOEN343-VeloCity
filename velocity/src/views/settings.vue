@@ -1,9 +1,11 @@
 <template>
   <topbar />
-  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-    <div class="min-h-screen bg-black/40 flex flex-col">
+  <div class="min-h-screen bg-white flex flex-col">
+
+
+    <div class="min-h-screen flex flex-col bg-white">
       <header class="text-center py-8 text-white drop-shadow">
-        <h1 class="text-3xl font-semibold">User Settings</h1>
+        <h1 class="text-3xl text-black font-semibold">User Settings</h1>
       </header>
 
       <section class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto w-full px-4 text-black items-start">
@@ -37,6 +39,53 @@
             </div>
           </div>
         </div>
+        <!-- Membership Card -->
+      <div 
+        class="self-start rounded-xl p-6 shadow-lg text-black backdrop-blur-md transition-all duration-300"
+        :class="tierGradientClass"
+      >
+        <h2 class="text-xl font-semibold mb-4">Membership</h2>
+
+        <!-- Tier -->
+        <p class="text-sm mb-2">
+          <strong>Status:</strong> {{ formattedTier }} {{ tierEmoji }}
+        </p>
+
+        <!-- Perks -->
+        <div class="text-sm bg-white/20 p-4 rounded-lg shadow-inner">
+          <p v-if="formattedTier === 'Gold'">
+            👑 <strong>Gold Perks</strong><br />
+            • 15% off every trip<br />
+            • +5 extra reservation minutes<br />
+            • Priority support
+          </p>
+
+          <p v-else-if="formattedTier === 'Silver'">
+            🥈 <strong>Silver Perks</strong><br />
+            • 10% off every trip<br />
+            • +2 extra reservation minutes
+          </p>
+
+          <p v-else-if="formattedTier === 'Bronze'">
+            🥉 <strong>Bronze Perks</strong><br />
+            • 5% off every trip<br />
+            • Standard reservation time
+          </p>
+
+          <p v-else>
+            🚴🏻‍♂️ <strong>No Tier Yet</strong><br />
+            Ride more to unlock discounts + bonus reservation time!
+          </p>
+        </div>
+
+        <!-- Learn More Button -->
+        <button
+          @click="goToPricing"
+          class="mt-4 bg-white/30 text-black px-4 py-2 rounded hover:bg-white/40 duration-300 text-sm"
+        >
+          Find Out More
+        </button>
+      </div>
 
         <!-- Payment Info Card -->
         <div class="self-start rounded-xl p-6 shadow-lg bg-white/50 backdrop-blur-md">
@@ -54,7 +103,7 @@
             <div class="space-y-8 w-full">
               <!-- Front of card -->
               <div
-                class="w-full rounded-xl shadow-lg bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 text-white overflow-hidden"
+                class="w-full rounded-xl shadow-lg bg-gradient-to-br from-blue-300 via-sky-300 to-blue-400 text-white overflow-hidden"
                 style="aspect-ratio: 85.6 / 54;">
                 <div class="relative h-full p-5 flex flex-col">
                   <div class="mt-2 mb-auto">
@@ -99,6 +148,7 @@
                 class="bg-slate-300 text-black px-4 py-2 rounded hover:bg-slate-200 duration-200">Cancel</button>
             </div>
           </div>
+          
         </div>
       </section>
     </div>
@@ -247,6 +297,47 @@ async function savePaymentInfo() {
     console.error("Error updating payment info:", err);
   }
 }
+
+  // Format tier properly
+  const formattedTier = computed(() => {
+    if (!profile.value?.tier) return "No Tier";
+    const t = profile.value.tier.toLowerCase();
+    if (t === "gold") return "Gold";
+    if (t === "silver") return "Silver";
+    if (t === "bronze") return "Bronze";
+    return "No Tier";
+  });
+
+  // Emoji based on tier
+  const tierEmoji = computed(() => {
+    switch (formattedTier.value) {
+      case "Gold": return "👑";
+      case "Silver": return "🥈";
+      case "Bronze": return "🥉";
+      default: return "🚴🏻‍♂️";
+    }
+  });
+
+  // Gradient theme for card
+  const tierGradientClass = computed(() => {
+    switch (formattedTier.value) {
+      case "Gold":
+        return "bg-gradient-to-br from-orange-300 via-yellow-400 to-yellow-600 text-black";
+      case "Silver":
+        return "bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400 text-black";
+      case "Bronze":
+        return "bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-400 text-black";
+      default:
+        return "bg-gradient-to-br from-sky-200 via-blue-100 to-indigo-300";
+    }
+  });
+
+
+  function goToPricing() {
+  router.push({ name: 'Pricing' }); 
+  }
+
+
 
 </script>
 
