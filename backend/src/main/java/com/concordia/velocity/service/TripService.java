@@ -339,6 +339,11 @@ public class TripService {
 
         station.addBike(bike);
 
+        // Verify if station is below 25% capacity for Flex Dollars reward
+        if (station.getNumDockedBikes() < (0.25 * station.getCapacity())) {
+            db.collection("riders").document(riderId).update("flexDollars", FieldValue.increment(5)).get();
+        }
+
         // Complete trip and calculate billing
         trip.completeTrip(stationId, station.getStationName(), dockId);
         Bill bill = calculateAndCreateBill(trip);

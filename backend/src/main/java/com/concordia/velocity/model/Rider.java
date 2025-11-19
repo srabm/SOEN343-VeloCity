@@ -7,6 +7,7 @@ public class Rider {
     private String address;
     private String email;
     private String phoneNumber;
+    private int flexDollars;
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
 
@@ -35,6 +36,9 @@ public class Rider {
 
     public String getPhoneNumber() { return phoneNumber; }
     public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public int getFlexDollars() { return flexDollars; }
+    public void setFlexDollars(int flexDollars) { this.flexDollars = flexDollars; }
 
     public Boolean getIsOperator() { return isOperator; }
     public void setIsOperator(Boolean isOperator) { this.isOperator = isOperator; }
