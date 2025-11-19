@@ -18,6 +18,7 @@ public class Rider {
     private String address;
     private String email;
     private String phoneNumber;
+    private int flexDollars;
     private Boolean isOperator;
     private PaymentInfo paymentInfo;
     private List<Timestamp> missedReservationTimestamps = new ArrayList<>();
@@ -68,6 +69,8 @@ public class Rider {
     public String getEmail() {
         return email;
     }
+    public int getFlexDollars() { return flexDollars; }
+    public void setFlexDollars(int flexDollars) { this.flexDollars = flexDollars; }
 
     public void setEmail(String email) {
         this.email = email;

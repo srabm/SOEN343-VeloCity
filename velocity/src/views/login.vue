@@ -161,6 +161,7 @@ async function handleSignup() {
       email: email.value,
       createdAt: new Date(),
       isOperator: false,
+      isOperatorView: false, // Initialize isOperatorView to false for new users
       phoneNumber: phoneNumber.value
     })
     router.push({ name: 'Home' })
