@@ -22,7 +22,6 @@ public class Rider {
     private PaymentInfo paymentInfo;
     private List<Timestamp> missedReservationTimestamps = new ArrayList<>();
 
-    // *remove: made these fields private, not sure if we had to or not
     private TierState tierState;
     private String tier; // For Firestore persistence to store "NoTier", "Bronze", "Silver", "Gold"
 

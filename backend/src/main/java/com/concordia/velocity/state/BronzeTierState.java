@@ -11,7 +11,6 @@ import com.concordia.velocity.model.RiderStats;
 public class BronzeTierState implements TierState {
     private final double discount = 0.05;
     private final int hold = 0;
-    // private RiderStats riderStats; //*remove: how do i pass this? should i add it as a parameter in evaluateTier?
 
      @Override
     public void evaluateTier(Rider rider, RiderStats riderStats) {
@@ -24,12 +23,11 @@ public class BronzeTierState implements TierState {
 
         //first check if bronze criteria is still met
         if (!bronzeCriteriaMet) {
-            rider.setTierState(new NoTierState()); //*remove: is it gonna be a new object each time we evaluate?? 
+            rider.setTierState(new NoTierState());
             return;
         }
 
         //if the bronze criteria is still met, check for silver criteria 
-        //*remove: i dont think i needed to check if the boolean bronzeCriteriaMet is true again, since if it was false it would have already returned, but better safe than sorry
         if (bronzeCriteriaMet && riderStats.hasSuccessfulClaims(5) && riderStats.hasTripsEveryMonth(6, 3)){
             rider.setTierState(new SilverTierState());
         }

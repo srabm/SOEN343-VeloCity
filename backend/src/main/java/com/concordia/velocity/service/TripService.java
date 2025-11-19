@@ -410,7 +410,6 @@ public class TripService {
         }
 
         //calculate billing
-        //*remove: still have to add the applyDiscount, but might have to do it in our payment strategy classes
         Bill bill = calculateAndCreateBill(trip, rider);
         trip.setBill(bill);
 

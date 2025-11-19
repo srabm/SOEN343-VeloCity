@@ -1,21 +1,18 @@
 package com.concordia.velocity.model;
 
-import com.concordia.velocity.observer.Observer;
-import com.concordia.velocity.observer.StatusObserver;
-import com.concordia.velocity.observer.Subject;
-import com.concordia.velocity.reservation.ReservationManager;
-import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.annotation.Exclude;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
+import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
+import com.concordia.velocity.observer.Subject;
+import com.concordia.velocity.reservation.ReservationManager;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.annotation.Exclude;
 
 /**
  * Bike model with proper Firestore serialization
@@ -58,8 +55,7 @@ public class Bike implements Subject {
         this.stationId = stationId;
         this.reservationUser = null;
         this.reservationExpiry = null;
-        attach(new StatusObserver()); //*remove: apparently we don't want to auto attach observers on bike creation 
-                                     //since it does it in bike service
+        attach(new StatusObserver()); 
     }
 
     @Override
