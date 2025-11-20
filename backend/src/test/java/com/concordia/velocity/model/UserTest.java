@@ -5,22 +5,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.concordia.velocity.model.Rider;
+import com.concordia.velocity.model.user;
 
-class RiderTest {
+class UserTest {
 
-    private Rider rider;
+    private User user;
 
     @BeforeEach
     void setup() {
-        rider = null;
+        user = nuull;
     }
 
     @Test
-    void getFullNameTest() {}
+    void toStringTest() {}
 
     @AfterEach
     void tearDown() {
-        rider = null;
+        user = null;
     }
 }
