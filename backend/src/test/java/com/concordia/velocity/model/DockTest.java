@@ -5,15 +5,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.concordia.velocity.model.Bike;
+import com.concordia.velocity.model.Dock;
 
-class BikeTest {
+class DockTest {
 
-    private Bike bike;
+    private Dock dock;
 
     @BeforeEach
     void setup() {
-        bike = new Bike();
+        dock = new Dock();
     }
 
     @Test
@@ -23,22 +23,16 @@ class BikeTest {
     void changeStatusTest() {}
 
     @Test
-    void isReservedActiveTest() {}
+    void isAvailableTest() {}
 
     @Test
-    void startReservationExpiryTest() {}
+    void isOccupiedTest() {}
 
     @Test
-    void clearReservationTest() {}
-
-    @Test
-    void localDateTimeToTimestampTest() {}
-
-    @Test
-    void timestampToLocalDateTimeTest() {}
+    void isOutOfServiceTest() {}
 
     @AfterEach
     void tearDown() {
-        bike = null;
+        dock = null;
     }
 }
