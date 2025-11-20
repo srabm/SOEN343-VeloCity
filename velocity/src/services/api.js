@@ -237,4 +237,64 @@ export const tripApi = {
   },
 };
 
+// ==================== Transfer API Calls ====================
+
+export const transferApi = {
+  /**
+   * Get all stations
+   */
+  async getAllStations() {
+    try {
+      const response = await api.get('/transfer/stations');
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get available bikes at a specific station
+   * @param {string} stationId - ID of the station
+   */
+  async getAvailableBikesAtStation(stationId) {
+    try {
+      const response = await api.get(`/transfer/stations/${stationId}/bikes`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Get available docks at a specific station
+   * @param {string} stationId - ID of the station
+   */
+  async getAvailableDocksAtStation(stationId) {
+    try {
+      const response = await api.get(`/transfer/stations/${stationId}/docks`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Transfer a bike from one dock to another
+   * @param {Object} transferRequest - Transfer details
+   * @param {string} transferRequest.bikeId - ID of the bike to transfer
+   * @param {string} transferRequest.sourceDockId - ID of the source dock
+   * @param {string} transferRequest.destinationDockId - ID of the destination dock
+   * @param {string} transferRequest.sourceStationId - ID of the source station
+   * @param {string} transferRequest.destinationStationId - ID of the destination station
+   */
+  async transferBike(transferRequest) {
+    try {
+      const response = await api.post('/transfer/bike', transferRequest);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
+};
+
 export default api;
