@@ -91,3 +91,16 @@
 [2025-11-21T15:51:40.452000000Z] TripID: Bike B012 changed status to reserved
 [2025-11-21T15:51:40.553000000Z] TripID: Bike B012 changed status to reserved
 [2025-11-21T15:51:40.553000000Z] TripID: Bike B012 changed status to on_trip
+[2025-11-21T16:21:41.825000000Z] TripID: Dock D003 status changed to empty
+[2025-11-21T16:24:44.107000000Z] TripID: Dock D003 status changed to out_of_service
+[2025-11-21T16:26:42.762000000Z] TripID: Dock D003 status changed to out_of_service
+[2025-11-21T16:27:32.856000000Z] TripID: Dock D003 status changed to out_of_service
+[2025-11-21T16:27:57.387000000Z] TripID: Dock D003 status changed to out_of_service
+[2025-11-21T16:28:25.710000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T16:28:25.739000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T16:28:25.741000000Z] TripID: Bike B012 changed status to on_trip
+[2025-11-21T16:28:25.781000000Z] TripID: Dock D003 status changed to out_of_service
+[2025-11-21T16:34:05.173000000Z] TripID: Dock D003 status changed to empty
+[2025-11-21T16:34:05.225000000Z] TripID: Dock D003 status changed to empty
+[2025-11-21T16:34:05.234000000Z] TripID: Dock D003 status changed to out_of_service
+[2025-11-21T16:34:05.240000000Z] TripID: Dock D003 status changed to out_of_service

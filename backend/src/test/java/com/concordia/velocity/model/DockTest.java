@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.concordia.velocity.model.Dock;
 
@@ -27,19 +30,40 @@ class DockTest {
     }
 
     @Test
-    void isValidStatusTest() {}
+    void isValidStatusTest() {
+        assertTrue(dock.isValidStatus("empty"));
+        assertTrue(dock.isValidStatus("occupied"));
+        assertTrue(dock.isValidStatus("out_of_service"));
+        assertFalse(dock.isValidStatus("random_status"));
+    }
 
     @Test
-    void changeStatusTest() {}
+    void changeStatusTest() {
+        assertThrows(IllegalArgumentException.class, () -> dock.changeStatus("random_status"));
+        assertFalse(dock.changeStatus(dock.STATUS_OCCUPIED));
+        assertTrue(dock.changeStatus(dock.STATUS_OUT_OF_SERVICE));
+    }
 
     @Test
-    void isAvailableTest() {}
+    void isAvailableTest() {
+        assertFalse(dock.isAvailable());
+        dock.changeStatus(dock.STATUS_EMPTY);
+        assertTrue(dock.isAvailable());
+    }
 
     @Test
-    void isOccupiedTest() {}
+    void isOccupiedTest() {
+        assertTrue(dock.isOccupied());
+        dock.changeStatus(dock.STATUS_EMPTY);
+        assertFalse(dock.isOccupied());
+    }
 
     @Test
-    void isOutOfServiceTest() {}
+    void isOutOfServiceTest() {
+        assertFalse(dock.isOutOfService());
+        dock.changeStatus(dock.STATUS_OUT_OF_SERVICE);
+        assertTrue(dock.isOutOfService());
+    }
 
     @AfterEach
     void tearDown() {
