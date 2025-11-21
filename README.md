@@ -54,4 +54,15 @@ cd backend
 4. Run the following command to start the backend server:
 ```
 ./gradlew bootRun
+
+```
+
+## How to Run the Unit Tests
+1. Change your directory from root to `backend` which is our back end directory
+```
+cd backend
+```
+2. Run the following command to start the testing:
+```
+./gradlew test
 ```
