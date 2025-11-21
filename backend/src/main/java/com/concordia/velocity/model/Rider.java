@@ -31,6 +31,8 @@ public class Rider {
         this.tier = "NoTier";
     }
 
+    public Rider() {}
+
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -110,6 +112,14 @@ public class Rider {
 
     public TierState getTierState() {
         return tierState;
+    }
+
+    public boolean redeemFlexDollar() {
+        if (this.flexDollars > 0) {
+            this.flexDollars = this.flexDollars - 1;
+            return true;
+        }
+        return false;
     }
 
     public String getFullName() {
