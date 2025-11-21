@@ -111,11 +111,18 @@ public class TripController {
             String dockId = request.get("dockId");
             String dockCode = request.get("dockCode");
 
-            String message = tripService.dockBikeAndEndTrip(bikeId, riderId, dockId, dockCode);
+            TripService.TripEndResponse tripResponse = tripService.dockBikeAndEndTrip(bikeId, riderId, dockId, dockCode);
 
             response.put("success", true);
-            response.put("message", message);
+            response.put("message", tripResponse.getMessage());
 
+            // Include tier change information if there was a change
+            if (tripResponse.getTierChange() != null) {
+                Map<String, String> tierChangeInfo = new HashMap<>();
+                tierChangeInfo.put("oldTier", tripResponse.getTierChange().getOldTier());
+                tierChangeInfo.put("newTier", tripResponse.getTierChange().getNewTier());
+                response.put("tierChange", tierChangeInfo);
+            }
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {

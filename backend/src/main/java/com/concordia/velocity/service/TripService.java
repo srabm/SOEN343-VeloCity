@@ -1,18 +1,5 @@
 package com.concordia.velocity.service;
 
-import com.concordia.velocity.model.*;
-import com.concordia.velocity.observer.DashboardObserver;
-import com.concordia.velocity.observer.StatusObserver;
-import com.concordia.velocity.observer.Observer;
-import com.concordia.velocity.strategy.OneTimeElectricPayment;
-import com.concordia.velocity.strategy.OneTimeStandardPayment;
-import com.concordia.velocity.strategy.PaymentStrategy;
-import com.google.api.core.ApiFuture;
-import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.*;
-import com.google.firebase.cloud.FirestoreClient;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,14 +7,50 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import org.springframework.stereotype.Service;
+
+import com.concordia.velocity.model.Bike;
+import com.concordia.velocity.model.Bill;
+import com.concordia.velocity.model.Dock;
+import com.concordia.velocity.model.Rider;
+import com.concordia.velocity.model.RiderStats;
+import com.concordia.velocity.model.Station;
+import com.concordia.velocity.model.Trip;
+import com.concordia.velocity.observer.DashboardObserver;
+import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
+import com.concordia.velocity.reservation.ReservationManager;
+import com.concordia.velocity.strategy.OneTimeElectricPayment;
+import com.concordia.velocity.strategy.OneTimeStandardPayment;
+import com.concordia.velocity.strategy.PaymentStrategy;
+import com.google.api.core.ApiFuture;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.FieldValue;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.QuerySnapshot;
+ import com.google.firebase.cloud.FirestoreClient;
 @Service
 public class TripService {
 
     private final Firestore db = FirestoreClient.getFirestore();
+    private final UserService userService;
+    private final LoyaltyStatsService loyaltyStatsService; 
+
+    // constructor injection
+    public TripService(UserService userService, LoyaltyStatsService loyaltyStatsService) {
+    this.userService = userService;
+    this.loyaltyStatsService = loyaltyStatsService;
+}
 
     /**
      * Wrapper method for docking bike and ending trip
@@ -39,7 +62,7 @@ public class TripService {
      * @param dockCode the code to lock the dock
      * @return trip completion message
      */
-    public String dockBikeAndEndTrip(String bikeId, String riderId, String dockId, String dockCode)
+    public TripEndResponse dockBikeAndEndTrip(String bikeId, String riderId, String dockId, String dockCode)
             throws ExecutionException, InterruptedException {
         // Call the existing endTrip method with parameters in the correct order
         return endTrip(bikeId, dockId, dockCode, riderId);
@@ -79,6 +102,10 @@ public class TripService {
         if (!riderId.equals(bike.getReservedByUserId())) {
             throw new IllegalArgumentException("Rider " + riderId + " did not reserve this bike");
         }
+
+        // Stops the reservation timer
+        ReservationManager.cancel(bike.getBikeId());
+        bike.clearReservation();
 
         // Get dock and station info before removing bike
         String previousDockId = bike.getDockId();
@@ -241,6 +268,27 @@ public class TripService {
                 " at station " + station.getStationName();
     }
 
+     /**
+     * Response class for trip end operation
+     */
+    public static class TripEndResponse {
+        private final String message;
+        private final Rider.TierChange tierChange;
+
+        public TripEndResponse(String message, Rider.TierChange tierChange) {
+            this.message = message;
+            this.tierChange = tierChange;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public Rider.TierChange getTierChange() {
+            return tierChange;
+        }
+    }
+
     /**
      * Ends a trip by docking the bike
      *
@@ -248,9 +296,9 @@ public class TripService {
      * @param dockId   the dock to return to
      * @param dockCode the code to lock the dock
      * @param riderId  the rider ending the trip
-     * @return trip completion message
+     * @return TripEndResponse containing completion message and tier change info
      */
-    public String endTrip(String bikeId, String dockId, String dockCode, String riderId)
+    public TripEndResponse endTrip(String bikeId, String dockId, String dockCode, String riderId)
             throws ExecutionException, InterruptedException {
 
         // Retrieve bike from Firestore
@@ -325,6 +373,10 @@ public class TripService {
         station.attach(dashboardObserver);
         station.attach(notificationObserver);
 
+        // Extra safety: ensure reservation timer is cancelled when ending trip
+        ReservationManager.cancel(bike.getBikeId());
+        bike.clearReservation();
+
         // End trip - change bike status to AVAILABLE
         bike.changeStatus(Bike.STATUS_AVAILABLE);
 
@@ -346,7 +398,24 @@ public class TripService {
 
         // Complete trip and calculate billing
         trip.completeTrip(stationId, station.getStationName(), dockId);
-        Bill bill = calculateAndCreateBill(trip);
+
+        //compute new loyalty tier
+        System.out.println("Looking up rider in Firestore: " + riderId);
+        Rider rider = userService.getUserById(riderId);
+        System.out.println("Rider object = " + rider);
+        Rider.TierChange tierChange = null;
+        if (rider != null) {
+            RiderStats stats = loyaltyStatsService.computeStats(riderId);
+            tierChange = rider.evaluateTier(stats);
+
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("tier", rider.getTierName());
+            System.out.println("New tier for rider " + rider.getId() + ": " + rider.getTierState());
+            userService.updateUser(riderId, updates); //to persist the new tier state
+        }
+
+        //calculate billing
+        Bill bill = calculateAndCreateBill(trip, rider);
         trip.setBill(bill);
 
         // Persist all changes to Firestore
@@ -356,12 +425,14 @@ public class TripService {
         db.collection("trips").document(trip.getTripId()).set(trip).get();
         db.collection("bills").document(bill.getBillId()).set(bill).get();
 
-        return String.format(
+        String message = String.format(
                 "Trip ended successfully. Bike %s docked at dock %s at station %s (%s). " +
                         "Trip duration: %d minutes. Total cost: $%.2f (including tax).",
                 bikeId, dockId, stationId, station.getStationName(),
                 trip.getDurationMinutes(), bill.getTotal()
         );
+
+        return new TripEndResponse(message, tierChange);
     }
 
     // ==================== Trip Management Helper Methods ====================
@@ -401,7 +472,7 @@ public class TripService {
      * Calculates billing for a completed trip and creates a bill
      * Uses Strategy pattern - delegates bill creation to the payment strategy
      */
-    private Bill calculateAndCreateBill(Trip trip) {
+    private Bill calculateAndCreateBill(Trip trip, Rider rider) {
         if (trip.getDurationMinutes() == null) {
             trip.calculateDuration();
         }
@@ -412,7 +483,7 @@ public class TripService {
         PaymentStrategy paymentStrategy = selectPaymentStrategy(trip.getBikeType());
 
         // Strategy creates the complete bill (cost + tax + total) and charge to rider
-        return paymentStrategy.createBillAndProcessPayment(trip, durationMinutes);
+        return paymentStrategy.createBillAndProcessPayment(trip, durationMinutes, rider);
     }
 
     /**
@@ -495,21 +566,23 @@ public class TripService {
     /**
      * Get all trips for a specific rider (userId)
      */
-    public List<Trip> getRiderTrips(String userId) throws ExecutionException, InterruptedException {
-        CollectionReference tripsRef = db.collection("trips");
-        ApiFuture<QuerySnapshot> future = tripsRef.whereArrayContains("riderId", userId).get();
-        List<QueryDocumentSnapshot> documents = future.get().getDocuments();
+    public List<Trip> getRiderTrips(String riderId) throws ExecutionException, InterruptedException {
+    var future = db.collection("trips")
+            .whereEqualTo("riderId", riderId)
+            .get();
 
-        List<Trip> trips = new ArrayList<>();
-        for (QueryDocumentSnapshot doc : documents) {
-            if (doc.exists()) {
-                Trip trip = doc.toObject(Trip.class);
-                if (trip != null) trips.add(trip);
-            }
+    List<QueryDocumentSnapshot> docs = future.get().getDocuments();
+    List<Trip> trips = new ArrayList<>();
+
+    for (QueryDocumentSnapshot doc : docs) {
+        if (doc.exists()) {
+            Trip trip = doc.toObject(Trip.class);
+            if (trip != null) trips.add(trip);
         }
-
-        return trips;
     }
+    return trips;
+}
+
 
 
     // ==================== Validation Helper Methods ====================

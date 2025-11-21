@@ -1,20 +1,18 @@
 package com.concordia.velocity.model;
 
-import com.concordia.velocity.observer.Observer;
-import com.concordia.velocity.observer.StatusObserver;
-import com.concordia.velocity.observer.Subject;
-import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.annotation.Exclude;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
+import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
+import com.concordia.velocity.observer.Subject;
+import com.concordia.velocity.reservation.ReservationManager;
+import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.annotation.Exclude;
 
 /**
  * Bike model with proper Firestore serialization
@@ -38,14 +36,14 @@ public class Bike implements Subject {
 
     // Store as Timestamp for Firestore compatibility
     private Timestamp reservationExpiry;
-
     private String reservedByUserId;
     private String dockId;
     private String stationId;
-    private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
+    // private static final ScheduledExecutorService RESERVATION_SCHEDULER = Executors.newSingleThreadScheduledExecutor();
     private Rider reservationUser;
 
     private transient List<Observer> observers = new ArrayList<>();
+    // private transient java.util.concurrent.ScheduledFuture<?> reservationTask;
 
     public Bike() {}
 
@@ -57,18 +55,20 @@ public class Bike implements Subject {
         this.stationId = stationId;
         this.reservationUser = null;
         this.reservationExpiry = null;
-        attach(new StatusObserver());
+        attach(new StatusObserver()); 
     }
 
     @Override
     public void attach(Observer observer) {
-        if (observers == null) observers = new ArrayList<>();
+        if (observers == null)
+            observers = new ArrayList<>();
         observers.add(observer);
     }
 
     @Override
     public void detach(Observer observer) {
-        if (observers == null) observers = new ArrayList<>();
+        if (observers == null)
+            observers = new ArrayList<>();
         observers.remove(observer);
     }
 
@@ -81,8 +81,18 @@ public class Bike implements Subject {
         }
     }
 
+    // notifyObservers with a custom message so we can detect the event in StatusObserver 
+    public void notifyObservers(String message) {
+        if (observers != null) {
+            for (Observer o : observers) {
+                o.update(message);
+            }
+        }
+    }
+
     public static boolean isValidStatus(String status) {
-        if (status == null) return false;
+        if (status == null)
+            return false;
         return VALID_STATUSES.contains(status);
     }
 
@@ -97,9 +107,9 @@ public class Bike implements Subject {
 
         if (STATUS_ON_TRIP.equalsIgnoreCase(this.status)
                 && !STATUS_AVAILABLE.equalsIgnoreCase(newStatus)) {
-            throw new IllegalStateException("Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
+            throw new IllegalStateException(
+                    "Cannot change status for a bike currently on a trip (Bike ID: " + bikeId + ")");
         }
-
 
         if (normalizedCurrentStatus.equals(normalizedNewStatus)) {
             return false;
@@ -111,38 +121,65 @@ public class Bike implements Subject {
     }
 
     public boolean isReservedActive() {
-        if (!STATUS_RESERVED.equalsIgnoreCase(this.status)) return false;
-        if (reservationExpiry == null) return false;
+        if (!STATUS_RESERVED.equalsIgnoreCase(this.status))
+            return false;
+        if (reservationExpiry == null)
+            return false;
 
         LocalDateTime expiryTime = timestampToLocalDateTime(reservationExpiry);
         return expiryTime != null && expiryTime.isAfter(LocalDateTime.now());
     }
 
-    public LocalDateTime startReservationExpiry(Station station, String userId) {
-        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(station.getReservationHoldTime());
+    public LocalDateTime startReservationExpiry(Station station, Rider rider) {
+        int baseHold = station.getReservationHoldTime();
+        int extraHold = (rider != null ? rider.getExtraHoldMinutes() : 0);
+        int totalHold = baseHold + extraHold;
+        LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(totalHold);
+
+        // Store expiry + reserver
         setReservationExpiryFromLocalDateTime(expiryTime);
-        setReservedByUserId(userId);
+        setReservedByUserId(rider != null ? rider.getId() : null);
         setStatus(STATUS_RESERVED);
 
-        RESERVATION_SCHEDULER.schedule(() -> {
-            if (STATUS_RESERVED.equalsIgnoreCase(getStatus()) &&
-                    getReservationExpiry() != null &&
-                    !LocalDateTime.now().isBefore(getReservationExpiryAsLocalDateTime())) {
+         System.out.println(
+            "[RESERVATION] Bike " + bikeId +
+            " reserved by user " + reservedByUserId +
+            " | Base hold time = " + baseHold +
+            " | Tier bonus = " + extraHold + 
+            " | TOTAL hold = " + totalHold + " minutes" +
+            " → Expires at: " + expiryTime
+        );
 
-                setStatus(STATUS_AVAILABLE);
-                setReservationExpiry(null);
-                setReservedByUserId(null);
-                notifyObservers();
-                System.out.println("Reservation expired, bike " + getBikeId() + " has been set to available.");
-            }
-        }, station.getReservationHoldTime(), TimeUnit.MINUTES);
+        // Schedule expiration using ReservationManager
+        ReservationManager.schedule(
+            bikeId,
+            () -> {
+                LocalDateTime exp = getReservationExpiryAsLocalDateTime();
+
+                if (STATUS_RESERVED.equalsIgnoreCase(getStatus())
+                    && exp != null
+                    && !LocalDateTime.now().isBefore(exp)) {
+
+                    setStatus(STATUS_AVAILABLE);
+                    setReservationExpiry(null);
+                    notifyObservers("RESERVATION_EXPIRED userId=" + reservedByUserId);
+                    setReservedByUserId(null);
+
+                    System.out.println("Reservation expired for bike " + bikeId +
+                        " (hold time: " + totalHold + " mins)");
+                }
+            },
+            totalHold // IMPORTANT: schedule actual corrected hold time
+        );
 
         return expiryTime;
     }
 
+
     public void clearReservation() {
         this.reservationExpiry = null;
         this.reservedByUserId = null;
+        ReservationManager.cancel(this.bikeId);
     }
 
     // ============ Conversion Helpers ============
@@ -151,7 +188,8 @@ public class Bike implements Subject {
      * Convert LocalDateTime to Timestamp
      */
     private Timestamp localDateTimeToTimestamp(LocalDateTime localDateTime) {
-        if (localDateTime == null) return null;
+        if (localDateTime == null)
+            return null;
         Instant instant = localDateTime.atZone(ZoneId.systemDefault()).toInstant();
         return Timestamp.ofTimeSecondsAndNanos(instant.getEpochSecond(), instant.getNano());
     }
@@ -160,29 +198,50 @@ public class Bike implements Subject {
      * Convert Timestamp to LocalDateTime
      */
     private LocalDateTime timestampToLocalDateTime(Timestamp timestamp) {
-        if (timestamp == null) return null;
+        if (timestamp == null)
+            return null;
         return LocalDateTime.ofInstant(
                 Instant.ofEpochSecond(timestamp.getSeconds(), timestamp.getNanos()),
-                ZoneId.systemDefault()
-        );
+                ZoneId.systemDefault());
     }
 
     // ============ Getters and Setters ============
 
-    public String getBikeId() { return bikeId; }
-    public void setBikeId(String bikeId) { this.bikeId = bikeId; }
+    public String getBikeId() {
+        return bikeId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setBikeId(String bikeId) {
+        this.bikeId = bikeId;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     // Firestore uses this
-    public Timestamp getReservationExpiry() { return reservationExpiry; }
-    public void setReservationExpiry(Timestamp reservationExpiry) { this.reservationExpiry = reservationExpiry; }
+    public Timestamp getReservationExpiry() {
+        return reservationExpiry;
+    }
 
-    // Convenience methods for LocalDateTime (marked with @Exclude so Firestore ignores them)
+    public void setReservationExpiry(Timestamp reservationExpiry) {
+        this.reservationExpiry = reservationExpiry;
+    }
+
+    // Convenience methods for LocalDateTime (marked with @Exclude so Firestore
+    // ignores them)
     @Exclude
     public LocalDateTime getReservationExpiryAsLocalDateTime() {
         return timestampToLocalDateTime(reservationExpiry);
@@ -193,14 +252,44 @@ public class Bike implements Subject {
         this.reservationExpiry = localDateTimeToTimestamp(localDateTime);
     }
 
-    public String getReservedByUserId() { return reservedByUserId; }
-    public void setReservedByUserId(String reservedByUserId) { this.reservedByUserId = reservedByUserId; }
+    public String getReservedByUserId() {
+        return reservedByUserId;
+    }
 
-    public String getDockId() { return dockId; }
-    public void setDockId(String dockId) { this.dockId = dockId; }
+    public void setReservedByUserId(String reservedByUserId) {
+        this.reservedByUserId = reservedByUserId;
+    }
 
-    public String getStationId() { return stationId; }
-    public void setStationId(String stationId) { this.stationId = stationId; }
+    // public void setReservationTask(java.util.concurrent.ScheduledFuture<?> task) {
+    //     this.reservationTask = task;
+    // }
+
+    // public void cancelReservationTimer() {
+    //     if (reservationExpiry == null) return;
+
+    //     if (reservationTask != null && !reservationTask.isDone()) {
+    //         reservationTask.cancel(true);
+    //         System.out.println("[DEBUG] Cancelled reservation timer for bike " + bikeId);
+    //     }
+
+    //     reservationTask = null; // important
+    // }
+    
+    public String getDockId() {
+        return dockId;
+    }
+
+    public void setDockId(String dockId) {
+        this.dockId = dockId;
+    }
+
+    public String getStationId() {
+        return stationId;
+    }
+
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
+    }
 
     @Override
     public String toString() {
