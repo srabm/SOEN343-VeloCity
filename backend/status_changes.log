@@ -82,3 +82,12 @@
 [2025-11-21T07:00:08.182000000Z] TripID: Bike B012 changed status to available
 [2025-11-21T07:01:10.107000000Z] TripID: Bike B012 changed status to reserved
 [2025-11-21T07:01:10.138000000Z] TripID: Bike B012 changed status to on_trip
+[2025-11-21T15:43:16.923000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T15:43:16.998000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T15:43:17Z] TripID: Bike B012 changed status to on_trip
+[2025-11-21T15:51:04.602000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T15:51:04.694000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T15:51:04.696000000Z] TripID: Bike B012 changed status to on_trip
+[2025-11-21T15:51:40.452000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T15:51:40.553000000Z] TripID: Bike B012 changed status to reserved
+[2025-11-21T15:51:40.553000000Z] TripID: Bike B012 changed status to on_trip

@@ -9,7 +9,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.ArrayList;
+import com.google.cloud.Timestamp;
+
 import com.concordia.velocity.model.Bike;
+import com.concordia.velocity.model.Station;
 
 class BikeTest {
 
@@ -54,21 +60,26 @@ class BikeTest {
         assertFalse(bike.isReservedActive());
         bike.changeStatus("reserved");
         assertFalse(bike.isReservedActive());
-        // bike.setReservationExpiry();
-        // set date and run assert true
+        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1);
+        bike.setReservationExpiryFromLocalDateTime(tomorrow);
+        assertTrue(bike.isReservedActive());
     }
 
     @Test
-    void startReservationExpiryTest() {}
+    void startReservationExpiryTest() {
+        LocalDateTime currentTime = LocalDateTime.now();
+        Station station = new Station("S012", "Mackay Street Station", "full", "-29.03984", "-62.77431", "4050 Mackay St., Montreal Qc.", 10, 10, 15, new ArrayList<String>(Arrays.asList("D001", "D002", "D003", "D004", "D005", "D006", "D007", "D008", "D009", "D0010")), new ArrayList<String>(Arrays.asList("B001", "B002", "B003", "B004", "B005", "B006", "B007", "B008", "B009", "B0010")), 3, 7);
+        assertTrue(bike.startReservationExpiry(station, "xxxxx").isAfter(currentTime));
+    }
 
     @Test
-    void clearReservationTest() {}
-
-    @Test
-    void localDateTimeToTimestampTest() {}
-
-    @Test
-    void timestampToLocalDateTimeTest() {}
+    void clearReservationTest() {
+        Station station = new Station("S012", "Mackay Street Station", "full", "-29.03984", "-62.77431", "4050 Mackay St., Montreal Qc.", 10, 10, 15, new ArrayList<String>(Arrays.asList("D001", "D002", "D003", "D004", "D005", "D006", "D007", "D008", "D009", "D0010")), new ArrayList<String>(Arrays.asList("B001", "B002", "B003", "B004", "B005", "B006", "B007", "B008", "B009", "B0010")), 3, 7);
+        bike.startReservationExpiry(station, "xxxxx");
+        bike.clearReservation();
+        assertNull(bike.getReservationExpiry());
+        assertNull(bike.getReservedByUserId());
+    }
 
     @AfterEach
     void tearDown() {
