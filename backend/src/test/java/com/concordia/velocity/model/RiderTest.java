@@ -13,7 +13,16 @@ class RiderTest {
 
     @BeforeEach
     void setup() {
-        rider = null;
+        rider = new Rider("Michel", "Traore", "359 av. Barvave, Balboa, SD", "m.traore@gmail.com", "5149994583");
+    }
+
+    @Test
+    void constructorTest() {
+        assertEquals("Michel", rider.getFirstName());
+        assertEquals("Traore", rider.getLastName());
+        assertEquals("359 av. Barvave, Balboa, SD", rider.getAddress());
+        assertEquals("m.traore@gmail.com", rider.getEmail());
+        assertEquals("5149994583", rider.getPhoneNumber());
     }
 
     @Test
