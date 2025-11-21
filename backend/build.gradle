@@ -45,3 +45,7 @@ tasks.named('bootRun') {
 application {
 	mainClass = 'com.concordia.velocity.BackendApplication'
 }
+
+test.testLogging {
+	showStandardStreams = true
+}
