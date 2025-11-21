@@ -13,12 +13,12 @@ class RiderTest {
 
     @BeforeEach
     void setup() {
-        rider = new Rider("Michel", "Traore", "359 av. Barvave, Balboa, SD", "m.traore@gmail.com", "5149994583");
+        rider = new Rider("     Michel", "Traore", "359 av. Barvave, Balboa, SD", "m.traore@gmail.com", "5149994583");
     }
 
     @Test
     void constructorTest() {
-        assertEquals("Michel", rider.getFirstName());
+        assertEquals("     Michel", rider.getFirstName());
         assertEquals("Traore", rider.getLastName());
         assertEquals("359 av. Barvave, Balboa, SD", rider.getAddress());
         assertEquals("m.traore@gmail.com", rider.getEmail());
@@ -26,7 +26,14 @@ class RiderTest {
     }
 
     @Test
-    void getFullNameTest() {}
+    void getFullNameTest() {
+        assertEquals("Michel Traore", rider.getFullName());
+    }
+
+    @Test
+    void getRodeTest() {
+        assertEquals("RIDER", rider.getRole());
+    }
 
     @AfterEach
     void tearDown() {
