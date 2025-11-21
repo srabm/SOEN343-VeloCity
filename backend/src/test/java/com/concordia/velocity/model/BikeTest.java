@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.concordia.velocity.model.Bike;
 
@@ -29,13 +32,31 @@ class BikeTest {
     }
 
     @Test
-    void isValidStatusTest() {}
+    void isValidStatusTest() {
+        assertTrue(bike.isValidStatus("available"));
+        assertTrue(bike.isValidStatus("reserved"));
+        assertTrue(bike.isValidStatus("maintenance"));
+        assertTrue(bike.isValidStatus("on_trip"));
+        assertFalse(bike.isValidStatus("random_status"));
+    }
 
     @Test
-    void changeStatusTest() {}
+    void changeStatusTest() {
+        assertThrows(IllegalArgumentException.class, () -> bike.changeStatus("random_status"));
+        assertTrue(bike.changeStatus("reserved"));
+        assertFalse(bike.changeStatus("reserved"));
+        bike.changeStatus("on_trip");
+        assertThrows(IllegalStateException.class, () -> bike.changeStatus("maintenance"));
+    }
 
     @Test
-    void isReservedActiveTest() {}
+    void isReservedActiveTest() {
+        assertFalse(bike.isReservedActive());
+        bike.changeStatus("reserved");
+        assertFalse(bike.isReservedActive());
+        // bike.setReservationExpiry();
+        // set date and run assert true
+    }
 
     @Test
     void startReservationExpiryTest() {}
