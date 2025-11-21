@@ -1,11 +1,12 @@
 package com.concordia.velocity.model;
 
-import com.concordia.velocity.observer.Observer;
-import com.concordia.velocity.observer.StatusObserver;
-import com.concordia.velocity.observer.Subject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.StatusObserver;
+import com.concordia.velocity.observer.Subject;
 
 public class Station implements Subject {
 
@@ -56,7 +57,7 @@ public class Station implements Subject {
 
         this.stationId = stationId;
         this.stationName = stationName;
-        this.status = status;
+        this.status = determineStatusFromCapacity();
         this.latitude = latitude;
         this.longitude = longitude;
         this.streetAddress = streetAddress;
@@ -186,11 +187,15 @@ public class Station implements Subject {
     public void setStreetAddress(String streetAddress) { this.streetAddress = streetAddress; }
 
     public int getCapacity() { return capacity; }
-    public void setCapacity(int capacity) { this.capacity = capacity; }
+    public void setCapacity(int capacity) { 
+        this.capacity = capacity;
+        this.status = determineStatusFromCapacity(); 
+    }
 
     public int getNumDockedBikes() { return numDockedBikes; }
     public void setNumDockedBikes(int numDockedBikes) {
         this.numDockedBikes = numDockedBikes;
+        this.status = determineStatusFromCapacity();
     }
 
     public int getReservationHoldTime() { return reservationHoldTime; }

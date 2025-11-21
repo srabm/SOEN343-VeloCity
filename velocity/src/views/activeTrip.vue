@@ -115,9 +115,10 @@ import { useRouter, useRoute } from 'vue-router';
 import { getAuth } from 'firebase/auth';
 import { tripApi } from '../services/api';
 
+
 export default {
   name: 'ActiveTrip',
-  
+
   setup() {
     const router = useRouter();
     const route = useRoute();
@@ -197,16 +198,28 @@ export default {
           endDockId.value,
           endDockCode.value
         );
-
+        
         if (!response.success) {
           throw new Error(response.error || 'Failed to end trip');
         }
 
-        // Show success message and navigate to trip summary/receipt
-        alert(response.message);
+        // Check for tier change in response
+        if (response.tierChange) {
+          // Store tier change info in localStorage to show notification on ride history page
+          const tierChangeKey = `pending_tier_change_${currentUser.value.uid}`;
+          localStorage.setItem(tierChangeKey, JSON.stringify({
+            oldTier: response.tierChange.oldTier,
+            newTier: response.tierChange.newTier
+          }));
+          
+          // Update localStorage with new tier
+          const storageKey = `rider_tier_${currentUser.value.uid}`;
+          localStorage.setItem(storageKey, response.tierChange.newTier);
+           }
         
-        // Navigate to ride history or home
-        router.push({ name: 'RideHistory' });
+          // Redirect immediately to ride history page
+          // The notification will be shown there if there was a tier change
+          router.push({ name: 'RideHistory' });
 
       } catch (err) {
         console.error('Error ending trip:', err);

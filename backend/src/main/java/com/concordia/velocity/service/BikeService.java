@@ -1,8 +1,12 @@
 package com.concordia.velocity.service;
 
 import com.concordia.velocity.model.Bike;
+import com.concordia.velocity.model.Rider;
+import com.concordia.velocity.model.Station;
 import com.concordia.velocity.observer.DashboardObserver;
 import com.concordia.velocity.observer.Observer;
+import com.concordia.velocity.observer.ReservationObserver;
+import com.concordia.velocity.observer.StatusObserver;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
@@ -17,6 +21,25 @@ import java.util.concurrent.ExecutionException;
 public class BikeService {
 
     private final Firestore db = FirestoreClient.getFirestore();
+    private final UserService userService;
+    private final LoyaltyStatsService loyaltyStatsService;
+
+    // Constructor injection for dependencies
+    public BikeService(UserService userService, LoyaltyStatsService loyaltyStatsService) {
+        this.userService = userService;
+        this.loyaltyStatsService = loyaltyStatsService;
+    }
+
+    /**
+     * Helper method to attach all necessary observers to a bike
+     */
+    private void attachObservers(Bike bike) {
+        if (bike != null) {
+            bike.attach(new StatusObserver());
+            bike.attach(new DashboardObserver());
+            bike.attach(new ReservationObserver(userService, loyaltyStatsService));
+        }
+    }
 
     /**
      * Creates a reservation for a bike
@@ -49,17 +72,17 @@ public class BikeService {
             throw new IllegalArgumentException("Station not found: " + stationId);
         }
 
-        // Attach observers
-        Observer dashboardObserver = new DashboardObserver();
-        bike.attach(dashboardObserver);
+        // Attach all observers
+        attachObservers(bike);
 
         // Start reservation (sets status to RESERVED and schedules auto-expiry)
-        LocalDateTime expiryTime = bike.startReservationExpiry(station, userId);
+        Rider rider = userService.getUserById(userId);
+        LocalDateTime expiryTime = bike.startReservationExpiry(station, rider);
 
         // Persist to Firestore
         db.collection("bikes").document(bikeId).set(bike).get();
 
-        return "Bike " + bikeId + " reserved successfully for user " + userId +
+        return "Bike " + bikeId + " reserved successfully for user " + rider.getFullName() +
                 ". Reservation expires at " + expiryTime;
     }
 
@@ -77,9 +100,8 @@ public class BikeService {
             throw new IllegalArgumentException("Bike not found: " + bikeId);
         }
 
-        // Attach observers before making changes
-        Observer dashboardObserver = new DashboardObserver();
-        bike.attach(dashboardObserver);
+        // Attach all observers before making changes
+        attachObservers(bike);
 
         // Perform status change (this will validate and notify observers)
         bike.changeStatus(newStatus);
@@ -91,8 +113,13 @@ public class BikeService {
     }
 
     public Bike getBikeById(String bikeId) throws ExecutionException, InterruptedException {
-        return db.collection("bikes").document(bikeId)
+        Bike bike = db.collection("bikes").document(bikeId)
                 .get().get().toObject(Bike.class);
+        
+        // Attach observers when retrieving bikes
+        attachObservers(bike);
+        
+        return bike;
     }
 
     public List<Bike> getAllBikes() throws ExecutionException, InterruptedException {
@@ -100,6 +127,8 @@ public class BikeService {
         for (DocumentSnapshot doc : db.collection("bikes").get().get().getDocuments()) {
             Bike bike = doc.toObject(Bike.class);
             if (bike != null) {
+                // Attach observers to each bike
+                attachObservers(bike);
                 bikes.add(bike);
             }
         }
