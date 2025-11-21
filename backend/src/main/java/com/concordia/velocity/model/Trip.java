@@ -11,6 +11,9 @@ public class Trip {
     public static final String STATUS_ACTIVE = "active";
     public static final String STATUS_COMPLETED = "completed";
     public static final String STATUS_CANCELLED = "cancelled";
+    public static final String STATUS_MISSED = "missed"; // added these 2 lines to handle missed reservations and expired reservations to use in LoyaltyStatsService
+    public static final String STATUS_EXPIRED = "expired";
+
 
     private String tripId;
     private String riderId;
@@ -27,6 +30,8 @@ public class Trip {
     private String status;              // active, completed, cancelled
     private Long durationMinutes;       // Trip duration in minutes
     private Bill bill;
+    private Boolean flexRedeemed;
+    private Double flexRedeemedAmount;
 
     public Trip() {}
 
@@ -159,6 +164,12 @@ public class Trip {
 
     public Bill getBill() { return bill; }
     public void setBill(Bill bill) { this.bill = bill; }
+
+    public Boolean getFlexRedeemed() { return flexRedeemed; }
+    public void setFlexRedeemed(Boolean flexRedeemed) { this.flexRedeemed = flexRedeemed; }
+
+    public Double getFlexRedeemedAmount() { return flexRedeemedAmount; }
+    public void setFlexRedeemedAmount(Double flexRedeemedAmount) { this.flexRedeemedAmount = flexRedeemedAmount; }
 
     @Override
     public String toString() {

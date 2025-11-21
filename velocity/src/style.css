@@ -18,8 +18,8 @@
   }
 
   body {
-    font-family: 'Roboto', sans-serif;
-    overflow-y: auto;
+    font-family: 'ABeeZee', sans-serif;
+    overflow-y: hidden;
     padding-top: 56px;
   }
 
@@ -54,5 +54,21 @@
   src: url('./assets/Fonts/VarelaRound-Regular.ttf') format('truetype');
   font-weight: 100 900; 
   font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABeeZee';
+  src: url('./assets/Fonts/ABeeZee-Regular.ttf') format('truetype');
+  font-weight: 400; 
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ABeeZee';
+  src: url('./assets/Fonts/ABeeZee-Italic.ttf') format('truetype');
+  font-weight: 400; 
+  font-style: italic;
   font-display: swap;
 }

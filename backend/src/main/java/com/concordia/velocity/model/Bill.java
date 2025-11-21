@@ -13,6 +13,7 @@ public class Bill {
     private String paymentMethodLastFour;  // Last 4 digits of payment method
     private Timestamp billingDate;
     private String status;  // "pending", "paid", "failed"
+    private double discount;
 
     public Bill() {}
 
@@ -25,6 +26,7 @@ public class Bill {
         this.total = total;
         this.billingDate = Timestamp.now();
         this.status = "pending";
+        this.discount = 0.0;
     }
 
     public Bill(String billId, String tripId, String riderId, double cost, double tax, double total,
@@ -38,6 +40,19 @@ public class Bill {
         this.paymentMethodLastFour = paymentMethodLastFour;
         this.billingDate = Timestamp.now();
         this.status = status;
+    }
+
+    // New constructor with discount
+    public Bill(String billId, String tripId, String riderId, double cost, double discount, double tax, double total) {
+        this.billId = billId;
+        this.tripId = tripId;
+        this.riderId = riderId;
+        this.cost = cost;
+        this.discount = discount;
+        this.tax = tax;
+        this.total = total;
+        this.billingDate = Timestamp.now();
+        this.status = "pending";
     }
 
     /**
@@ -84,6 +99,9 @@ public class Bill {
     public void setStatus(String status) { this.status = status; }
 
     public String getRiderId() { return this.riderId; }
+
+    public double getDiscount() { return discount; }
+    public void setDiscount(double discount) { this.discount = discount; }
 
     @Override
     public String toString() {

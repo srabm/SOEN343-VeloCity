@@ -255,6 +255,7 @@ export default {
               button.disabled = true;
               button.textContent = 'Reserving...';
               
+              // this is the actual reservation API call 
               try {
                 // Call API to reserve the bike
                 const response = await bikeApi.reserveBike(bikeId, currentUser.uid, stationId);
@@ -374,7 +375,8 @@ export default {
               `Maximum Capacity: ${capacity}<br>` +
               `Available Regular Bikes: ${nbRegBikes}<br>` +
               `Available Electric Bikes: ${nbElectricBikes}<br>` +
-              `Available Docks: ${station.capacity - (station.bikeIds ? station.bikeIds.length : 0)}<br>` +              
+              `Available Docks: ${station.capacity - totalBikes}<br>` + //*remove: changed the way we do available docks. old way is on the next line
+              //`Available Docks: ${station.capacity - (station.bikeIds ? station.bikeIds.length : 0)}<br>` +
               (nbRegBikes > 0
                 ? `<button onclick="window.dispatchEvent(new CustomEvent('reserveBike', 
                         {detail: {stationId: '${station.id}', stationName: '${station.stationName}', bikeType: 'standard'}}))">
