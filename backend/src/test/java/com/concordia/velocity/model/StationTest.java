@@ -5,10 +5,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.ArrayList;
 import com.concordia.velocity.model.Station;
+import com.concordia.velocity.model.Bike;
 
 class StationTest {
 
@@ -37,31 +41,85 @@ class StationTest {
     }
 
     @Test
-    void isValidStatusTest() {}
+    void isValidStatusTest() {
+        assertTrue(station.isValidStatus("empty"));
+        assertTrue(station.isValidStatus("occupied"));
+        assertTrue(station.isValidStatus("full"));
+        assertTrue(station.isValidStatus("out_of_service"));
+        assertFalse(station.isValidStatus("random_status"));
+        assertFalse(station.isValidStatus(null));
+    }
 
     @Test
-    void changeStatusTest() {}
+    void changeStatusTest() {
+        assertThrows(IllegalArgumentException.class, () -> station.changeStatus("random_status"));
+        assertFalse(station.changeStatus("full"));
+        assertTrue(station.changeStatus("empty"));
+    }
 
     @Test
-    void determineStatusFromCapacityTest() {}
+    void determineStatusFromCapacityTest() {
+        assertEquals(station.STATUS_FULL, station.determineStatusFromCapacity());
+        station.setNumDockedBikes(0);
+        assertEquals(station.STATUS_EMPTY, station.determineStatusFromCapacity());
+        station.setNumDockedBikes(5);
+        assertEquals(station.STATUS_OCCUPIED, station.determineStatusFromCapacity());
+    }
 
     @Test
-    void hasAvailableSpaceTest() {}
+    void hasAvailableSpaceTest() {
+        assertFalse(station.hasAvailableSpace());
+        station.setNumDockedBikes(5);
+        assertTrue(station.hasAvailableSpace());
+        station.changeStatus(station.STATUS_OUT_OF_SERVICE);
+        assertFalse(station.hasAvailableSpace());
+    }
 
     @Test
-    void hasBikesAvailableTest() {}
+    void hasBikesAvailableTest() {
+        assertTrue(station.hasBikesAvailable());
+        station.setNumDockedBikes(0);
+        assertFalse(station.hasBikesAvailable());
+        station.setNumDockedBikes(5);
+        station.changeStatus(station.STATUS_OUT_OF_SERVICE);
+        assertFalse(station.hasBikesAvailable());
+        station.changeStatus(station.STATUS_OUT_OF_SERVICE);
+        assertFalse(station.hasBikesAvailable());
+    }
 
     @Test
-    void isOutOfServiceTest() {}
+    void isOutOfServiceTest() {
+        assertFalse(station.isOutOfService());
+        station.changeStatus(station.STATUS_OUT_OF_SERVICE);
+        assertTrue(station.isOutOfService());
+    }
 
     @Test
-    void isFullTest() {}
+    void isFullTest() {
+        assertTrue(station.isFull());
+        station.setNumDockedBikes(station.getCapacity() - 1);
+        assertFalse(station.isFull());
+    }
 
     @Test
-    void removeBikeTest() {}
+    void removeBikeTest() {
+        int initialElectricBikes = station.getNumElectricBikes();
+        Bike bike = new Bike("B005", "available", "electric", "D005", "S002");
+        station.removeBike(bike);
+        assertEquals(initialElectricBikes - 1, station.getNumElectricBikes());
+    }
 
     @Test
-    void addBikeTest() {}
+    void addBikeTest() {
+        int initialElectricBikes = station.getNumElectricBikes();
+        int initialStandardBikes = station.getNumStandardBikes();
+        Bike bike1 = new Bike("B005", "available", "electric", "D005", "S002");
+        Bike bike2 = new Bike("B018", "available", "standard", "D006", "S002");
+        station.removeBike(bike1);
+        station.addBike(bike2);
+        assertEquals(initialElectricBikes - 1, station.getNumElectricBikes());
+        assertEquals(initialStandardBikes + 1, station.getNumStandardBikes());
+    }
 
     @AfterEach
     void tearDown() {
