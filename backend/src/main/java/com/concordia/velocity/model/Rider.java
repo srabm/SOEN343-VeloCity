@@ -1,15 +1,11 @@
 package com.concordia.velocity.model;
 
+import com.concordia.velocity.state.*;
+import com.google.cloud.Timestamp;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.concordia.velocity.state.BronzeTierState;
-import com.concordia.velocity.state.GoldTierState;
-import com.concordia.velocity.state.NoTierState;
-import com.concordia.velocity.state.SilverTierState;
-import com.concordia.velocity.state.TierState;
-import com.google.cloud.Timestamp;
 
 public class Rider {
     private String id;
@@ -30,8 +26,6 @@ public class Rider {
         this.tierState = new NoTierState(); // initially the rider has no tier
         this.tier = "NoTier";
     }
-
-    public Rider() {}
 
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
         this.firstName = firstName;
