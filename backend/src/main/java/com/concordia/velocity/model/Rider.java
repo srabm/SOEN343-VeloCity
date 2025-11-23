@@ -27,6 +27,7 @@ public class Rider {
         this.tier = "NoTier";
     }
 
+
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
         this.firstName = firstName;
         this.lastName = lastName;
