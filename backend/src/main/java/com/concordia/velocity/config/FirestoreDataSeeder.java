@@ -7,7 +7,6 @@ import com.google.cloud.firestore.Firestore;
 import com.google.firebase.cloud.FirestoreClient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +20,7 @@ import java.util.concurrent.ExecutionException;
  * To run: Uncomment @Component annotation above
  * Or manually call seedFirestoreData() bean
  */
-@Component  // Uncomment to run on startup -> ./gradlew bootRun --args='--seed'
+// @Component  // Uncomment to run on startup -> ./gradlew bootRun --args='--seed'
 public class FirestoreDataSeeder {
 
     private final Random random = new Random();
