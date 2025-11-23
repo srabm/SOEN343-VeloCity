@@ -1,27 +1,6 @@
 package com.concordia.velocity.service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-
-import org.springframework.stereotype.Service;
-
-import com.concordia.velocity.model.Bike;
-import com.concordia.velocity.model.Bill;
-import com.concordia.velocity.model.Dock;
-import com.concordia.velocity.model.Rider;
-import com.concordia.velocity.model.RiderStats;
-import com.concordia.velocity.model.Station;
-import com.concordia.velocity.model.Trip;
+import com.concordia.velocity.model.*;
 import com.concordia.velocity.observer.DashboardObserver;
 import com.concordia.velocity.observer.Observer;
 import com.concordia.velocity.observer.StatusObserver;
@@ -31,25 +10,31 @@ import com.concordia.velocity.strategy.OneTimeStandardPayment;
 import com.concordia.velocity.strategy.PaymentStrategy;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.FieldValue;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
-import com.google.cloud.firestore.QuerySnapshot;
- import com.google.firebase.cloud.FirestoreClient;
+import com.google.cloud.firestore.*;
+import com.google.firebase.cloud.FirestoreClient;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 @Service
 public class TripService {
 
     private final Firestore db = FirestoreClient.getFirestore();
     private final UserService userService;
-    private final LoyaltyStatsService loyaltyStatsService; 
+    private final LoyaltyStatsService loyaltyStatsService;
+    private final IdGeneratorService idGeneratorService;
 
     // constructor injection
-    public TripService(UserService userService, LoyaltyStatsService loyaltyStatsService) {
+    public TripService(UserService userService, LoyaltyStatsService loyaltyStatsService,IdGeneratorService idGeneratorService ) {
     this.userService = userService;
     this.loyaltyStatsService = loyaltyStatsService;
+    this.idGeneratorService = idGeneratorService;
 }
 
     /**
@@ -464,8 +449,8 @@ public class TripService {
      * Creates a new trip record
      */
     private Trip createTripRecord(String bikeId, String bikeType, String riderId,
-                                  String startDockId, String startStationId, String startStationName) {
-        String tripId = UUID.randomUUID().toString();
+                                  String startDockId, String startStationId, String startStationName) throws ExecutionException, InterruptedException {
+        String tripId = idGeneratorService.generateTripId();
         return new Trip(tripId, riderId, bikeId, bikeType, startStationId, startStationName, startDockId);
     }
 
@@ -495,7 +480,7 @@ public class TripService {
      * Calculates billing for a completed trip and creates a bill
      * Uses Strategy pattern - delegates bill creation to the payment strategy
      */
-    private Bill calculateAndCreateBill(Trip trip, Rider rider) {
+    private Bill calculateAndCreateBill(Trip trip, Rider rider) throws ExecutionException, InterruptedException {
         if (trip.getDurationMinutes() == null) {
             trip.calculateDuration();
         }
@@ -505,8 +490,15 @@ public class TripService {
         // Select payment strategy based on bike type
         PaymentStrategy paymentStrategy = selectPaymentStrategy(trip.getBikeType());
 
+
+
         // Strategy creates the complete bill (cost + tax + total) and charge to rider
-        return paymentStrategy.createBillAndProcessPayment(trip, durationMinutes, rider);
+        Bill bill = paymentStrategy.createBillAndProcessPayment(trip, durationMinutes, rider);
+
+        String billId = idGeneratorService.generateBillId();  // Creates BILL0001, BILL0002, etc.
+        bill.setBillId(billId);
+
+        return bill;
     }
 
     /**
