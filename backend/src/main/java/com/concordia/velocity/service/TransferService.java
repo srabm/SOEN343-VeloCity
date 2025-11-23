@@ -212,9 +212,14 @@ public class TransferService {
             // 6. Perform the transfer
             boolean isInterStationTransfer = !sourceStationId.equals(destinationStationId);
 
-            // Update bike
+            // Update bike location
             bike.setDockId(destinationDockId);
             bike.setStationId(destinationStationId);
+
+            // Clear any reservation data (important for operator transfers)
+            // This also cancels any scheduled reservation expiry tasks
+            bike.clearReservation();
+
             txn.set(bikeRef, bike);
 
             // Update source dock - make it empty
