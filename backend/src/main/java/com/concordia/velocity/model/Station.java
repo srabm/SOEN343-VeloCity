@@ -57,7 +57,6 @@ public class Station implements Subject {
 
         this.stationId = stationId;
         this.stationName = stationName;
-        this.status = determineStatusFromCapacity();
         this.latitude = latitude;
         this.longitude = longitude;
         this.streetAddress = streetAddress;
@@ -68,6 +67,8 @@ public class Station implements Subject {
         this.bikeIds = bikeIds;
         this.numStandardBikes = numStandardBikes;
         this.numElectricBikes = numElectricBikes;
+
+        this.status = determineStatusFromCapacity();
         attach(new StatusObserver());
     }
 
