@@ -5,7 +5,7 @@
     </router-link>
     <button
       type="button"
-      class="bg-yellow-300 text-black font-medium px-3 py-1 rounded hover:bg-yellow-400 duration-300"
+      class="bg-[#0348af] text-white font-medium px-3 py-1 rounded hover:bg-blue-700 duration-300"
       @click="handleLogout"
     >
       Logout
