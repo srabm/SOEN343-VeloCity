@@ -96,6 +96,27 @@
           </form>
         </div>
 
+        <div v-if="lowStations.length > 0" class="low-stations-section">
+          <h3 class="text-green-800 text-lg font-semibold">Stations Low On Bikes</h3>
+          <p class="text-green-700">You will be rewarded 2 flex dollars for returning your bike to a station with low bike availability.</p>
+          <ul class="low-station-list">
+            <li v-for="station in lowStations" :key="station.stationId" class="low-station-item">
+              <div class="station-header">
+                <strong>{{ station.stationName }}</strong>
+                <span class="available">Available docks: {{ station.availableDocks }}</span>
+                <button class="btn btn-sm" @click.prevent="toggleShowDocks(station.stationId)">
+                  {{ stationDocks[station.stationId] ? 'Hide docks' : 'Show docks' }}
+                </button>
+              </div>
+              <ul v-if="stationDocks[station.stationId]" class="dock-list">
+                <li v-for="dock in stationDocks[station.stationId]" :key="dock.dockId">
+                  Dock ID: {{ dock.dockId }}
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
         <div class="help-section">
           <h3>Need Help?</h3>
           <ul>
@@ -112,10 +133,10 @@
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, reactive } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getAuth } from 'firebase/auth';
-import { tripApi } from '../services/api';
+import { tripApi, transferApi } from '../services/api';
 
 
 export default {
@@ -137,6 +158,8 @@ export default {
     const endDockCode = ref('');
     const ending = ref(false);
     const endError = ref(null);
+    const lowStations = ref([]);
+    const stationDocks = reactive({});
     let durationInterval = null;
 
     // Get current user
@@ -186,6 +209,26 @@ export default {
       // Start duration timer
       updateDuration();
       durationInterval = setInterval(updateDuration, 1000);
+    };
+
+    // Load low-capacity stations
+    const loadLowStations = async () => {
+
+        const resp = await transferApi.getAllStations();
+        const lows = resp.filter(s => s.numDockedBikes < (0.25 * s.capacity));
+        lowStations.value = lows.map(s => ({
+          ...s,
+          availableDocks: Math.max(0, s.capacity - s.numDockedBikes)
+        }));
+    };
+
+    const toggleShowDocks = async (stationId) => {
+      if (stationDocks[stationId]) {
+        delete stationDocks[stationId];
+        return;
+      }
+        const docks = await transferApi.getAvailableDocksAtStation(stationId);
+        stationDocks[stationId] = docks;
     };
 
     // End trip
@@ -239,6 +282,7 @@ export default {
     // Lifecycle
     onMounted(() => {
       loadTrip();
+      loadLowStations();
     });
 
     onUnmounted(() => {
@@ -261,6 +305,9 @@ export default {
       formatDuration,
       endTrip,
       goToMap,
+      lowStations,
+      stationDocks,
+      toggleShowDocks,
     };
   },
 };
@@ -415,6 +462,21 @@ export default {
   margin-top: 0;
   color: #2e7d32;
 }
+
+.low-stations-section {
+  background: #edf7ee;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.low-station-list { list-style: none; padding: 0; margin: 0; }
+.low-station-item { padding: 0.5rem 0; border-bottom: 1px dashed #eee; }
+.station-header { display:flex; gap:1rem; align-items:center; flex-wrap:nowrap; white-space:nowrap; }
+.station-header strong {
+  white-space: nowrap;
+}
+.station-header .available { margin-left: 20px; color: #2e7d32; font-weight:600; }
 
 .form-group {
   margin-bottom: 1rem;
