@@ -22,10 +22,12 @@
 
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">How It Works</h2>
-                    <ul class="list-none space-y-1 text-slate-700">
-                        <li><strong>1.</strong> T.</li>
-                        <li><strong>2.</strong> B.</li>
-                        <li><strong>3.</strong> D.</li>
+                    <ul class="list-none space-y-1 text-slate-700 text-left px-5">
+                        <li><strong>1.</strong> Pick a station from where you want to start your ride.</li>
+                        <li><strong>2.</strong> Choose a bike or e-bike from the available options.</li>
+                        <li><strong>3.</strong> Unlock the bike using the provided pin before it expires.</li>
+                        <li><strong>4.</strong> Enjoy your ride and explore the city!</li>
+                        <li><strong>5.</strong> Return the bike to any station and end your ride.</li>
                     </ul>
                 </div>
 

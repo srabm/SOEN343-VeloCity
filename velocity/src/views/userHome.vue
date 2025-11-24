@@ -19,7 +19,7 @@
                 </p>
             </header>
 
-            <section class="px-50 pb-4">
+            <section class="px-50 pb-4 h-full">
                 <div class="rounded-xl p-3 md:p-4 shadow-lg bg-white/50 backdrop-blur-md">
                     <div class="w-full h-[60vh] md:h-[70vh]">
                         <mapView class="w-full h-full rounded-lg overflow-hidden" />

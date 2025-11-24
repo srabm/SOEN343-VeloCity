@@ -1,6 +1,7 @@
 <template>
-  <div class="active-trip-page">
-    <div class="container">
+  <div class="bg-cover bg-center no-topbar-offset" style="background-image: url('/src/assets/bike-bg.jpg');">
+    <div class="min-h-screen bg-black/40 overflow-auto pb-4">
+      <div class="active-trip-page container mx-auto px-4">
       <!-- Loading State -->
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
@@ -125,6 +126,7 @@
             <li>You'll receive a receipt with your trip details after docking</li>
           </ul>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -313,9 +315,11 @@ export default {
 
 <style scoped>
 .active-trip-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   padding: 2rem;
+}
+
+.no-topbar-offset {
+  margin-top: -56px;
 }
 
 .container {

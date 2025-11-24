@@ -1,7 +1,9 @@
 <template>
   <topbar />
-  <div class="billing-history">
-    <h1>Billing History</h1>
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
+    <div class="min-h-screen bg-black/40 overflow-auto pt-16 pb-4">
+      <div class="billing-history">
+        <h1>Billing History</h1>
 
     <!-- Filters -->
     <div class="filters">
@@ -99,9 +101,11 @@
       <p>No billing records found.</p>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading">
-      <p>Loading billing history...</p>
+        <!-- Loading State -->
+        <div v-if="loading" class="loading">
+          <p>Loading billing history...</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -371,6 +375,8 @@ const sortedAndFilteredBills = computed(() => {
 
 .table-container {
   overflow-x: auto;
+  overflow-y: auto;
+  max-height: 60vh;
 }
 
 .billing-table {
@@ -502,6 +508,12 @@ const sortedAndFilteredBills = computed(() => {
   .billing-table th,
   .billing-table td {
     padding: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    max-height: 50vh;
   }
 }
 </style>
