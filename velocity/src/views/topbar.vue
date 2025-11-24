@@ -3,7 +3,9 @@
         <nav class="grid grid-cols-3 items-stretch h-14 px-4">
             <!-- logo -->
             <div class="flex items-center">
-                <img :src="logo" alt="VeloCity" class="h-14 w-auto select-none" />
+            <router-link to="/VeloCity/home">
+                <img :src="logo" alt="VeloCity" class="h-14 w-auto select-none cursor-pointer" />
+            </router-link>
             </div>
 
             <!-- tabs -->
@@ -115,5 +117,15 @@ onMounted(() => {
 
 
 <style scoped>
+header,
+header a {
+  color: #0348af !important;
+  font-weight: 1000 !important;
+}
+
+header a {
+    font-size: 0.88rem !important; /* = text-sm */
+}
+
 
 </style>
