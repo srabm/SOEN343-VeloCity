@@ -15,10 +15,8 @@
             <!-- PRICING SECTION -->
             <section class="px-4 pb-10 max-w-6xl mx-auto">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                 <!-- PAY-AS-YOU-GO -->
-                <div class="mt-6 rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+                <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">Pay-as-you-go Pricing</h2>
 
                     <ul class="text-gray-800 space-y-1">
@@ -31,6 +29,8 @@
                         Default pricing for guests or users without a membership. Charges are calculated when your bike is returned.
                     </p>
                 </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
 
                 <!-- Regular Membership -->
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
