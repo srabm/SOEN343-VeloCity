@@ -7,7 +7,7 @@
             </div>
 
             <!-- tabs -->
-            <div class="justify-self-center h-full flex items-stretch">
+            <div class="justify-self-center h-full flex truncate">
                 <router-link to="/VeloCity/home" class="h-full inline-flex items-center px-4 hover:bg-slate-200 duration-400">
                     Home
                 </router-link>
