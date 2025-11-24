@@ -31,7 +31,7 @@ public class Rider {
         this.tier = "NoTier";
     }
 
-    public Rider() {}
+    // public Rider() {}
 
     public Rider(String firstName, String lastName, String address, String email, String phoneNumber) {
         this.firstName = firstName;
