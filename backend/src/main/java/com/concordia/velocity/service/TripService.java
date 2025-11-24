@@ -414,9 +414,21 @@ public class TripService {
                 db.collection("riders").document(riderId).update("flexDollars", FieldValue.increment(-1)).get();
                 redeemed = true;
                 redeemedAmount = 0.5;
-                double oldTotal = bill.getTotal();
-                double newTotal = Math.max(0.0, Math.round((oldTotal - redeemedAmount) * 100.0) / 100.0);
-                bill.setTotal(newTotal);
+                double oldCost = bill.getCost();
+                double newCost = Math.max(0.0, Math.round((oldCost - redeemedAmount) * 100.0) / 100.0);
+                bill.setCost(newCost);
+
+                PaymentStrategy strategy = selectPaymentStrategy(trip.getBikeType());
+                double taxRate = 0.0;
+                if (strategy instanceof OneTimeStandardPayment) {
+                    taxRate = ((OneTimeStandardPayment) strategy).getTaxRate();
+                } else if (strategy instanceof OneTimeElectricPayment) {
+                    taxRate = ((OneTimeElectricPayment) strategy).getTaxRate();
+                }
+
+                bill.calculateTax(taxRate);
+                bill.setTax(Math.round(bill.getTax() * 100.0) / 100.0);
+                bill.setTotal(Math.round(bill.getTotal() * 100.0) / 100.0);
             }
         }
 
