@@ -1,7 +1,7 @@
 <template>
     <topbar />
-    <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-        <div class="min-h-screen bg-black/40">
+    <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
+        <div class="min-h-screen bg-black/20">
             <header class="text-center py-8 text-white drop-shadow">
                 <h1 class="text-3xl font-semibold">About VeloCity</h1>
                 <p class="mt-2 px-4 max-w-3xl mx-auto text-slate-100/90">
@@ -13,7 +13,10 @@
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">Our Mission</h2>
                     <p class="text-slate-600">
-                        TBD.
+                        At VeloCity, our mission is to make urban cycling simple, sustainable, and accessible for everyone.
+                        We believe that moving through the city should feel effortless—whether you're commuting, exploring, or taking a spontaneous ride.
+                        Through reliable bikes, transparent pricing, and rider-first features, we’re building a transportation system that empowers our community 
+                        to choose greener travel, embrace active living, and enjoy every moment of the journey.
                     </p>
                 </div>
 

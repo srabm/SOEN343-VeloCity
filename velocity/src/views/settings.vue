@@ -1,9 +1,8 @@
 <template>
   <topbar />
   <div class="min-h-screen bg-white flex flex-col">
+    <div class="bg-cover bg-center min-h-screen" style="background-image: url('/src/assets/montreal-architecture.jpg');">
 
-
-    <div class="min-h-screen flex flex-col bg-white">
       <header class="text-center py-8 text-white drop-shadow">
         <h1 class="text-3xl text-black font-semibold">User Settings</h1>
       </header>
