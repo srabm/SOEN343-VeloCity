@@ -3,7 +3,7 @@
     <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
         <div class="min-h-screen bg-black/20">
             <header class="text-center py-8 text-white drop-shadow">
-                <h1 class="text-3xl font-semibold">About VeloCity</h1>
+                <h1 class="text-3xl font-extrabold">About VeloCity</h1>
                 <p class="mt-2 px-4 max-w-3xl mx-auto text-slate-100/90">
                     A bike-sharing system that promotes low-cost mobility, exercise, and low-emission transportation.
                 </p>
