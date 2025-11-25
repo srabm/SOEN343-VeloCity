@@ -372,13 +372,13 @@ async function savePaymentInfo() {
   const tierGradientClass = computed(() => {
     switch (formattedTier.value) {
       case "Gold":
-        return "bg-gradient-to-br from-orange-300 via-yellow-400 to-yellow-600 text-black";
+        return "card-gold";
       case "Silver":
-        return "bg-gradient-to-br from-gray-300 via-gray-200 to-gray-400 text-black";
+        return "card-silver";
       case "Bronze":
-        return "bg-gradient-to-br from-amber-600 via-amber-500 to-yellow-400 text-black";
+        return "card-bronze";
       default:
-        return "bg-gradient-to-br from-sky-200 via-blue-100 to-indigo-300";
+        return "no-tier-card";
     }
   });
 
@@ -391,4 +391,62 @@ async function savePaymentInfo() {
 
 </script>
 
-<style scoped></style>
+<style scoped>
+/* GOLD — Matches .tier-welcome.gold */
+.card-gold {
+  background: linear-gradient(135deg, #f7e08c 0%, #d4b24c 100%);
+  color: black;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* SILVER — Matches .tier-welcome.silver */
+.card-silver {
+  background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+  color: white;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* BRONZE — Matches .tier-welcome.bronze */
+.card-bronze {
+  background: linear-gradient(135deg, #cd7f32 0%, #cc773e 80%);
+  color: white;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* NO TIER — Matches .tier-welcome.notier */
+.card-no-tier {
+  background: linear-gradient(135deg, #0348af 0%, #005be8 100%);
+  color: white;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Optional: sheen effect like notification */
+.card-gold::before,
+.card-silver::before,
+.card-bronze::before,
+.card-no-tier::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.20) 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  pointer-events: none;
+}
+
+</style>

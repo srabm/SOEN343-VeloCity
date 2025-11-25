@@ -105,19 +105,21 @@ function dismiss() {
 }
 
 .tier-welcome.bronze {
-  background: linear-gradient(135deg, #b17f4a 0%, #f9a826 100%);
+  background: linear-gradient(135deg, #cd7f32 0%, #cc773e 60%);
 }
 
 .tier-welcome.silver {
-  background: linear-gradient(135deg, #9ca3af 0%, #cbd5f5 100%);
+  background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
 }
 
 .tier-welcome.gold {
-  background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+  background: linear-gradient(135deg, #f7e08c 0%, #d4b24c 100%);
 }
 
 .tier-welcome.notier {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #0348af 0%, #005be8 100%);
+  backdrop-filter: blur(4px);
+  color: white;
 }
 
 .welcome-content {
