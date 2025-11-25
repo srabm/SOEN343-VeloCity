@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-cover bg-center no-topbar-offset" style="background-image: url('/src/assets/bike-bg.jpg');">
+  <div class="bg-cover bg-center no-topbar-offset" style="background-image: url('/src/assets/montreal-architecture.jpg');">
     <div class="min-h-screen bg-black/40 overflow-auto pb-4">
       <div class="reservation-page container mx-auto px-4">
       <!-- Loading State -->
