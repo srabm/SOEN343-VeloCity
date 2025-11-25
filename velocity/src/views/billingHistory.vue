@@ -1,6 +1,6 @@
 <template>
   <topbar />
-  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
     <div class="min-h-screen bg-black/40 overflow-auto pt-16 pb-4">
       <div class="billing-history">
         <h1>Billing History</h1>
