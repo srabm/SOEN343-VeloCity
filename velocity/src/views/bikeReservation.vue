@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-cover bg-center no-topbar-offset" style="background-image: url('/src/assets/montreal-architecture.jpg');">
-    <div class="min-h-screen bg-black/20 overflow-auto pb-4">
+  <div class="bg-cover bg-center no-topbar-offset" style="background-image: url('/src/assets/bike-bg.jpg');">
+    <div class="min-h-screen bg-black/40 overflow-auto pb-4">
       <div class="reservation-page container mx-auto px-4">
       <!-- Loading State -->
       <div v-if="loading" class="loading">
@@ -90,9 +90,9 @@
           ❌ Cancel Reservation
         </button>
       </div>
+      </div>
     </div>
   </div>
-</div>
 </template>
 
 <script>
@@ -360,9 +360,11 @@ export default {
 
 <style scoped>
 .reservation-page {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem;
+}
+
+.no-topbar-offset {
+  margin-top: -56px;
 }
 
 .container {

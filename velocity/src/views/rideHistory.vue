@@ -33,6 +33,9 @@
               <p v-if="selectedRide.bill?.discount && selectedRide.bill.discount > 0" class="text-green-800">
                 <strong>Tier Discount:</strong> -${{ selectedRide.bill.discount.toFixed(2) }}
               </p>
+              <p v-if="selectedRide.flexRedeemedAmount" class="text-green-800">
+                <strong>Flex Discount:</strong> -$0.50
+              </p>
               <p><strong>Tax:</strong> ${{ selectedRide.bill?.tax?.toFixed(2) || '0.00' }}</p>
               <p><strong>Total:</strong> ${{ selectedRide.bill?.total?.toFixed(2) || '0.00' }}</p>
             </div>
