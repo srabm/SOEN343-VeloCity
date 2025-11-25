@@ -1,6 +1,7 @@
 <template>
-  <div class="active-trip-page">
-    <div class="container">
+  <div class="bg-cover bg-center no-topbar-offset" style="background-image: url('/src/assets/montreal-architecture.jpg');">
+    <div class="min-h-screen bg-black/20 overflow-auto pb-4">
+      <div class="active-trip-page container mx-auto px-4">
       <!-- Loading State -->
       <div v-if="loading" class="loading">
         <div class="spinner"></div>
@@ -107,6 +108,7 @@
       </div>
     </div>
   </div>
+</div>
 </template>
 
 <script>

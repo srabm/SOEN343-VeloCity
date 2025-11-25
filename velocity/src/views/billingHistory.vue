@@ -1,108 +1,111 @@
 <template>
   <topbar />
-  
-  <div class="billing-history">
-    <h1>Billing History</h1>
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
+    <div class="min-h-screen bg-black/20 overflow-auto pt-16 pb-4">
+      <div class="billing-history">
+        <h1>Billing History</h1>
 
-    <!-- Filters -->
-    <div class="filters">
-      <div class="filter-group">
-        <label>From Date:</label>
-        <input v-model="filters.dateFrom" type="date" />
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filter-group">
+            <label>From Date:</label>
+            <input v-model="filters.dateFrom" type="date" />
+          </div>
+          
+          <div class="filter-group">
+            <label>To Date:</label>
+            <input v-model="filters.dateTo" type="date" />
+          </div>
+
+          <div class="filter-group">
+            <label>Bill ID:</label>
+            <input 
+              v-model="filters.billId" 
+              type="text" 
+              placeholder="Enter bill ID"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label>Station:</label>
+            <input 
+              v-model="filters.station" 
+              type="text" 
+              placeholder="Origin or arrival station"
+            />
+          </div>
+
+          <div class="filter-group">
+            <label>Sort By:</label>
+            <select v-model="sortBy">
+              <option value="date">Date (Newest First)</option>
+              <option value="dateOldest">Date (Oldest First)</option>
+              <option value="costHigh">Cost (High to Low)</option>
+              <option value="costLow">Cost (Low to High)</option>
+            </select>
+          </div>
+
+          <button @click="clearFilters" class="clear-btn">Clear Filters</button>
+        </div>
+
+        <!-- Billing Table -->
+        <div class="table-container">
+          <table class="billing-table">
+            <thead>
+              <tr>
+                <th>Bill ID</th>
+                <th>Date & Time</th>
+                <th>Bike ID</th>
+                <th>Origin Station</th>
+                <th>Arrival Station</th>
+                <th>Charges</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-for="bill in sortedAndFilteredBills" :key="bill.billId">
+                <td class="bill-id">{{ bill.billId }}</td>
+                <td>{{ formatDateTime(bill.billingDate) }}</td>
+                <td>{{ bill.bikeId || "—" }}</td>
+                <td>{{ bill.startStationName || "—" }}</td>
+                <td>{{ bill.endStationName || "—" }}</td>
+                <td class="charges-cell">
+                  <div class="charge-breakdown">
+                    <div class="charge-line">
+                      <span>Cost:</span>
+                      <span>${{ bill.cost?.toFixed(2) || "0.00" }}</span>
+                    </div>
+                    <div class="charge-line">
+                      <span>Tax:</span>
+                      <span>${{ bill.tax?.toFixed(2) || "0.00" }}</span>
+                    </div>
+                    <div class="charge-line total-line">
+                      <span>Total:</span>
+                      <span>${{ bill.total?.toFixed(2) || "0.00" }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span :class="'status-badge status-' + bill.status">
+                    {{ bill.status?.toUpperCase() || "UNKNOWN" }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div v-if="sortedAndFilteredBills.length === 0" class="no-results">
+          <p>No billing records found.</p>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="loading">
+          <p>Loading billing history...</p>
+        </div>
       </div>
-      
-      <div class="filter-group">
-        <label>To Date:</label>
-        <input v-model="filters.dateTo" type="date" />
-      </div>
-
-      <div class="filter-group">
-        <label>Bill ID:</label>
-        <input 
-          v-model="filters.billId" 
-          type="text" 
-          placeholder="Enter bill ID"
-        />
-      </div>
-
-      <div class="filter-group">
-        <label>Station:</label>
-        <input 
-          v-model="filters.station" 
-          type="text" 
-          placeholder="Origin or arrival station"
-        />
-      </div>
-
-      <div class="filter-group">
-        <label>Sort By:</label>
-        <select v-model="sortBy">
-          <option value="date">Date (Newest First)</option>
-          <option value="dateOldest">Date (Oldest First)</option>
-          <option value="costHigh">Cost (High to Low)</option>
-          <option value="costLow">Cost (Low to High)</option>
-        </select>
-      </div>
-
-      <button @click="clearFilters" class="clear-btn">Clear Filters</button>
-    </div>
-
-    <!-- Billing Table -->
-    <div class="table-container">
-      <table class="billing-table">
-        <thead>
-          <tr>
-            <th>Bill ID</th>
-            <th>Date & Time</th>
-            <th>Bike ID</th>
-            <th>Origin Station</th>
-            <th>Arrival Station</th>
-            <th>Charges</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr v-for="bill in sortedAndFilteredBills" :key="bill.billId">
-            <td class="bill-id">{{ bill.billId }}</td>
-            <td>{{ formatDateTime(bill.billingDate) }}</td>
-            <td>{{ bill.bikeId || "—" }}</td>
-            <td>{{ bill.startStationName || "—" }}</td>
-            <td>{{ bill.endStationName || "—" }}</td>
-            <td class="charges-cell">
-              <div class="charge-breakdown">
-                <div class="charge-line">
-                  <span>Cost:</span>
-                  <span>${{ bill.cost?.toFixed(2) || "0.00" }}</span>
-                </div>
-                <div class="charge-line">
-                  <span>Tax:</span>
-                  <span>${{ bill.tax?.toFixed(2) || "0.00" }}</span>
-                </div>
-                <div class="charge-line total-line">
-                  <span>Total:</span>
-                  <span>${{ bill.total?.toFixed(2) || "0.00" }}</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span :class="'status-badge status-' + bill.status">
-                {{ bill.status?.toUpperCase() || "UNKNOWN" }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Empty State -->
-    <div v-if="sortedAndFilteredBills.length === 0" class="no-results">
-      <p>No billing records found.</p>
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="loading" class="loading">
-      <p>Loading billing history...</p>
     </div>
   </div>
 </template>

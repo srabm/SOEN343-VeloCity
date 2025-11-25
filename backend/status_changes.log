@@ -238,8 +238,21 @@
 [2025-11-24T03:31:32.656000000Z] TripID: Dock D011 status changed to occupied
 [2025-11-24T03:42:05.962000000Z] TripID: Bike B041 changed status to available
 [2025-11-24T03:42:05.966000000Z] TripID: Dock D072 status changed to occupied
+<<<<<<< Updated upstream
 [2025-11-24T04:17:44.444000000Z] TripID: Bike B045 changed status to available
 [2025-11-24T04:17:44.447000000Z] TripID: Dock D067 status changed to occupied
 [2025-11-24T23:45:39.375000000Z] TripID: RESERVATION_EXPIRED userId=VQpIkO3EIgUqwPWsSDdEftyAZiQ2
 [2025-11-24T23:47:07.339000000Z] TripID: RESERVATION_EXPIRED userId=VQpIkO3EIgUqwPWsSDdEftyAZiQ2
 [2025-11-24T23:48:48.217000000Z] TripID: RESERVATION_EXPIRED userId=VQpIkO3EIgUqwPWsSDdEftyAZiQ2
+=======
+[2025-11-24T23:30:11.883000000Z] TripID: Bike B040 changed status to available
+[2025-11-24T23:30:11.897000000Z] TripID: Dock D056 status changed to occupied
+[2025-11-24T23:32:18.894000000Z] TripID: Bike B060 changed status to available
+[2025-11-24T23:33:54.768000000Z] TripID: Bike B061 changed status to available
+[2025-11-24T23:38:23.946000000Z] TripID: Bike B059 changed status to available
+[2025-11-24T23:38:23.953000000Z] TripID: Dock D101 status changed to occupied
+[2025-11-24T23:39:32.521000000Z] TripID: Bike B072 changed status to available
+[2025-11-24T23:39:32.523000000Z] TripID: Dock D002 status changed to occupied
+>>>>>>> Stashed changes
+[2025-11-25T00:34:16.941000000Z] TripID: Bike B040 changed status to available
+[2025-11-25T00:34:16.947000000Z] TripID: Dock D056 status changed to occupied
