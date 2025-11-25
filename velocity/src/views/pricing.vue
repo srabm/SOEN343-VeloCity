@@ -15,36 +15,8 @@
             <!-- PRICING SECTION -->
             <section class="px-4 pb-10 max-w-6xl mx-auto">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    <!-- Regular Membership -->
-                    <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
-                        <h2 class="text-xl font-semibold mb-3">Regular Membership</h2>
-                        <p class="text-2xl font-bold mb-2">
-                            $22.22 <span class="text-sm font-medium text-slate-600">/ month</span>
-                        </p>
-                        <p class="text-slate-700">Unlimited access to regular velos.</p>
-                        <button class="mt-4 w-full bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-500 duration-300">
-                            Coming soon...
-                        </button>
-                    </div>
-
-                    <!-- Electric Membership -->
-                    <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
-                        <h2 class="text-xl font-semibold mb-3">Electric Membership</h2>
-                        <p class="text-2xl font-bold mb-2">
-                            $33.33 <span class="text-sm font-medium text-slate-600">/ month</span>
-                        </p>
-                        <p class="text-slate-700">Unlimited access to both regular and electric velos.</p>
-                        <button class="mt-4 w-full bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-500 duration-300">
-                            Coming soon...
-                        </button>
-                    </div>
-
-                </div>
-
                 <!-- PAY-AS-YOU-GO -->
-                <div class="mt-6 rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+                <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">Pay-as-you-go Pricing</h2>
 
                     <ul class="text-gray-800 space-y-1">
@@ -56,6 +28,46 @@
                     <p class="text-slate-700 mt-3 text-sm">
                         Default pricing for guests or users without a membership. Charges are calculated when your bike is returned.
                     </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+
+                <!-- Regular Membership -->
+                <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+                    <h2 class="text-xl font-semibold mb-3">Regular Membership</h2>
+                    <p class="text-2xl font-bold mb-2">
+                        $22.22 <span class="text-sm font-medium text-slate-600">/ month</span>
+                    </p>
+                    <p class="text-slate-600">Unlimited access to regular velos.</p>
+                    <button
+                        class="mt-4 w-full bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-500 duration-300">
+                        Coming soon...
+                    </button>
+                </div>
+
+                <!-- Electric Membership -->
+                <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+                    <h2 class="text-xl font-semibold mb-3">Electric Membership</h2>
+                    <p class="text-2xl font-bold mb-2">
+                        $33.33 <span class="text-sm font-medium text-slate-600">/ month</span>
+                    </p>
+                    <p class="text-slate-600">Unlimited access to both regular and electric velos.</p>
+                    <button
+                        class="mt-4 w-full bg-yellow-300 text-black px-4 py-2 rounded hover:bg-yellow-500 duration-300">
+                        Coming soon...
+                    </button>
+                </div>
+
+                <!-- Flex dollars -->
+                <div class="md:col-span-2 rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+                    <h2 class="text-xl font-semibold mb-3">Flex Dollars</h2>
+                    
+                    <p class="mt-3 px-6">
+                        As an incentive for our users to return their bike at a low capacity station, 2 Flex dollars will be rewarded.
+                        Each Flex dollar will be automatically redeemed for a $0.50 discount on your next ride.
+                    </p>
+                </div>
+
                 </div>
 
                 <!-- SEPARATOR -->

@@ -484,6 +484,7 @@ export default {
 
 <style scoped>
 #map {
+  height: 100%;
   width: 100%;
   height: 70vh;   /* responsive height */
   max-height: 90vh; 
