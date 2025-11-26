@@ -54,6 +54,14 @@ application {
 	mainClass = 'com.concordia.velocity.BackendApplication'
 }
 
-test.testLogging {
+// test.testLogging {
+// 	showStandardStreams = true
+// }
+
+test {
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+	
+	testLogging {
 	showStandardStreams = true
+}
 }

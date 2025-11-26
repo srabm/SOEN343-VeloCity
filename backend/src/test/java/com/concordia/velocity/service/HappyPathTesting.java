@@ -1,26 +1,25 @@
+package com.concordia.velocity.service;
+import java.util.concurrent.ExecutionException;
+
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
 
 import com.concordia.velocity.model.Bike;
 import com.concordia.velocity.model.Bill;
 import com.concordia.velocity.model.Rider;
 import com.concordia.velocity.model.Station;
 import com.concordia.velocity.model.Trip;
-import com.concordia.velocity.service.BikeService;
-import com.concordia.velocity.service.TripService;
-import com.concordia.velocity.service.UserService;
-import com.concordia.velocity.service.LoyaltyStatsService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.MockedStatic;
-import com.google.firebase.cloud.FirestoreClient;
-import org.junit.jupiter.api.AfterEach;
 import com.google.cloud.firestore.Firestore;
-
-import java.util.concurrent.ExecutionException;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.google.firebase.cloud.FirestoreClient;
 
 public class HappyPathTesting {
 
