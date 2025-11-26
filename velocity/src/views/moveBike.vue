@@ -1,5 +1,5 @@
 <template>
-    <topbar />
+  <topbar />
   <div class="move-bike-container">
     <div class="header">
       <h1>Move Bike</h1>
@@ -165,215 +165,182 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, onMounted } from 'vue';
 import { transferApi } from '../services/api.js';
+import topbar from './topbar.vue';
 
-export default {
-  name: 'MoveBike',
-  setup() {
-    const loading = ref(false);
-    const error = ref(null);
-    const success = ref(null);
-    const transferring = ref(false);
+const loading = ref(false);
+const error = ref(null);
+const success = ref(null);
+const transferring = ref(false);
 
-    // Data
-    const allStations = ref([]);
-    const availableBikes = ref([]);
-    const availableDocks = ref([]);
+// Data
+const allStations = ref([]);
+const availableBikes = ref([]);
+const availableDocks = ref([]);
 
-    // Selected items
-    const selectedSourceStation = ref(null);
-    const selectedBike = ref(null);
-    const selectedDestStation = ref(null);
-    const selectedDestDock = ref(null);
+// Selected items
+const selectedSourceStation = ref(null);
+const selectedBike = ref(null);
+const selectedDestStation = ref(null);
+const selectedDestDock = ref(null);
 
-    // Search terms
-    const stationSearchTerm = ref('');
-    const destStationSearchTerm = ref('');
+// Search terms
+const stationSearchTerm = ref('');
+const destStationSearchTerm = ref('');
 
-    // Filtered lists
-    const filteredSourceStations = ref([]);
-    const filteredDestStations = ref([]);
+// Filtered lists
+const filteredSourceStations = ref([]);
+const filteredDestStations = ref([]);
 
-    // Computed
-    const isInterStationTransfer = computed(() => {
-      if (!selectedSourceStation.value || !selectedDestStation.value) return false;
-      return selectedSourceStation.value.stationId !== selectedDestStation.value.stationId;
-    });
+// Computed
+const isInterStationTransfer = computed(() => {
+  if (!selectedSourceStation.value || !selectedDestStation.value) return false;
+  return selectedSourceStation.value.stationId !== selectedDestStation.value.stationId;
+});
 
-    // Methods
-    const loadStations = async () => {
-      loading.value = true;
-      error.value = null;
-      try {
-        allStations.value = await transferApi.getAllStations();
-        filteredSourceStations.value = allStations.value.filter(s => s.numDockedBikes > 0);
-      } catch (err) {
-        error.value = 'Failed to load stations. Please try again.';
-        console.error('Error loading stations:', err);
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const filterStations = () => {
-      if (!stationSearchTerm.value) {
-        filteredSourceStations.value = allStations.value.filter(s => s.numDockedBikes > 0);
-      } else {
-        const term = stationSearchTerm.value.toLowerCase();
-        filteredSourceStations.value = allStations.value.filter(station =>
-          station.numDockedBikes > 0 &&
-          (station.stationName.toLowerCase().includes(term) ||
-           station.streetAddress.toLowerCase().includes(term))
-        );
-      }
-    };
-
-    const filterDestStations = () => {
-      let stations = allStations.value.filter(
-        s => selectedSourceStation.value && s.stationId !== selectedSourceStation.value.stationId
-      );
-
-      if (destStationSearchTerm.value) {
-        const term = destStationSearchTerm.value.toLowerCase();
-        stations = stations.filter(station =>
-          station.stationName.toLowerCase().includes(term) ||
-          station.streetAddress.toLowerCase().includes(term)
-        );
-      }
-
-      filteredDestStations.value = stations;
-    };
-
-    const loadSourceBikes = async () => {
-      if (!selectedSourceStation.value) return;
-      
-      // Reset downstream selections
-      selectedBike.value = null;
-      selectedDestStation.value = null;
-      selectedDestDock.value = null;
-      availableBikes.value = [];
-      availableDocks.value = [];
-      
-      loading.value = true;
-      error.value = null;
-      try {
-        availableBikes.value = await transferApi.getAvailableBikesAtStation(
-          selectedSourceStation.value.stationId
-        );
-        if (availableBikes.value.length === 0) {
-          error.value = 'No available bikes at this station.';
-        }
-        // Prepare destination stations list
-        filterDestStations();
-      } catch (err) {
-        error.value = 'Failed to load bikes. Please try again.';
-        console.error('Error loading bikes:', err);
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const loadDestinationDocks = async () => {
-      if (!selectedDestStation.value) return;
-      
-      // Reset dock selection
-      selectedDestDock.value = null;
-      availableDocks.value = [];
-      
-      loading.value = true;
-      error.value = null;
-      try {
-        availableDocks.value = await transferApi.getAvailableDocksAtStation(
-          selectedDestStation.value.stationId
-        );
-        if (availableDocks.value.length === 0) {
-          error.value = 'No empty docks at this station.';
-        }
-      } catch (err) {
-        error.value = 'Failed to load docks. Please try again.';
-        console.error('Error loading docks:', err);
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const confirmTransfer = async () => {
-      transferring.value = true;
-      error.value = null;
-      try {
-        const result = await transferApi.transferBike({
-          bikeId: selectedBike.value.bikeId,
-          sourceDockId: selectedBike.value.dockId,
-          destinationDockId: selectedDestDock.value.dockId,
-          sourceStationId: selectedSourceStation.value.stationId,
-          destinationStationId: selectedDestStation.value.stationId
-        });
-        
-        success.value = `Successfully transferred ${selectedBike.value.bikeId} from ${selectedSourceStation.value.stationName} to ${selectedDestStation.value.stationName}`;
-        
-        // Reload stations to get updated counts
-        setTimeout(() => {
-          loadStations();
-        }, 2000);
-        
-      } catch (err) {
-        error.value = err.message || 'Failed to transfer bike. Please try again.';
-        console.error('Error transferring bike:', err);
-      } finally {
-        transferring.value = false;
-      }
-    };
-
-    const resetForm = () => {
-      selectedSourceStation.value = null;
-      selectedBike.value = null;
-      selectedDestStation.value = null;
-      selectedDestDock.value = null;
-      availableBikes.value = [];
-      availableDocks.value = [];
-      stationSearchTerm.value = '';
-      destStationSearchTerm.value = '';
-      success.value = null;
-      error.value = null;
-      loadStations();
-    };
-
-    onMounted(() => {
-      loadStations();
-    });
-
-    return {
-      loading,
-      error,
-      success,
-      transferring,
-      allStations,
-      availableBikes,
-      availableDocks,
-      selectedSourceStation,
-      selectedBike,
-      selectedDestStation,
-      selectedDestDock,
-      stationSearchTerm,
-      destStationSearchTerm,
-      filteredSourceStations,
-      filteredDestStations,
-      isInterStationTransfer,
-      filterStations,
-      filterDestStations,
-      loadSourceBikes,
-      loadDestinationDocks,
-      confirmTransfer,
-      resetForm
-    };
+// Methods
+const loadStations = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    allStations.value = await transferApi.getAllStations();
+    filteredSourceStations.value = allStations.value.filter(s => s.numDockedBikes > 0);
+  } catch (err) {
+    error.value = 'Failed to load stations. Please try again.';
+    console.error('Error loading stations:', err);
+  } finally {
+    loading.value = false;
   }
 };
-</script>
 
-<script setup>
-import topbar from './topbar.vue'
+const filterStations = () => {
+  if (!stationSearchTerm.value) {
+    filteredSourceStations.value = allStations.value.filter(s => s.numDockedBikes > 0);
+  } else {
+    const term = stationSearchTerm.value.toLowerCase();
+    filteredSourceStations.value = allStations.value.filter(station =>
+      station.numDockedBikes > 0 &&
+      (station.stationName.toLowerCase().includes(term) ||
+       station.streetAddress.toLowerCase().includes(term))
+    );
+  }
+};
+
+const filterDestStations = () => {
+  let stations = allStations.value.filter(
+    s => selectedSourceStation.value && s.stationId !== selectedSourceStation.value.stationId
+  );
+
+  if (destStationSearchTerm.value) {
+    const term = destStationSearchTerm.value.toLowerCase();
+    stations = stations.filter(station =>
+      station.stationName.toLowerCase().includes(term) ||
+      station.streetAddress.toLowerCase().includes(term)
+    );
+  }
+
+  filteredDestStations.value = stations;
+};
+
+const loadSourceBikes = async () => {
+  if (!selectedSourceStation.value) return;
+  
+  // Reset downstream selections
+  selectedBike.value = null;
+  selectedDestStation.value = null;
+  selectedDestDock.value = null;
+  availableBikes.value = [];
+  availableDocks.value = [];
+  
+  loading.value = true;
+  error.value = null;
+  try {
+    availableBikes.value = await transferApi.getAvailableBikesAtStation(
+      selectedSourceStation.value.stationId
+    );
+    if (availableBikes.value.length === 0) {
+      error.value = 'No available bikes at this station.';
+    }
+    // Prepare destination stations list
+    filterDestStations();
+  } catch (err) {
+    error.value = 'Failed to load bikes. Please try again.';
+    console.error('Error loading bikes:', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const loadDestinationDocks = async () => {
+  if (!selectedDestStation.value) return;
+  
+  // Reset dock selection
+  selectedDestDock.value = null;
+  availableDocks.value = [];
+  
+  loading.value = true;
+  error.value = null;
+  try {
+    availableDocks.value = await transferApi.getAvailableDocksAtStation(
+      selectedDestStation.value.stationId
+    );
+    if (availableDocks.value.length === 0) {
+      error.value = 'No empty docks at this station.';
+    }
+  } catch (err) {
+    error.value = 'Failed to load docks. Please try again.';
+    console.error('Error loading docks:', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const confirmTransfer = async () => {
+  transferring.value = true;
+  error.value = null;
+  try {
+    const result = await transferApi.transferBike({
+      bikeId: selectedBike.value.bikeId,
+      sourceDockId: selectedBike.value.dockId,
+      destinationDockId: selectedDestDock.value.dockId,
+      sourceStationId: selectedSourceStation.value.stationId,
+      destinationStationId: selectedDestStation.value.stationId
+    });
+    
+    success.value = `Successfully transferred ${selectedBike.value.bikeId} from ${selectedSourceStation.value.stationName} to ${selectedDestStation.value.stationName}`;
+    
+    // Reload stations to get updated counts
+    setTimeout(() => {
+      loadStations();
+    }, 2000);
+    
+  } catch (err) {
+    error.value = err.message || 'Failed to transfer bike. Please try again.';
+    console.error('Error transferring bike:', err);
+  } finally {
+    transferring.value = false;
+  }
+};
+
+const resetForm = () => {
+  selectedSourceStation.value = null;
+  selectedBike.value = null;
+  selectedDestStation.value = null;
+  selectedDestDock.value = null;
+  availableBikes.value = [];
+  availableDocks.value = [];
+  stationSearchTerm.value = '';
+  destStationSearchTerm.value = '';
+  success.value = null;
+  error.value = null;
+};
+
+// Load stations when component mounts
+onMounted(() => {
+  loadStations();
+});
 </script>
 
 <style scoped>

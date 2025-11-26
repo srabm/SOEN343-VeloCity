@@ -65,21 +65,25 @@ class BikeTest {
         assertTrue(bike.isReservedActive());
     }
 
-    // @Test
-    // void startReservationExpiryTest() {
-    //     LocalDateTime currentTime = LocalDateTime.now();
-    //     Station station = new Station("S012", "Mackay Street Station", "full", "-29.03984", "-62.77431", "4050 Mackay St., Montreal Qc.", 10, 10, 15, new ArrayList<String>(Arrays.asList("D001", "D002", "D003", "D004", "D005", "D006", "D007", "D008", "D009", "D0010")), new ArrayList<String>(Arrays.asList("B001", "B002", "B003", "B004", "B005", "B006", "B007", "B008", "B009", "B0010")), 3, 7);
-    //     assertTrue(bike.startReservationExpiry(station, "xxxxx").isAfter(currentTime));
-    // }
+    @Test
+    void startReservationExpiryTest() {
+        LocalDateTime currentTime = LocalDateTime.now();
+        Station station = new Station("S012", "Mackay Street Station", "full", "-29.03984", "-62.77431", "4050 Mackay St., Montreal Qc.", 10, 10, 15, new ArrayList<String>(Arrays.asList("D001", "D002", "D003", "D004", "D005", "D006", "D007", "D008", "D009", "D0010")), new ArrayList<String>(Arrays.asList("B001", "B002", "B003", "B004", "B005", "B006", "B007", "B008", "B009", "B0010")), 3, 7);
+        Rider rider = new Rider();
+        rider.setId("xxxxx");
+        assertTrue(bike.startReservationExpiry(station, rider).isAfter(currentTime));
+    }
 
-    // @Test
-    // void clearReservationTest() {
-    //     Station station = new Station("S012", "Mackay Street Station", "full", "-29.03984", "-62.77431", "4050 Mackay St., Montreal Qc.", 10, 10, 15, new ArrayList<String>(Arrays.asList("D001", "D002", "D003", "D004", "D005", "D006", "D007", "D008", "D009", "D0010")), new ArrayList<String>(Arrays.asList("B001", "B002", "B003", "B004", "B005", "B006", "B007", "B008", "B009", "B0010")), 3, 7);
-    //     bike.startReservationExpiry(station, "xxxxx");
-    //     bike.clearReservation();
-    //     assertNull(bike.getReservationExpiry());
-    //     assertNull(bike.getReservedByUserId());
-    // }
+    @Test
+    void clearReservationTest() {
+        Station station = new Station("S012", "Mackay Street Station", "full", "-29.03984", "-62.77431", "4050 Mackay St., Montreal Qc.", 10, 10, 15, new ArrayList<String>(Arrays.asList("D001", "D002", "D003", "D004", "D005", "D006", "D007", "D008", "D009", "D0010")), new ArrayList<String>(Arrays.asList("B001", "B002", "B003", "B004", "B005", "B006", "B007", "B008", "B009", "B0010")), 3, 7);
+         Rider rider = new Rider();
+        rider.setId("xxxxx");
+        bike.startReservationExpiry(station, rider);
+        bike.clearReservation();
+        assertNull(bike.getReservationExpiry());
+        assertNull(bike.getReservedByUserId());
+    }
 
     @AfterEach
     void tearDown() {

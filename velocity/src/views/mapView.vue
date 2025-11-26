@@ -484,9 +484,14 @@ export default {
 
 <style scoped>
 #map {
-  height: 700px;
+  height: 100%;
   width: 100%;
+  height: 70vh;   /* responsive height */
+  max-height: 90vh; 
+  border-radius: 12px; /* optional */
+  overflow: hidden; /* prevent bleeding */
 }
+
 
 #map :deep(.leaflet-control-attribution) {
   font-size: 9px;

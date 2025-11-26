@@ -152,25 +152,21 @@ onMounted(() => {
   min-width: 350px;
   max-width: 500px;
   border-radius: 12px;
+  background: #fac61e; 
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   overflow: hidden;
 }
 
-.tier-notification.upgrade {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-left: 4px solid #4ade80;
-}
-
+.tier-notification.upgrade,
 .tier-notification.downgrade {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  border-left: 4px solid #fbbf24;
+  background: #fac61e !important; 
 }
 
 .notification-content {
   display: flex;
   align-items: flex-start;
   padding: 1.25rem;
-  color: white;
+  color: #0348af;
   gap: 1rem;
 }
 
@@ -188,25 +184,25 @@ onMounted(() => {
   margin: 0 0 0.5rem 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: white;
+  color: #0348af;
 }
 
 .notification-message {
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.95);
+  color: #0348af(255, 255, 255, 0.95);
 }
 
 .notification-message strong {
   font-weight: 700;
-  color: white;
+  color: #0348af;
 }
 
 .close-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
-  color: white;
+  color: #0348af;
   font-size: 1.5rem;
   width: 32px;
   height: 32px;
@@ -216,7 +212,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
   line-height: 1;
   padding: 0;
 }
@@ -230,7 +226,7 @@ onMounted(() => {
 }
 
 .slide-down-leave-active {
-  transition: all 0.3s ease-in;
+  transition: all 0.35s ease-out;
 }
 
 .slide-down-enter-from {
@@ -240,7 +236,7 @@ onMounted(() => {
 
 .slide-down-leave-to {
   opacity: 0;
-  transform: translateY(-100%);
+  transform: translateY(-20px);
 }
 
 @media (max-width: 640px) {

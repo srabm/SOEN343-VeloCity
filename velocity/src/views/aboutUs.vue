@@ -1,7 +1,7 @@
 <template>
     <topbar />
-    <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-        <div class="min-h-screen bg-black/40">
+    <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
+        <div class="min-h-screen bg-black/20">
             <header class="text-center py-8 text-white drop-shadow">
                 <h1 class="text-3xl font-semibold">About VeloCity</h1>
                 <p class="mt-2 px-4 max-w-3xl mx-auto text-slate-100/90">
@@ -13,16 +13,21 @@
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">Our Mission</h2>
                     <p class="text-slate-600">
-                        TBD.
+                        At VeloCity, our mission is to make urban cycling simple, sustainable, and accessible for everyone.
+                        We believe that moving through the city should feel effortless—whether you're commuting, exploring, or taking a spontaneous ride.
+                        Through reliable bikes, transparent pricing, and rider-first features, we’re building a transportation system that empowers our community 
+                        to choose greener travel, embrace active living, and enjoy every moment of the journey.
                     </p>
                 </div>
 
                 <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
                     <h2 class="text-xl font-semibold mb-3">How It Works</h2>
-                    <ul class="list-none space-y-1 text-slate-700">
-                        <li><strong>1.</strong> T.</li>
-                        <li><strong>2.</strong> B.</li>
-                        <li><strong>3.</strong> D.</li>
+                    <ul class="list-none space-y-1 text-slate-700 text-left px-5">
+                        <li><strong>1.</strong> Pick a station from where you want to start your ride.</li>
+                        <li><strong>2.</strong> Choose a bike or e-bike from the available options.</li>
+                        <li><strong>3.</strong> Unlock the bike using the provided pin before it expires.</li>
+                        <li><strong>4.</strong> Enjoy your ride and explore the city!</li>
+                        <li><strong>5.</strong> Return the bike to any station and end your ride.</li>
                     </ul>
                 </div>
 

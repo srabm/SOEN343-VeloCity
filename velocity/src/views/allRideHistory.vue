@@ -1,12 +1,12 @@
 <template>
   <topbar />
-  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-    <div class="min-h-screen bg-black/40">
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
+    <div class="min-h-screen bg-black/20">
       <header class="text-center py-8 text-white drop-shadow">
         <h1 class="text-3xl font-semibold">All Ride History (All Users)</h1>
       </header>
 
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto px-4 items-start">
+      <section class="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-4 max-w-6xl mx-auto px-4 items-start">
         <!-- Left: Selected Ride Details -->
         <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md min-h-[210px]">
           <h2 class="text-xl font-semibold mb-3">Ride Details</h2>
@@ -41,7 +41,7 @@
         </div>
 
         <!-- Right: List + Filters -->
-        <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+        <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md max-h-[500px] overflow-y-auto">
           <h2 class="text-xl font-semibold mb-3">Past Rides</h2>
 
           <!-- Filters -->
@@ -85,20 +85,22 @@
             <p class="text-slate-500">Try clearing filters or searching a different Ride ID.</p>
           </div>
 
-          <ul v-else class="divide-y divide-slate-200">
-            <li v-for="ride in filteredRides" :key="ride._id"
-              :class="['py-2 cursor-pointer', ride._id === selectedRide?._id ? 'bg-blue-50' : '']"
-              @click="selectRide(ride)">
-              <div class="flex justify-between text-sm">
-                <span class="font-semibold">{{ ride.tripId }}</span>
-                <span class="text-purple-600">{{ ride.riderEmail || "—" }}</span>
-                <span>{{ formatDate(ride.startTime) }}</span>
-                <span class="font-semibold">${{ ride.bill?.total?.toFixed(2) || '—' }}</span>
-              </div>
-            </li>
-          </ul>
 
-          
+          <!-- Scrollable list -->
+          <div v-else class="max-h-[60vh] overflow-y-auto pr-1">
+            <ul class="divide-y divide-slate-200">
+              <li v-for="ride in filteredRides" :key="ride._id"
+                :class="['py-2 cursor-pointer', ride._id === selectedRide?._id ? 'bg-blue-50' : '']"
+                @click="selectRide(ride)">
+                <div class="grid grid-cols-4 gap-2 text-sm items-center">
+                  <span class="font-semibold truncate">{{ ride.tripId }}</span>
+                  <span class="text-purple-600 truncate">{{ ride.riderEmail || "—" }}</span>
+                  <span class="truncate">{{ formatDate(ride.startTime) }}</span>
+                  <span class="font-semibold truncate">${{ ride.bill?.total?.toFixed(2) || '—' }}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </section>
     </div>
@@ -278,4 +280,18 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.max-h-\[60vh\]::-webkit-scrollbar {
+  width: 6px;
+}
+
+.max-h-\[60vh\]::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+}
+
+.max-h-\[60vh\]::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+</style>

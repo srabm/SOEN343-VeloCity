@@ -6,10 +6,10 @@
     :newTier="tierChange.newTier"
     @close="dismissTierNotification"
   />
-  <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-    <div class="min-h-screen bg-black/40">
+  <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
+    <div class="min-h-screen bg-black/20">
       <header class="text-center py-8 text-white drop-shadow">
-        <h1 class="text-3xl font-semibold">Ride History</h1>
+        <h1 class="text-3xl font-extrabold">Ride History</h1>
       </header>
 
       <section class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto px-4 items-start">
@@ -33,6 +33,9 @@
               <p v-if="selectedRide.bill?.discount && selectedRide.bill.discount > 0" class="text-green-800">
                 <strong>Tier Discount:</strong> -${{ selectedRide.bill.discount.toFixed(2) }}
               </p>
+              <p v-if="selectedRide.flexRedeemedAmount" class="text-green-800">
+                <strong>Flex Discount:</strong> -$0.50
+              </p>
               <p><strong>Tax:</strong> ${{ selectedRide.bill?.tax?.toFixed(2) || '0.00' }}</p>
               <p><strong>Total:</strong> ${{ selectedRide.bill?.total?.toFixed(2) || '0.00' }}</p>
             </div>
@@ -50,7 +53,7 @@
         </div>
 
         <!-- Right: List + Filters -->
-        <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md">
+        <div class="rounded-xl p-5 shadow-lg bg-white/50 backdrop-blur-md max-h-[500px] overflow-y-auto">
           <h2 class="text-xl font-semibold mb-3">Past Rides</h2>
 
           <!-- Filters -->
