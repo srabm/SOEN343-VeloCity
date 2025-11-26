@@ -21,7 +21,8 @@ jobs:
         distribution: 'temurin'
     
     - name: build with Gradle
-      run: ./gradlew build --no-daemon
+      working-directory: ./backend
+      run: cd ./gradlew build --no-daemon
 
   backend-test:
     name: backend test
@@ -38,6 +39,7 @@ jobs:
         distribution: 'temurin'
     
     - name: run tests
+      working-directory: ./backend
       run: ./gradlew test --no-daemon
     
     - name: Upload test results
@@ -61,7 +63,9 @@ jobs:
         cache: 'npm'
     
     - name: Install dependencies
+      working-directory: ./velocity
       run: npm install
     
     - name: Build frontend
+      working-directory: ./velocity
       run: npm run build
