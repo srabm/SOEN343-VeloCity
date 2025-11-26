@@ -22,7 +22,7 @@ jobs:
     
     - name: build with Gradle
       working-directory: ./backend
-      run: cd ./gradlew build --no-daemon
+      run: ./gradlew build --no-daemon
 
   backend-test:
     name: backend test
