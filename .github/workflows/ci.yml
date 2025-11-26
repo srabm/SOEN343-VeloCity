@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, iteration4 ]
+    branches: [ main, iteration4, testing ]
   pull_request:
-    branches: [ main, iteration4 ]
+    branches: [ main, iteration4, testing ]
 
 jobs:
   backend-build:
