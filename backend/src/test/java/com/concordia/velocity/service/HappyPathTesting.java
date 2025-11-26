@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockedStatic;
+import com.google.firebase.cloud.FirestoreClient;
+import org.junit.jupiter.api.AfterEach;
 import com.google.cloud.firestore.Firestore;
 
 import java.util.concurrent.ExecutionException;
@@ -30,13 +33,24 @@ public class HappyPathTesting {
 
     private BikeService bikeService;
 
+    private MockedStatic<FirestoreClient> firestoreClientStatic;
     private Firestore mockFirestore;
 
     @BeforeEach
     void setUp() {
-                MockitoAnnotations.openMocks(this);
+                firestoreClientStatic = mockStatic(FirestoreClient.class);
                 mockFirestore = mock(Firestore.class);
-                bikeService = new BikeService(mockFirestore, userService, loyaltyStatsService);
+                firestoreClientStatic.when(FirestoreClient::getFirestore).thenReturn(mockFirestore);
+
+                MockitoAnnotations.openMocks(this);
+                bikeService = new BikeService(userService, loyaltyStatsService);
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (firestoreClientStatic != null) {
+            firestoreClientStatic.close();
+        }
     }
 
 
