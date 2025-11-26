@@ -10,9 +10,9 @@ import com.concordia.velocity.service.UserService;
 import com.concordia.velocity.service.LoyaltyStatsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import com.google.cloud.firestore.Firestore;
 
 import java.util.concurrent.ExecutionException;
 
@@ -28,14 +28,17 @@ public class HappyPathTesting {
     @Mock
     private TripService tripService;
 
-    @InjectMocks
     private BikeService bikeService;
+
+    private Firestore mockFirestore;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        bikeService = new BikeService(userService, loyaltyStatsService);
+                MockitoAnnotations.openMocks(this);
+                mockFirestore = mock(Firestore.class);
+                bikeService = new BikeService(mockFirestore, userService, loyaltyStatsService);
     }
+
 
     @Test
     void happyPath_reserveRideReturnBike_outputsBillAndTrip() throws ExecutionException, InterruptedException {
