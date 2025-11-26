@@ -13,6 +13,7 @@ public class Trip {
     public static final String STATUS_CANCELLED = "cancelled";
     public static final String STATUS_MISSED = "missed"; // added these 2 lines to handle missed reservations and expired reservations to use in LoyaltyStatsService
     public static final String STATUS_EXPIRED = "expired";
+    public static final String STATUS_ABANDONED = "abandoned"; // trips active for >12 hours
 
 
     private String tripId;

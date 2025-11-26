@@ -36,6 +36,7 @@ public class Station implements Subject {
 
     private int numElectricBikes;
     private int numStandardBikes;
+    private boolean lowCapacity;
 
     private transient final List<Observer> observers = new ArrayList<>();
 
@@ -70,6 +71,7 @@ public class Station implements Subject {
 
         this.status = determineStatusFromCapacity();
         attach(new StatusObserver());
+        this.lowCapacity = this.numDockedBikes < (0.25 * this.capacity);
     }
 
     /**
@@ -218,6 +220,9 @@ public class Station implements Subject {
         this.numElectricBikes = numElectricBikes;
     }
 
+    public boolean isLowCapacity() { return lowCapacity; }
+    public void setLowCapacity(boolean lowCapacity) { this.lowCapacity = lowCapacity; }
+
 
     // we could probably integrate the incrementing with this... so incrementing code does not repeat + maintained simultaneously
     public void removeBike(Bike bike) {
@@ -234,6 +239,10 @@ public class Station implements Subject {
         String newStationStatus = determineStatusFromCapacity();
         if (!newStationStatus.equals(getStatus())) {
             setStatus(newStationStatus);
+        }
+        boolean newLow = getNumDockedBikes() < (0.25 * getCapacity());
+        if (newLow != isLowCapacity()) {
+            setLowCapacity(newLow);
         }
     }
 
@@ -252,6 +261,10 @@ public class Station implements Subject {
         String newStationStatus = determineStatusFromCapacity();
         if (!newStationStatus.equals(getStatus())) {
             setStatus(newStationStatus);
+        }
+        boolean newLow = getNumDockedBikes() < (0.25 * getCapacity());
+        if (newLow != isLowCapacity()) {
+            setLowCapacity(newLow);
         }
     }
 

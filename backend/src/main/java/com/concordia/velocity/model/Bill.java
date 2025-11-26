@@ -99,6 +99,9 @@ public class Bill {
     public void setStatus(String status) { this.status = status; }
 
     public String getRiderId() { return this.riderId; }
+    public void setRiderId(String riderId) {
+        this.riderId = riderId;
+    }
 
     public double getDiscount() { return discount; }
     public void setDiscount(double discount) { this.discount = discount; }

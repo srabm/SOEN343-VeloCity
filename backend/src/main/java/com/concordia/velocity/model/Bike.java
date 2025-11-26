@@ -1,18 +1,18 @@
 package com.concordia.velocity.model;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import com.concordia.velocity.observer.Observer;
 import com.concordia.velocity.observer.StatusObserver;
 import com.concordia.velocity.observer.Subject;
 import com.concordia.velocity.reservation.ReservationManager;
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.annotation.Exclude;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Bike model with proper Firestore serialization
@@ -25,9 +25,10 @@ public class Bike implements Subject {
     public static final String STATUS_RESERVED = "reserved";
     public static final String STATUS_MAINTENANCE = "maintenance";
     public static final String STATUS_ON_TRIP = "on_trip";
+    public static final String STATUS_ABANDONED = "abandoned"; // bike lost/never returned to dock
 
     private static final List<String> VALID_STATUSES = Arrays.asList(
-            STATUS_AVAILABLE, STATUS_RESERVED, STATUS_MAINTENANCE, STATUS_ON_TRIP
+            STATUS_AVAILABLE, STATUS_RESERVED, STATUS_MAINTENANCE, STATUS_ON_TRIP, STATUS_ABANDONED
     );
 
     private String bikeId;
@@ -55,7 +56,7 @@ public class Bike implements Subject {
         this.stationId = stationId;
         this.reservationUser = null;
         this.reservationExpiry = null;
-        attach(new StatusObserver()); 
+        attach(new StatusObserver());
     }
 
     @Override
@@ -141,35 +142,35 @@ public class Bike implements Subject {
         setReservedByUserId(rider != null ? rider.getId() : null);
         setStatus(STATUS_RESERVED);
 
-         System.out.println(
-            "[RESERVATION] Bike " + bikeId +
-            " reserved by user " + reservedByUserId +
-            " | Base hold time = " + baseHold +
-            " | Tier bonus = " + extraHold + 
-            " | TOTAL hold = " + totalHold + " minutes" +
-            " → Expires at: " + expiryTime
+        System.out.println(
+                "[RESERVATION] Bike " + bikeId +
+                        " reserved by user " + reservedByUserId +
+                        " | Base hold time = " + baseHold +
+                        " | Tier bonus = " + extraHold +
+                        " | TOTAL hold = " + totalHold + " minutes" +
+                        " → Expires at: " + expiryTime
         );
 
         // Schedule expiration using ReservationManager
         ReservationManager.schedule(
-            bikeId,
-            () -> {
-                LocalDateTime exp = getReservationExpiryAsLocalDateTime();
+                bikeId,
+                () -> {
+                    LocalDateTime exp = getReservationExpiryAsLocalDateTime();
 
-                if (STATUS_RESERVED.equalsIgnoreCase(getStatus())
-                    && exp != null
-                    && !LocalDateTime.now().isBefore(exp)) {
+                    if (STATUS_RESERVED.equalsIgnoreCase(getStatus())
+                            && exp != null
+                            && !LocalDateTime.now().isBefore(exp)) {
 
-                    setStatus(STATUS_AVAILABLE);
-                    setReservationExpiry(null);
-                    notifyObservers("RESERVATION_EXPIRED userId=" + reservedByUserId);
-                    setReservedByUserId(null);
+                        setStatus(STATUS_AVAILABLE);
+                        setReservationExpiry(null);
+                        notifyObservers("RESERVATION_EXPIRED userId=" + reservedByUserId);
+                        setReservedByUserId(null);
 
-                    System.out.println("Reservation expired for bike " + bikeId +
-                        " (hold time: " + totalHold + " mins)");
-                }
-            },
-            totalHold // IMPORTANT: schedule actual corrected hold time
+                        System.out.println("Reservation expired for bike " + bikeId +
+                                " (hold time: " + totalHold + " mins)");
+                    }
+                },
+                totalHold // IMPORTANT: schedule actual corrected hold time
         );
 
         return expiryTime;
@@ -274,7 +275,7 @@ public class Bike implements Subject {
 
     //     reservationTask = null; // important
     // }
-    
+
     public String getDockId() {
         return dockId;
     }

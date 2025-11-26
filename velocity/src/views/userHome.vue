@@ -8,18 +8,18 @@
         :message="tierWelcome.message"
         @close="tierWelcome = null"
     />
-    <div class="bg-cover bg-center" style="background-image: url('/src/assets/bike-bg.jpg');">
-        <div class="min-h-screen bg-black/40">
+    <div class="bg-cover bg-center" style="background-image: url('/src/assets/montreal-architecture.jpg');">
+        <div class="min-h-screen bg-black/20">
             <header class="text-center py-6 text-white drop-shadow">
-                <h1 class="text-3xl font-semibold">
+                <h1 class="text-4xl font-extrabold tracking-tight">
                     {{ greeting }}<template v-if="userName">, {{ userName }}!</template><template v-else>!</template>
                 </h1>
-                <p class="mt-2 px-4 max-w-3xl mx-auto text-slate-100/90">
+                <p class="         ">
                     Choose a station to start your ride.
                 </p>
             </header>
 
-            <section class="px-50 pb-4">
+            <section class="px-50 pb-4 h-full">
                 <div class="rounded-xl p-3 md:p-4 shadow-lg bg-white/50 backdrop-blur-md">
                     <div class="w-full h-[60vh] md:h-[70vh]">
                         <mapView class="w-full h-full rounded-lg overflow-hidden" />
