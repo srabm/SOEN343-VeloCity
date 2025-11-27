@@ -100,7 +100,9 @@ function dismiss() {
 }
 
 watch(() => [props.oldTier, props.newTier], () => {
-  if (props.oldTier && props.newTier && props.oldTier !== props.newTier) {
+  const oldNormalized = normalizeTierForComparison(props.oldTier)
+  const newNormalized = normalizeTierForComparison(props.newTier)
+  if (props.oldTier && props.newTier && oldNormalized !== newNormalized) {
     show.value = true
     
     // Only auto-close if explicitly enabled (default is false)
