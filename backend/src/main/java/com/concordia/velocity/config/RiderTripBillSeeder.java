@@ -589,6 +589,7 @@ public class RiderTripBillSeeder {
         bill.setBillId(idGeneratorService.generateBillId());  // Use IdGeneratorService for sequential IDs
         bill.setTripId(trip.getTripId());
         bill.setRiderId(trip.getRiderId());
+        bill.setBaseCost(Math.round(cost * 100.0) / 100.0);
         bill.setCost(Math.round(cost * 100.0) / 100.0);
         bill.setDiscount(0.0);
         bill.calculateTax(0.14975);
