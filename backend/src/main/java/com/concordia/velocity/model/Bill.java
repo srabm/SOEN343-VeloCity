@@ -33,6 +33,20 @@ public class Bill {
         this.operatorDiscount = 0.0;
     }
 
+    public Bill(String billId, String tripId, String riderId, double cost, double tax, double total) {
+        this.billId = billId;
+        this.tripId = tripId;
+        this.riderId = riderId;
+        this.baseCost = cost;
+        this.cost = cost;
+        this.tax = tax;
+        this.total = total;
+        this.billingDate = Timestamp.now();
+        this.status = "pending";
+        this.discount = 0.0;
+        this.operatorDiscount = 0.0;
+    }
+
     public Bill(String billId, String tripId, String riderId, double baseCost, double cost, double tax, double total,
                 String paymentMethodLastFour, String status) {
         this.billId = billId;
