@@ -593,6 +593,7 @@ public class RiderTripBillSeeder {
         bill.setCost(Math.round(cost * 100.0) / 100.0);
         bill.setDiscount(0.0);
         bill.calculateTax(0.14975);
+        bill.calculateTax(0.14975);
         bill.setTotal(Math.round(bill.getTotal() * 100.0) / 100.0);
         bill.setTax(Math.round(bill.getTax() * 100.0) / 100.0);
         bill.setStatus("paid");
