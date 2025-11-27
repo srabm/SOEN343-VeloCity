@@ -7,6 +7,7 @@ public class Bill {
     private String billId;
     private String tripId;
     private String riderId;
+    private double baseCost;
     private double cost;
     private double tax;
     private double total;
@@ -14,26 +15,30 @@ public class Bill {
     private Timestamp billingDate;
     private String status;  // "pending", "paid", "failed"
     private double discount;
+    private double operatorDiscount;
 
     public Bill() {}
 
-    public Bill(String billId, String tripId, String riderId, double cost, double tax, double total) {
+    public Bill(String billId, String tripId, String riderId, double baseCost, double cost, double tax, double total) {
         this.billId = billId;
         this.tripId = tripId;
         this.riderId = riderId;
+        this.baseCost = baseCost;
         this.cost = cost;
         this.tax = tax;
         this.total = total;
         this.billingDate = Timestamp.now();
         this.status = "pending";
         this.discount = 0.0;
+        this.operatorDiscount = 0.0;
     }
 
-    public Bill(String billId, String tripId, String riderId, double cost, double tax, double total,
+    public Bill(String billId, String tripId, String riderId, double baseCost, double cost, double tax, double total,
                 String paymentMethodLastFour, String status) {
         this.billId = billId;
         this.tripId = tripId;
         this.riderId = riderId;
+        this.baseCost = baseCost;
         this.cost = cost;
         this.tax = tax;
         this.total = total;
@@ -43,12 +48,14 @@ public class Bill {
     }
 
     // New constructor with discount
-    public Bill(String billId, String tripId, String riderId, double cost, double discount, double tax, double total) {
+    public Bill(String billId, String tripId, String riderId, double baseCost, double cost, double discount, double operatorDiscount, double tax, double total) {
         this.billId = billId;
         this.tripId = tripId;
         this.riderId = riderId;
+        this.baseCost = baseCost;
         this.cost = cost;
         this.discount = discount;
+        this.operatorDiscount = operatorDiscount;
         this.tax = tax;
         this.total = total;
         this.billingDate = Timestamp.now();
@@ -101,6 +108,22 @@ public class Bill {
     public String getRiderId() { return this.riderId; }
     public void setRiderId(String riderId) {
         this.riderId = riderId;
+    }
+
+    public double getBaseCost() {
+        return baseCost;
+    }
+
+    public void setBaseCost(double baseCost) {
+        this.baseCost = baseCost;
+    }
+
+    public double getOperatorDiscount() {
+        return operatorDiscount;
+    }
+
+    public void setOperatorDiscount(double operatorDiscount) {
+        this.operatorDiscount = operatorDiscount;
     }
 
     public double getDiscount() { return discount; }

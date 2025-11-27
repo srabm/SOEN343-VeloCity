@@ -19,15 +19,16 @@ public class AbandonedPayment implements PaymentStrategy {
     @Override
     public Bill createBillAndProcessPayment(Trip trip, long durationMinutes, Rider rider) {
         // Fixed abandonment fee - no discounts apply
-        double cost = ABANDONMENT_FEE;
+        double cost = ABANDONMENT_FEE; // cost = base cost
         double discount = 0.0; // No tier discounts for abandonment
+        double operatorDiscount = 0.0;
 
         // Round to 2 decimal places
         cost = Math.round(cost * 100.0) / 100.0;
 
         // Create bill with abandonment fee
         String billId = UUID.randomUUID().toString();
-        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), cost, discount, 0, 0);
+        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), cost, cost, discount, operatorDiscount, 0, 0);
 
         // Calculate tax and total
         bill.calculateTax(TAX_RATE);
