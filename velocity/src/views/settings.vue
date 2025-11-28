@@ -113,10 +113,22 @@
           Find Out More
         </button>
       </div>
+      </section>
 
-        <!-- Payment Info Card -->
-        <div class="self-start rounded-xl p-6 shadow-lg bg-white/50 backdrop-blur-md">
-          <h2 class="text-xl font-semibold mb-4">Payment Information</h2>
+      <!-- Payment Info Card -->
+        <div :class="[
+            'self-start rounded-xl p-6 shadow-lg bg-white/50 backdrop-blur-md mx-auto my-6',
+            editPaymentMode ? 'max-w-3xl w-full' : 'max-w-md w-full'
+          ]">
+          <div class="flex items-start justify-between mb-4">
+            <h2 class="text-xl font-semibold">Payment Information</h2>
+            <div v-if="editPaymentMode" class="flex gap-3">
+              <button @click="savePaymentInfo"
+                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 duration-200">Save</button>
+              <button @click="togglePaymentEdit(false)"
+                class="bg-slate-300 text-black px-4 py-2 rounded hover:bg-slate-200 duration-200">Cancel</button>
+            </div>
+          </div>
           <div v-if="!editPaymentMode" class="space-y-2 text-sm">
             <p><strong>Cardholder Name:</strong> {{ profile?.paymentInfo?.cardholderName || 'Not set' }}</p>
             <p><strong>Card Number:</strong> {{ profile?.paymentInfo?.cardNumber || 'Not set' }}</p>
@@ -127,10 +139,10 @@
           </div>
           <!-- Edit payment info -->
           <div v-else>
-            <div class="space-y-8 w-full">
+            <div class="flex flex-col md:flex-row gap-4 w-full justify-center items-stretch">
               <!-- Front of card -->
               <div
-                class="w-full rounded-xl shadow-lg bg-gradient-to-br from-blue-300 via-sky-300 to-blue-400 text-white overflow-hidden"
+                class="flex-1 min-w-0 max-w-xl rounded-xl shadow-lg bg-gradient-to-br from-blue-300 via-sky-300 to-blue-400 text-white overflow-hidden"
                 style="aspect-ratio: 85.6 / 54;">
                 <div class="relative h-full p-5 flex flex-col">
                   <div class="mt-2 mb-auto">
@@ -157,7 +169,7 @@
 
               <!-- Back of card -->
               <div
-                class="relative w-full rounded-xl shadow-lg bg-gradient-to-br from-slate-800 to-slate-900 text-white overflow-hidden"
+                class="relative flex-1 min-w-0 max-w-md rounded-xl shadow-lg bg-gradient-to-br from-slate-800 to-slate-900 text-white overflow-hidden"
                 style="aspect-ratio: 85.6 / 54;">
                 <div class="absolute left-0 right-0 top-8 h-8 bg-black/60"></div>
                 <div class="absolute top-[38%] right-6 w-32">
@@ -167,17 +179,9 @@
                 </div>
               </div>
             </div>
-
-            <div class="flex gap-3 pt-2 justify-center mt-5">
-              <button @click="savePaymentInfo"
-                class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 duration-200">Save</button>
-              <button @click="togglePaymentEdit(false)"
-                class="bg-slate-300 text-black px-4 py-2 rounded hover:bg-slate-200 duration-200">Cancel</button>
-            </div>
           </div>
           
         </div>
-      </section>
     </div>
   </div>
 </template>
