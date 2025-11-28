@@ -246,14 +246,14 @@ const filterDestStations = () => {
 
 const loadSourceBikes = async () => {
   if (!selectedSourceStation.value) return;
-  
+
   // Reset downstream selections
   selectedBike.value = null;
   selectedDestStation.value = null;
   selectedDestDock.value = null;
   availableBikes.value = [];
   availableDocks.value = [];
-  
+
   loading.value = true;
   error.value = null;
   try {
@@ -275,11 +275,11 @@ const loadSourceBikes = async () => {
 
 const loadDestinationDocks = async () => {
   if (!selectedDestStation.value) return;
-  
+
   // Reset dock selection
   selectedDestDock.value = null;
   availableDocks.value = [];
-  
+
   loading.value = true;
   error.value = null;
   try {
@@ -308,14 +308,14 @@ const confirmTransfer = async () => {
       sourceStationId: selectedSourceStation.value.stationId,
       destinationStationId: selectedDestStation.value.stationId
     });
-    
+
     success.value = `Successfully transferred ${selectedBike.value.bikeId} from ${selectedSourceStation.value.stationName} to ${selectedDestStation.value.stationName}`;
-    
+
     // Reload stations to get updated counts
     setTimeout(() => {
       loadStations();
     }, 2000);
-    
+
   } catch (err) {
     error.value = err.message || 'Failed to transfer bike. Please try again.';
     console.error('Error transferring bike:', err);

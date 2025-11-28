@@ -32,11 +32,13 @@ public class AbandonedTripService {
     private final UserService userService;
     private final BikeService bikeService;
     private final PaymentStrategy abandonedPaymentStrategy;
+    private final IdGeneratorService idGeneratorService;
 
-    public AbandonedTripService(UserService userService, BikeService bikeService) {
+    public AbandonedTripService(UserService userService, BikeService bikeService, IdGeneratorService idGeneratorService) {
         this.userService = userService;
         this.bikeService = bikeService;
         this.abandonedPaymentStrategy = new AbandonedPayment();
+        this.idGeneratorService = idGeneratorService;
     }
 
     /**
@@ -142,6 +144,10 @@ public class AbandonedTripService {
 
         // Create abandonment bill using payment strategy
         Bill abandonmentBill = abandonedPaymentStrategy.createBillAndProcessPayment(trip, durationMinutes, rider);
+
+        String billId = idGeneratorService.generateBillId();  // Creates BILL0001, BILL0002, etc.
+        abandonmentBill.setBillId(billId);
+
         trip.setBill(abandonmentBill);
 
         // Save updated trip to Firestore

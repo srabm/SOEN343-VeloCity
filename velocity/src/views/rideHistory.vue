@@ -29,13 +29,18 @@
 
             <h3 class="text-lg font-medium mt-5 mb-2">Bill Summary</h3>
             <div v-if="selectedRide.bill" class="space-y-1 text-sm">
-              <p><strong>Price:</strong> ${{ selectedRide.bill?.cost?.toFixed(2) || '0.00' }}</p>
+              <p><strong>Price:</strong> ${{ selectedRide.bill?.baseCost?.toFixed(2) || '0.00' }}</p>
               <p v-if="selectedRide.bill?.discount && selectedRide.bill.discount > 0" class="text-green-800">
                 <strong>Tier Discount:</strong> -${{ selectedRide.bill.discount.toFixed(2) }}
+              </p>
+              <p v-if="selectedRide.bill?.operatorDiscount && selectedRide.bill.operatorDiscount > 0" class="text-green-800">
+                <strong>Operator Discount:</strong> -${{ selectedRide.bill.operatorDiscount.toFixed(2) }}
               </p>
               <p v-if="selectedRide.flexRedeemedAmount" class="text-green-800">
                 <strong>Flex Discount:</strong> -$0.50
               </p>
+              <br v-if="selectedRide.bill?.cost != selectedRide.bill?.baseCost && selectedRide.bill.cost" />
+              <p v-if="selectedRide.bill?.cost != selectedRide.bill?.baseCost && selectedRide.bill.cost" ><strong>Price (with discount):</strong> ${{ selectedRide.bill?.cost?.toFixed(2) || '0.00' }}</p>
               <p><strong>Tax:</strong> ${{ selectedRide.bill?.tax?.toFixed(2) || '0.00' }}</p>
               <p><strong>Total:</strong> ${{ selectedRide.bill?.total?.toFixed(2) || '0.00' }}</p>
             </div>

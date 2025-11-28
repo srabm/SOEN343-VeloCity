@@ -73,7 +73,24 @@
             <td class="charges-cell">
               <div class="charge-breakdown">
                 <div class="charge-line">
-                  <span>Cost:</span>
+                  <span>Price:</span>
+                  <span>${{ bill.baseCost?.toFixed(2) || "0.00" }}</span>
+                </div>
+                <div v-if="bill?.discount && bill.discount > 0" class="charge-line">
+                  <span>Tier Discount:</span>
+                  <span>-${{ bill.discount?.toFixed(2) || "0.00" }}</span>
+                </div>
+                <div v-if="bill?.operatorDiscount && bill.operatorDiscount > 0" class="charge-line">
+                  <span>Operator Discount:</span>
+                  <span>-${{ bill.operatorDiscount?.toFixed(2) || "0.00" }}</span>
+                </div>
+                <div v-if="bill?.flexRedeemedAmount && bill.flexRedeemedAmount > 0" class="charge-line">
+                  <span>Flex Discount:</span>
+                  <span>-$0.50</span>
+                </div>
+                <br v-if="bill?.cost != bill?.baseCost && bill.cost" />
+                <div v-if="bill?.cost != bill?.baseCost && bill.cost" class="charge-line">
+                  <span>Price (discounted):</span>
                   <span>${{ bill.cost?.toFixed(2) || "0.00" }}</span>
                 </div>
                 <div class="charge-line">
@@ -168,7 +185,11 @@ async function loadBillingHistory() {
           // Bill data from embedded bill object
           billId: tripData.bill.billId,
           billingDate: tripData.bill.billingDate,
+          baseCost: tripData.bill.baseCost,
           cost: tripData.bill.cost,
+          discount: tripData.bill.discount,
+          operatorDiscount: tripData.bill.operatorDiscount,
+          flexRedeemedAmount: tripData.flexRedeemedAmount,
           tax: tripData.bill.tax,
           total: tripData.bill.total,
           status: tripData.bill.status,
