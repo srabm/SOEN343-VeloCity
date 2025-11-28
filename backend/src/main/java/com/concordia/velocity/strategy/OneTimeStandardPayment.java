@@ -1,10 +1,10 @@
 package com.concordia.velocity.strategy;
 
-import java.util.UUID;
-
 import com.concordia.velocity.model.Bill;
 import com.concordia.velocity.model.Rider;
 import com.concordia.velocity.model.Trip;
+
+import java.util.UUID;
 
 /**
  * Payment strategy for standard (non-electric) bikes
@@ -23,6 +23,7 @@ public class OneTimeStandardPayment implements PaymentStrategy {
 
         // Apply tier discount
         double discount = 0.0;
+        double operator_discount = 0.0;
         double finalCost = baseCost;
 
         if (rider != null) {
@@ -31,13 +32,20 @@ public class OneTimeStandardPayment implements PaymentStrategy {
             finalCost = discountedCost;
         }
 
+        if (rider != null) {
+            if (rider.getIsOperator()) {
+                operator_discount = baseCost * 0.1;
+                finalCost -= operator_discount;
+            }
+        }
+
         // Round final cost and discount
         finalCost = Math.round(finalCost * 100.0) / 100.0;
         discount = Math.round(discount * 100.0) / 100.0;
 
         // Create bill
         String billId = UUID.randomUUID().toString();
-        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), finalCost, discount, 0, 0);
+        Bill bill = new Bill(billId, trip.getTripId(), trip.getRiderId(), baseCost, finalCost, discount, operator_discount,0, 0);
 
         // Calculate tax and total
         bill.calculateTax(TAX_RATE);
